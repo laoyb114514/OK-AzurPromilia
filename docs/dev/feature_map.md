@@ -35,6 +35,7 @@
 |------|------|------|------|------|
 | 一条龙：顺序可配、可拖动排序 | ✅ | `src/tasks/daily/order.py` + 「一条龙顺序」页 | `test_daily_order.py` | [路线](routes_and_replay.md) §1 |
 | 一条龙每项自己的参数可见 / 可打开配置 | ✅ | `src/core/task_config_summary.py` | `test_task_config_summary.py` | 同上 §1 |
+| 一条龙跑完的执行汇总（日志 + txt 报告，多轮/多账号分组，旧报告按天数清理） | ✅ | `src/tasks/daily/daily_summary.py` | `test_daily_summary.py` | 同上 §1 |
 | 周常活跃奖励 | ✅ | `assets/flow_templates/周常活跃奖励.json`（只用已有模板，开箱可跑） | `test_flow_templates.py` | [流程](flows_and_queues.md) §7 |
 | 危机讨伐 / 剧情委托 | 🚧 | `assets/flow_templates/`（骨架流程，各差 3 个模板；模板名已写死，标好照抄即可） | 同上 | 同上 §7 |
 | 实时辅助（按设置持续操作） | ✅ | `src/tasks/trigger/auto_combat_assist_task.py` | `test_auto_combat_assist_task.py` | 同上 §4 |
@@ -119,10 +120,13 @@
 | 安装自检（流程/队列/方案/路线/配置/i18n） | ✅ | `src/core/health_check.py` + `tools/health_check.py` | `test_health_check.py` | [诊断](diagnostics_and_policy.md) §9 |
 | GUI 页离屏构建冒烟（9 个自定义页全部 build） | ✅ | `tests/test_gui_tabs.py` | 自身 | [开发指南](development.md) |
 | 静态引用体检（动作白名单 / FeatureList / 配置项重名 / 图标 / i18n / 任务名） | ✅ | `tests/test_imports.py` | 自身 | [开发指南](development.md) |
+| 补丁安装体检（16 个启动补丁装得上、幂等、不漏接） | ✅ | `tests/test_patch_install.py`（子进程隔离） | 自身 | 同上 |
+| 文档守卫（链接 / 锚点 / 点名的测试文件 / 导航覆盖） | ✅ | `tests/test_docs_links.py` | 自身 | 同上 |
+| 仓库卫生（测试不许往仓库里写文件；CI `git status` 门禁） | ✅ | `tests/test_repo_hygiene.py` + `pr-test.yml` | 自身 | 同上 |
 | 离线回归 | ✅ | `tests/`（**1200+ 项**，不需要游戏） | 自身 | [开发指南](development.md) |
 | CI 测试门禁 | ✅ | `.github/workflows/pr-test.yml` | — | [界面行为](ui_behavior.md) §6 |
 | CI 只对改动文件跑 ruff | ✅ | 同上 | — | 同上 §6 |
-| i18n 校验（6 语种、无空 msgstr） | ✅ | `scripts/validate_all.py` + `tools/task_i18n_helper.py` | — | 同上 §6 |
+| i18n 校验（6 语种 × 449 条、无空 msgstr；CI 也跑） | ✅ | `scripts/validate_all.py` + `tools/task_i18n_helper.py` + `tests/test_imports.py`（扫 `tr(` 与 `_tr(` 字面量、动态状态词） | 同上 | 同上 §6 |
 
 ---
 
@@ -149,10 +153,20 @@
 | 14 | **断点只记序号，不看内容** | 改流程/路线后续跑会跳过错误的步骤 | `ce667a4`（结构摘要 fingerprint，兼容旧断点） |
 | 15 | 提醒/任务栏线程出错静默死掉 | 「提醒没反应」无法排查 | `f44354c`（单轮函数 + 限流日志） |
 | 16 | 全模板复测的参数是否正确 | ——（**验证结论：正确**，贴入模板得 +1.000 排第一） | `e3807da`（真素材端到端测试） |
+| 17 | **「另存为」手输文件名不补扩展名** | 导出成 `材料单`（无后缀），双击打不开 | `6551e12`（`ensure_suffix`，四处导出都补） |
+| 18 | **测试往仓库里写文件**（养成导入的备份默认落仓库） | 8 个 `growth_*.json` 被 `git add -A` 提交 | `6551e12`（备份跟目标走）+ `c2c7c01`（静态检查 + CI `git status` 门禁） |
+| 19 | **OCR 语言表只有简中**（`home.json:little_bobo`） | 日/英客户端回退到中文原文，识别不到且无日志 | `d7614e1`（`test_lang_json.py` + 显式 `KNOWN_GAPS` 登记） |
+| 20 | `scripts/lang_fill_missing.py` 遇到说明键就崩 | 文档推荐的维护命令不可用 | `d7614e1`（跳过非字典节点 + 5 个用例） |
+| 21 | `src/data/lang` 读取后不关文件句柄 | Windows 上语言表文件被占用 | `d7614e1`（`with` + `-W error::ResourceWarning` 验证） |
+| 22 | 16 个启动补丁基本没有测试 | 补丁名改了/漏接 = 功能静默失效 | `afd2431`（子进程装两遍 + 防漏接 + 正控）；**结论：16 个全部正常且幂等** |
+| 23 | **DPI 取整策略设得太晚**（框架在 `QApplication()` 之后设） | Qt 忽略 → 150% 缩放下文字偏糊 | `d0fc317`（入口最前面 `apply_high_dpi_policy()`，用 Qt getter 验证生效） |
+| 24 | **一条龙汇总把失败任务拆成单字**（旧格式是字符串） | 报告里写「每, 日, 委, 托」 | `ce6b9d3` |
+| 25 | **汇总的 19 条文案从未翻译**（用局部变量 `_tr`，静态检查扫不到） | 英文/日文用户看到整段中文 | `ce6b9d3`（补 19 条 × 6 语种 + 检查 `_tr(` 与动态状态词） |
 
 **还验证过、确认无误的部分**（没有改动，只补了护栏）：路线校验（空航点/越界/未知界面/超时为 0）、
 仓库条目名不能跳出目录、损坏 JSON 的配置一律回退默认值、`notification.emit` 的参数与框架一致、
-热键/HUD/任务栏/提醒都有真实调用点。
+热键/HUD/任务栏/提醒都有真实调用点、16 个启动补丁全部能装且幂等、
+headless 启动整条链路（配置 → 补丁 → 设备 → 模板集 → 主窗口）无异常。
 
 ---
 
