@@ -915,3 +915,120 @@ msgstr "{count} 個の言語パックを検出しました。適用前に i18n �
 
 msgid "已还原 {name}"
 msgstr "{name} に戻しました"
+
+msgid "界面与提醒"
+msgstr "画面とリマインダー"
+
+msgid "关闭行为"
+msgstr "閉じる動作"
+
+msgid "提醒"
+msgstr "リマインダー"
+
+msgid "任务栏进度与快捷键"
+msgstr "タスクバーの進捗とホットキー"
+
+msgid "启用提醒"
+msgstr "リマインダーを有効化"
+
+msgid "每日重置提醒"
+msgstr "毎日のリセット通知"
+
+msgid "体力提醒"
+msgstr "スタミナ通知"
+
+msgid "保存提醒设置"
+msgstr "リマインダー設定を保存"
+
+msgid "在任务栏显示进度"
+msgstr "タスクバーに進捗を表示"
+
+msgid "校验快捷键"
+msgstr "ホットキーを検証"
+
+msgid "保存快捷键"
+msgstr "ホットキーを保存"
+
+msgid "快捷键在程序启动时注册；改完需要重启生效。F9–F12 属于框架的启动/停止，不能再绑定。"
+msgstr "ホットキーは起動時に登録されます。変更後は再起動が必要です。F9–F12 はフレームワークの開始/停止用のため登録できません。"
+
+msgid "设置已载入"
+msgstr "設定を読み込みました"
+
+msgid "关闭行为已保存"
+msgstr "閉じる動作を保存しました"
+
+msgid "提醒设置已保存"
+msgstr "リマインダー設定を保存しました"
+
+msgid "快捷键校验通过"
+msgstr "ホットキーの検証に合格しました"
+
+msgid "快捷键已保存"
+msgstr "ホットキーを保存しました"
+
+msgid "已填入默认快捷键（记得保存）"
+msgstr "既定のホットキーを入力しました（保存を忘れずに）"
+
+msgid "点关闭按钮时"
+msgstr "閉じるボタンを押したとき"
+
+msgid "每次都问"
+msgstr "毎回確認する"
+
+msgid "直接关闭"
+msgstr "すぐ閉じる"
+
+msgid "最小化到托盘"
+msgstr "トレイに最小化"
+
+msgid "重置小时"
+msgstr "リセット時刻"
+
+msgid "间隔（分钟）"
+msgstr "間隔（分）"
+
+msgid "如 ctrl+alt+p"
+msgstr "例：ctrl+alt+p"
+
+msgid "快捷键有问题"
+msgstr "ホットキーに問題があります"
+
+msgid "关闭行为已保存到 {path}"
+msgstr "閉じる動作を {path} に保存しました"
+
+msgid "提醒设置已保存到 {path}（30 秒内生效）"
+msgstr "リマインダー設定を {path} に保存しました（30 秒以内に反映）"
+
+msgid "任务栏进度已{state}"
+msgstr "タスクバーの進捗を{state}"
+
+msgid "快捷键已保存到 {path}，重启后生效"
+msgstr "ホットキーを {path} に保存しました。再起動後に有効になります"
+
+msgid "开启"
+msgstr "有効"
+
+msgid "关闭"
+msgstr "無効"
+
+msgid "快捷键有问题：{issues}"
+msgstr "ホットキーに問題があります：{issues}"
+
+msgid "关闭 ok-ap"
+msgstr "ok-ap を閉じる"
+
+msgid "要完全关闭程序，还是最小化到系统托盘？"
+msgstr "アプリを完全に終了しますか、それともシステムトレイに最小化しますか？"
+
+msgid "完全关闭"
+msgstr "完全に終了"
+
+msgid "收到托盘"
+msgstr "トレイに格納"
+
+msgid "取消"
+msgstr "キャンセル"
+
+msgid "记住我的选择"
+msgstr "選択を記憶する"

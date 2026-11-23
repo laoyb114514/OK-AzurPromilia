@@ -919,3 +919,120 @@ msgstr "Found {count} language pack(s); i18n and assets/lang are backed up befor
 
 msgid "已还原 {name}"
 msgstr "Restored {name}"
+
+msgid "界面与提醒"
+msgstr "Interface & reminders"
+
+msgid "关闭行为"
+msgstr "Close behaviour"
+
+msgid "提醒"
+msgstr "Reminders"
+
+msgid "任务栏进度与快捷键"
+msgstr "Taskbar progress & hotkeys"
+
+msgid "启用提醒"
+msgstr "Enable reminders"
+
+msgid "每日重置提醒"
+msgstr "Daily reset reminder"
+
+msgid "体力提醒"
+msgstr "Stamina reminder"
+
+msgid "保存提醒设置"
+msgstr "Save reminder settings"
+
+msgid "在任务栏显示进度"
+msgstr "Show progress on the taskbar"
+
+msgid "校验快捷键"
+msgstr "Validate hotkeys"
+
+msgid "保存快捷键"
+msgstr "Save hotkeys"
+
+msgid "快捷键在程序启动时注册；改完需要重启生效。F9–F12 属于框架的启动/停止，不能再绑定。"
+msgstr "Hotkeys are registered at startup; restart to apply changes. F9–F12 belong to the framework's start/stop and cannot be rebound."
+
+msgid "设置已载入"
+msgstr "Settings loaded"
+
+msgid "关闭行为已保存"
+msgstr "Close behaviour saved"
+
+msgid "提醒设置已保存"
+msgstr "Reminder settings saved"
+
+msgid "快捷键校验通过"
+msgstr "Hotkeys validated"
+
+msgid "快捷键已保存"
+msgstr "Hotkeys saved"
+
+msgid "已填入默认快捷键（记得保存）"
+msgstr "Default hotkeys filled in (remember to save)"
+
+msgid "点关闭按钮时"
+msgstr "When clicking the close button"
+
+msgid "每次都问"
+msgstr "Ask every time"
+
+msgid "直接关闭"
+msgstr "Close directly"
+
+msgid "最小化到托盘"
+msgstr "Minimize to tray"
+
+msgid "重置小时"
+msgstr "Reset hour"
+
+msgid "间隔（分钟）"
+msgstr "Interval (minutes)"
+
+msgid "如 ctrl+alt+p"
+msgstr "e.g. ctrl+alt+p"
+
+msgid "快捷键有问题"
+msgstr "Hotkey problem"
+
+msgid "关闭行为已保存到 {path}"
+msgstr "Close behaviour saved to {path}"
+
+msgid "提醒设置已保存到 {path}（30 秒内生效）"
+msgstr "Reminder settings saved to {path} (takes effect within 30 seconds)"
+
+msgid "任务栏进度已{state}"
+msgstr "Taskbar progress {state}"
+
+msgid "快捷键已保存到 {path}，重启后生效"
+msgstr "Hotkeys saved to {path}; restart to apply"
+
+msgid "开启"
+msgstr "enabled"
+
+msgid "关闭"
+msgstr "disabled"
+
+msgid "快捷键有问题：{issues}"
+msgstr "Hotkey problems: {issues}"
+
+msgid "关闭 ok-ap"
+msgstr "Close ok-ap"
+
+msgid "要完全关闭程序，还是最小化到系统托盘？"
+msgstr "Quit the app completely, or minimize it to the system tray?"
+
+msgid "完全关闭"
+msgstr "Quit completely"
+
+msgid "收到托盘"
+msgstr "Minimize to tray"
+
+msgid "取消"
+msgstr "Cancel"
+
+msgid "记住我的选择"
+msgstr "Remember my choice"

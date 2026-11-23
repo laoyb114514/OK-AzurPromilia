@@ -910,3 +910,120 @@ msgstr "找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/l
 
 msgid "已还原 {name}"
 msgstr "已还原 {name}"
+
+msgid "界面与提醒"
+msgstr "界面与提醒"
+
+msgid "关闭行为"
+msgstr "关闭行为"
+
+msgid "提醒"
+msgstr "提醒"
+
+msgid "任务栏进度与快捷键"
+msgstr "任务栏进度与快捷键"
+
+msgid "启用提醒"
+msgstr "启用提醒"
+
+msgid "每日重置提醒"
+msgstr "每日重置提醒"
+
+msgid "体力提醒"
+msgstr "体力提醒"
+
+msgid "保存提醒设置"
+msgstr "保存提醒设置"
+
+msgid "在任务栏显示进度"
+msgstr "在任务栏显示进度"
+
+msgid "校验快捷键"
+msgstr "校验快捷键"
+
+msgid "保存快捷键"
+msgstr "保存快捷键"
+
+msgid "快捷键在程序启动时注册；改完需要重启生效。F9–F12 属于框架的启动/停止，不能再绑定。"
+msgstr "快捷键在程序启动时注册；改完需要重启生效。F9–F12 属于框架的启动/停止，不能再绑定。"
+
+msgid "设置已载入"
+msgstr "设置已载入"
+
+msgid "关闭行为已保存"
+msgstr "关闭行为已保存"
+
+msgid "提醒设置已保存"
+msgstr "提醒设置已保存"
+
+msgid "快捷键校验通过"
+msgstr "快捷键校验通过"
+
+msgid "快捷键已保存"
+msgstr "快捷键已保存"
+
+msgid "已填入默认快捷键（记得保存）"
+msgstr "已填入默认快捷键（记得保存）"
+
+msgid "点关闭按钮时"
+msgstr "点关闭按钮时"
+
+msgid "每次都问"
+msgstr "每次都问"
+
+msgid "直接关闭"
+msgstr "直接关闭"
+
+msgid "最小化到托盘"
+msgstr "最小化到托盘"
+
+msgid "重置小时"
+msgstr "重置小时"
+
+msgid "间隔（分钟）"
+msgstr "间隔（分钟）"
+
+msgid "如 ctrl+alt+p"
+msgstr "如 ctrl+alt+p"
+
+msgid "快捷键有问题"
+msgstr "快捷键有问题"
+
+msgid "关闭行为已保存到 {path}"
+msgstr "关闭行为已保存到 {path}"
+
+msgid "提醒设置已保存到 {path}（30 秒内生效）"
+msgstr "提醒设置已保存到 {path}（30 秒内生效）"
+
+msgid "任务栏进度已{state}"
+msgstr "任务栏进度已{state}"
+
+msgid "快捷键已保存到 {path}，重启后生效"
+msgstr "快捷键已保存到 {path}，重启后生效"
+
+msgid "开启"
+msgstr "开启"
+
+msgid "关闭"
+msgstr "关闭"
+
+msgid "快捷键有问题：{issues}"
+msgstr "快捷键有问题：{issues}"
+
+msgid "关闭 ok-ap"
+msgstr "关闭 ok-ap"
+
+msgid "要完全关闭程序，还是最小化到系统托盘？"
+msgstr "要完全关闭程序，还是最小化到系统托盘？"
+
+msgid "完全关闭"
+msgstr "完全关闭"
+
+msgid "收到托盘"
+msgstr "收到托盘"
+
+msgid "取消"
+msgstr "取消"
+
+msgid "记住我的选择"
+msgstr "记住我的选择"

@@ -44,6 +44,11 @@
   - **诊断包 (`src/core/diagnostics_bundle.py`)**：配置+日志+模板清单+失败帧+系统信息打成 zip（默认不含截图）。
   - **崩溃诊断 (`src/core/crash_guard.py`)**：三处异常钩子写 `crashes/`，并自动附诊断包。
   - **在线仓库 (`src/core/repo_index.py`)**：填一个索引地址就能浏览并一键安装别人分享的流程/队列/轮椅方案/模板包（同名不覆盖、可选 SHA-256）。
+- **界面行为（「界面与提醒」页）**：
+  - **关闭询问**：点 × 时三选一（完全关闭 / 收到托盘 / 取消），可记住选择；退出流程中不弹窗。
+  - **提醒**：每日 04:00 重置提醒 + 按分钟循环的体力提醒，只发通知、不打断任务。
+  - **任务栏进度**：按历史平均用时估算、封顶 97%，拿不到窗口句柄自动降级。
+  - **全局快捷键**：暂停/继续、停止当前任务、开关 UID 遮挡，可改键（F9–F12 归框架的启动/停止）。
 
 ## 快速导航
 
@@ -54,6 +59,7 @@
 - [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
 - [一条龙顺序、导航路线与轮椅方案](dev/routes_and_replay.md)
 - [隐私遮挡、坐标拾取与支持工具（语言包 / 诊断包 / 崩溃诊断）](dev/privacy_and_support.md)
+- [界面行为：关闭询问 / 提醒 / 任务栏进度 / 快捷键](dev/ui_behavior.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 
@@ -89,6 +95,10 @@
 │   │   ├── diagnostics_bundle.py 诊断包 zip
 │   │   ├── crash_guard.py      崩溃诊断钩子
 │   │   ├── repo_index.py      在线仓库（加载索引 + 一键安装）
+│   │   ├── close_behavior.py   关闭询问（记住选择）
+│   │   ├── reminders.py        每日重置 / 体力提醒调度
+│   │   ├── hotkeys.py          快捷键解析/校验/注册计划
+│   │   ├── taskbar.py          任务栏进度（ITaskbarList3，可降级）
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
@@ -97,7 +107,7 @@
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
 │   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计、运行报表）
 │   │   └── account/            账号作用域配置存储
-│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 一条龙顺序 / 流程与队列 / 离线工具 / 隐私遮挡 / 工具与诊断）
+│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 一条龙顺序 / 流程与队列 / 离线工具 / 隐私遮挡 / 界面与提醒 / 工具与诊断）
 │   ├── interaction/            游戏交互（GameInteraction 模拟键鼠、ScreenPosition）
 │   ├── image/                  图像算法（旋转模板匹配、连通域、圆弧拟合、音游/叠叠乐检测等）
 │   ├── yolo/                   YOLO 模型注册与 OpenVINO 推理

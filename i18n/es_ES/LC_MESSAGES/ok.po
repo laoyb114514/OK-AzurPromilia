@@ -921,3 +921,120 @@ msgstr "Se encontraron {count} paquete(s) de idioma; antes de aplicar se respald
 
 msgid "已还原 {name}"
 msgstr "Se restauró {name}"
+
+msgid "界面与提醒"
+msgstr "Interfaz y recordatorios"
+
+msgid "关闭行为"
+msgstr "Comportamiento al cerrar"
+
+msgid "提醒"
+msgstr "Recordatorios"
+
+msgid "任务栏进度与快捷键"
+msgstr "Progreso en la barra de tareas y atajos"
+
+msgid "启用提醒"
+msgstr "Activar recordatorios"
+
+msgid "每日重置提醒"
+msgstr "Recordatorio del reinicio diario"
+
+msgid "体力提醒"
+msgstr "Recordatorio de resistencia"
+
+msgid "保存提醒设置"
+msgstr "Guardar ajustes de recordatorios"
+
+msgid "在任务栏显示进度"
+msgstr "Mostrar el progreso en la barra de tareas"
+
+msgid "校验快捷键"
+msgstr "Validar atajos"
+
+msgid "保存快捷键"
+msgstr "Guardar atajos"
+
+msgid "快捷键在程序启动时注册；改完需要重启生效。F9–F12 属于框架的启动/停止，不能再绑定。"
+msgstr "Los atajos se registran al iniciar; reinicia para aplicarlos. F9–F12 pertenecen al inicio/parada del framework y no se pueden reasignar."
+
+msgid "设置已载入"
+msgstr "Ajustes cargados"
+
+msgid "关闭行为已保存"
+msgstr "Comportamiento al cerrar guardado"
+
+msgid "提醒设置已保存"
+msgstr "Ajustes de recordatorios guardados"
+
+msgid "快捷键校验通过"
+msgstr "Atajos validados"
+
+msgid "快捷键已保存"
+msgstr "Atajos guardados"
+
+msgid "已填入默认快捷键（记得保存）"
+msgstr "Atajos predeterminados rellenados (recuerda guardar)"
+
+msgid "点关闭按钮时"
+msgstr "Al pulsar el botón de cerrar"
+
+msgid "每次都问"
+msgstr "Preguntar siempre"
+
+msgid "直接关闭"
+msgstr "Cerrar directamente"
+
+msgid "最小化到托盘"
+msgstr "Minimizar a la bandeja"
+
+msgid "重置小时"
+msgstr "Hora del reinicio"
+
+msgid "间隔（分钟）"
+msgstr "Intervalo (minutos)"
+
+msgid "如 ctrl+alt+p"
+msgstr "p. ej. ctrl+alt+p"
+
+msgid "快捷键有问题"
+msgstr "Problema con los atajos"
+
+msgid "关闭行为已保存到 {path}"
+msgstr "Comportamiento al cerrar guardado en {path}"
+
+msgid "提醒设置已保存到 {path}（30 秒内生效）"
+msgstr "Ajustes de recordatorios guardados en {path} (se aplican en 30 segundos)"
+
+msgid "任务栏进度已{state}"
+msgstr "Progreso de la barra de tareas {state}"
+
+msgid "快捷键已保存到 {path}，重启后生效"
+msgstr "Atajos guardados en {path}; reinicia para aplicarlos"
+
+msgid "开启"
+msgstr "activado"
+
+msgid "关闭"
+msgstr "desactivado"
+
+msgid "快捷键有问题：{issues}"
+msgstr "Problemas con los atajos: {issues}"
+
+msgid "关闭 ok-ap"
+msgstr "Cerrar ok-ap"
+
+msgid "要完全关闭程序，还是最小化到系统托盘？"
+msgstr "¿Cerrar la aplicación por completo o minimizarla a la bandeja del sistema?"
+
+msgid "完全关闭"
+msgstr "Cerrar por completo"
+
+msgid "收到托盘"
+msgstr "Minimizar a la bandeja"
+
+msgid "取消"
+msgstr "Cancelar"
+
+msgid "记住我的选择"
+msgstr "Recordar mi elección"

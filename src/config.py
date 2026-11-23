@@ -141,6 +141,7 @@ config = {
         ["src.gui.flow_tab", "FlowTab"],
         ["src.gui.offline_tools_tab", "OfflineToolsTab"],
         ["src.gui.privacy_tab", "PrivacyTab"],
+        ["src.gui.ui_extras_tab", "UiExtrasTab"],
         ["src.gui.diagnostics_tab", "DiagnosticsTab"],
     ],
     "trigger_tasks": [  # 不断执行的触发式任务
