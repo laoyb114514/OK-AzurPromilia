@@ -152,11 +152,13 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
         另外补齐了 ``config['wait_until_before_delay']`` / ``wait_until_check_delay``：
         这两个键在 ok-script 2.0.6 里没有任何代码引用（是死键），这里由项目自己实现，
-        默认 0 与旧行为一致。
+        默认 0 与旧行为一致。条件没满足时的重试间隔还会叠加全局配置的
+        ``重试间隔(秒)``（取两者较大值），这样那个配置项才真的有用。
         """
         self.executor.reset_scene()
         before_delay = _as_delay(app_config.get("wait_until_before_delay", 0))
         check_delay = _as_delay(app_config.get("wait_until_check_delay", 0))
+        retry_gap = _runtime_of(self).resolve_retry_gap(check_delay)
         if before_delay > 0:
             self.sleep(before_delay)
         start = self.active_time()
@@ -184,8 +186,8 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             settled = None
             if post_action is not None:
                 post_action()
-            if check_delay > 0:
-                self.sleep(check_delay)
+            if retry_gap > 0:
+                self.sleep(retry_gap)
             if self.active_time() - start > time_out:
                 break
 

@@ -12,8 +12,8 @@
 | 键 | 默认 | 作用 |
 |------|------|------|
 | `单步超时(秒)` | 10.0 | `self.loop(time_out=None)` 的默认超时 |
-| `重试间隔(秒)` | 0.0 | 动作验证失败后重试之间的间隔 |
-| `动作后等待(秒)` | 0.0 | 动作成功后追加的稳定等待 |
+| `重试间隔(秒)` | 0.0 | 条件没满足时两次重试之间的间隔（与 `wait_until_check_delay` 取较大值） |
+| `动作后等待(秒)` | 0.0 | 失败自恢复时每次按返回键后的等待 |
 | `卡死检测阈值(秒)` | 30.0 | 画面长时间不变的告警阈值 |
 | `低配模式` | False | 所有超时放宽 1.5 倍（含卡死阈值） |
 | `失败后自动返回主菜单` | True | 失败后按返回键退回主菜单 |
@@ -37,6 +37,12 @@
 `src/config.py` 里的 `wait_until_before_delay` / `wait_until_check_delay` 在 ok-script 2.0.6
 **没有任何代码引用**（死键）。`BaseGameTask.wait_until` 现在自己实现它们：
 首次检测前等待、每轮检测之间等待，默认 0 与旧行为一致。
+
+> ⚠️ 这一节曾经有个坑：`重试间隔(秒)` 与 `动作后等待(秒)` 在**改造当时其实没有消费者**
+> —— 只有 dataclass 字段被读、没有任何调用点用它，等于用户改了没反应。现在：
+> `重试间隔` 接进了 `wait_until` 的重试间隔（`RuntimeSettings.resolve_retry_gap`，
+> 与死键 `wait_until_check_delay` 取较大值），`动作后等待` 接进了失败自恢复的按返回键间隔。
+> 两个默认都是 0，所以存量行为不变。
 
 > `wait_until_timeout` 仍未接进 `TaskExecutor`：`executor.wait_scene_timeout` 依旧是写死的 10 秒。
 > 需要改单个等待的超时，请继续用 `self.loop(time_out=...)` / `wait_until(time_out=...)` 显式传值。

@@ -326,11 +326,11 @@ msgstr "Failure frames to keep"
 msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
 msgstr "Default timeout for a single wait/poll step; places that pass an explicit timeout are unaffected"
 
-msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
-msgstr "Delay between retries after a failed verification; 0 means no extra wait"
+msgid "条件没满足时两次重试之间的间隔（与 wait_until_check_delay 取较大值），0 表示不额外等待"
+msgstr "Gap between retries when the condition is not met (the larger of this and wait_until_check_delay); 0 means no extra wait"
 
-msgid "动作成功后追加的稳定等待，0 表示不等待"
-msgstr "Extra settle wait after a successful action; 0 means no wait"
+msgid "失败自恢复时每次按返回键后的等待；0 表示用框架的默认间隔"
+msgstr "Wait after each back press during failure recovery; 0 uses the framework default"
 
 msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
 msgstr "Threshold for an unchanged screen (possible freeze); only logs a warning, never aborts the task"

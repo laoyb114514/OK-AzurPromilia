@@ -106,6 +106,18 @@ class RuntimeSettings:
         base = self.step_timeout if time_out is None else time_out
         return self.scaled_timeout(base)
 
+    def resolve_retry_gap(self, check_delay: float = 0.0) -> float:
+        """条件没满足时，两次重试之间等多久。
+
+        ``wait_until_check_delay``（框架死键，由本项目实现）显式配了就优先用它；
+        否则用 ``重试间隔(秒)``；两者都为 0 就是「不额外等待」，与旧行为一致。
+        """
+        try:
+            explicit = max(0.0, float(check_delay or 0.0))
+        except (TypeError, ValueError):
+            explicit = 0.0
+        return max(explicit, max(0.0, float(self.retry_interval or 0.0)))
+
     def resolve_stuck_threshold(self) -> float:
         """卡死阈值同样按低配模式放宽，避免慢机器误报。"""
         return self.scaled_timeout(self.stuck_threshold)
@@ -127,8 +139,8 @@ def build_default_config() -> dict:
 
 CONFIG_DESCRIPTION = {
     STEP_TIMEOUT_KEY: "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响",
-    RETRY_INTERVAL_KEY: "动作验证失败后重试之间的间隔，0 表示不额外等待",
-    AFTER_ACTION_WAIT_KEY: "动作成功后追加的稳定等待，0 表示不等待",
+    RETRY_INTERVAL_KEY: "条件没满足时两次重试之间的间隔（与 wait_until_check_delay 取较大值），0 表示不额外等待",
+    AFTER_ACTION_WAIT_KEY: "失败自恢复时每次按返回键后的等待；0 表示用框架的默认间隔",
     STUCK_THRESHOLD_KEY: "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务",
     LOW_SPEC_KEY: "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽",
     AUTO_RECOVER_KEY: "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务",

@@ -328,11 +328,11 @@ msgstr "Fotogramas fallidos a conservar"
 msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
 msgstr "Tiempo de espera predeterminado de un paso de espera o sondeo; los puntos que indican uno explícito no se ven afectados"
 
-msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
-msgstr "Espera entre reintentos tras un fallo de verificación; 0 significa sin espera adicional"
+msgid "条件没满足时两次重试之间的间隔（与 wait_until_check_delay 取较大值），0 表示不额外等待"
+msgstr "Intervalo entre reintentos cuando no se cumple la condición (el mayor entre este y wait_until_check_delay); 0 = sin espera extra"
 
-msgid "动作成功后追加的稳定等待，0 表示不等待"
-msgstr "Espera adicional de estabilización tras una acción correcta; 0 significa sin espera"
+msgid "失败自恢复时每次按返回键后的等待；0 表示用框架的默认间隔"
+msgstr "Espera tras cada pulsación de retroceso durante la recuperación; 0 usa el valor por defecto del framework"
 
 msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
 msgstr "Umbral de pantalla sin cambios (posible bloqueo); solo registra un aviso y nunca aborta la tarea"

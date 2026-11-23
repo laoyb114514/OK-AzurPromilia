@@ -129,5 +129,29 @@ class TestRuntimeScaling(unittest.TestCase):
         self.assertTrue(patched.low_spec)
 
 
+class TestRetryGap(unittest.TestCase):
+    """``重试间隔(秒)`` 必须真的被 ``wait_until`` 用上（之前是死配置）。"""
+
+    def test_default_is_zero(self):
+        self.assertEqual(RuntimeSettings().resolve_retry_gap(), 0.0)
+
+    def test_explicit_check_delay_wins_when_larger(self):
+        self.assertAlmostEqual(RuntimeSettings().resolve_retry_gap(0.3), 0.3)
+
+    def test_config_value_used_when_no_check_delay(self):
+        settings = with_override(RuntimeSettings(), retry_interval=0.7)
+        self.assertAlmostEqual(settings.resolve_retry_gap(), 0.7)
+
+    def test_larger_of_the_two_wins(self):
+        settings = with_override(RuntimeSettings(), retry_interval=0.7)
+        self.assertAlmostEqual(settings.resolve_retry_gap(0.2), 0.7)
+        self.assertAlmostEqual(settings.resolve_retry_gap(1.2), 1.2)
+
+    def test_bad_values_fall_back_to_zero(self):
+        settings = with_override(RuntimeSettings(), retry_interval=-3.0)
+        self.assertEqual(settings.resolve_retry_gap(), 0.0)
+        self.assertEqual(settings.resolve_retry_gap("oops"), 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
