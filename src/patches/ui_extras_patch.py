@@ -272,7 +272,14 @@ def install_ui_extras_patch() -> bool:
 
 
 def _attach_hud(main_window) -> object | None:
-    """按设置创建 HUD，并在退出时一并关掉（不抢焦点、失败不影响启动）。"""
+    """按设置创建 HUD，并在退出时一并关掉（不抢焦点、失败不影响启动）。
+
+    幂等：窗口不小心重建第二次时复用已有的 HUD，避免两个悬浮条叠在一起（旧的那个
+    还带着自己的 1 秒 QTimer，谁也停不掉）。
+    """
+    existing = getattr(main_window, "_ok_ap_hud", None)
+    if existing is not None:
+        return existing
     try:
         from src.core.hud import load_settings
 

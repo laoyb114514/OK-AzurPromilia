@@ -96,6 +96,10 @@ ok-ap-diagnostics-<时间戳>.zip
 - `OK_AP_DISABLE_CRASH_GUARD=1` 可以关掉（跑测试或排查钩子冲突时用）；
 - `installed_guard()` 能拿到已装上的实例，调试用。
 
+接线本身也有测试（`tests/test_crash_guard_patch.py`）：装上后真的会写
+`crashes/crash_*.txt`、重复调用幂等、环境变量能关、安装失败不抛，以及
+「崩溃诊断必须是 `install_startup_patches()` 里的第一个调用」。
+
 ## 6. 在线仓库（分享与一键安装）
 
 `src/core/repo_index.py`。给一个返回 JSON 的 http(s) 索引地址（也可以是本地文件，
