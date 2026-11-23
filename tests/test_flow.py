@@ -493,6 +493,45 @@ class TestFailurePolicy(unittest.TestCase):
         result = executor.run()
         self.assertFalse(result.ok)
         self.assertIn("预算", result.error)
+        self.assertTrue(result.budget_exceeded)
+        self.assertIn("超出时间预算", result.summary())
+
+    def test_budget_aborts_even_when_continue_on_error(self):
+        """预算不是「某一步失败」：continue_on_error 也不该继续刷剩下的步骤。"""
+        executor, task = make_executor(
+            make_flow(
+                [
+                    {"type": "wait", "seconds": 5},
+                    {"type": "click", "x": 0.1, "y": 0.1},
+                    {"type": "click", "x": 0.2, "y": 0.2},
+                    {"type": "click", "x": 0.3, "y": 0.3},
+                ]
+            ),
+            budget_seconds=1.0,
+            continue_on_error=True,
+        )
+        result = executor.run()
+        self.assertFalse(result.ok)
+        self.assertTrue(result.budget_exceeded)
+        self.assertEqual(result.failed, [], "预算不该被记成步骤失败")
+        # 第一步的 wait 自己就被预算打断了，所以它不算完成
+        self.assertEqual(result.completed, 0)
+        self.assertEqual(task.named("click"), [], "预算用完后不该再执行任何步骤")
+
+    def test_budget_stops_at_successful_step_for_resume(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = CheckpointStore(Path(tmp))
+            flow = make_flow(
+                [{"type": "wait", "seconds": 1}, {"type": "wait", "seconds": 5}, {"type": "wait", "seconds": 1}]
+            )
+            executor, _ = make_executor(
+                flow, budget_seconds=2.0, checkpoint=store.for_flow(flow)
+            )
+            result = executor.run()
+            self.assertTrue(result.budget_exceeded)
+            self.assertEqual(result.completed, 1)
+            # 断点停在最后一个成功步骤，续跑会重跑被打断的那一步
+            self.assertEqual(store.for_flow(flow).load(), 1)
 
     def test_elapsed_is_reported(self):
         executor, _ = make_executor(make_flow([{"type": "wait", "seconds": 2}]))

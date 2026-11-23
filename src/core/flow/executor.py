@@ -66,6 +66,15 @@ class FlowError(Exception):
         self.message = message
 
 
+class FlowBudgetExceeded(FlowError):
+    """超出本次时间预算。
+
+    单独一个类型是因为它**不是步骤失败**：``continue_on_error=True`` 时也不该
+    「继续跑剩下的步骤」——剩下的每一步都会立刻再撞上预算，日志刷屏且毫无意义。
+    预算用完就整条流程中止，断点停在最后一个**成功**的步骤，下次续跑会重跑被打断的那步。
+    """
+
+
 @dataclass
 class FlowRunResult:
     """一次流程运行的结果。"""
@@ -77,10 +86,13 @@ class FlowRunResult:
     failed: list[str] = field(default_factory=list)
     error: str | None = None
     elapsed: float = 0.0
+    budget_exceeded: bool = False
 
     def summary(self) -> str:
         if self.ok:
             return f"流程完成：{self.completed}/{self.total} 步，用时 {self.elapsed:.1f}s"
+        if self.budget_exceeded:
+            return f"超出时间预算，已中止（已完成 {self.completed}/{self.total} 步）"
         head = f"流程失败于 {self.error}" if self.error else "流程失败"
         return f"{head}（已完成 {self.completed}/{self.total} 步）"
 
@@ -286,6 +298,13 @@ class FlowExecutor:
             try:
                 self._check_budget(step)
                 self._run_step(step)
+            except FlowBudgetExceeded as exc:
+                # 预算不是「某一步失败」：整条流程立刻中止，不看 continue_on_error
+                result.ok = False
+                result.budget_exceeded = True
+                result.error = str(exc)
+                self._info(f"超出时间预算，流程中止（已完成 {result.completed}/{total} 步）")
+                break
             except Exception as exc:  # 单步失败：按策略决定继续或中止
                 result.ok = False
                 result.failed.append(getattr(exc, "path", step.path) or step.path)
@@ -354,7 +373,7 @@ class FlowExecutor:
             self.context.key(step.key or "", step.duration)
 
     def _step_wait(self, step: FlowStep) -> None:
-        self.context.sleep(max(0.0, float(step.seconds or 0.0)))
+        self._sleep_within_budget(max(0.0, float(step.seconds or 0.0)))
 
     def _step_wait_template(self, step: FlowStep) -> None:
         want = step.expect != "disappear"
@@ -425,25 +444,58 @@ class FlowExecutor:
 
         返回 ``(是否达到目标状态, 命中时的 box)``：等出现成功时 box 有值，
         等消失成功时没有 box（也就不存在「用 False 当哨兵」的歧义）。
+
+        轮询过程中也会检查时间预算：否则一个 ``timeout=600`` 的等待会把
+        「预算 5 分钟」直接撑到 10 分钟——文档里说「流程会被预算打断」就成了空话。
         """
         deadline = self.context.now() + float(timeout or self.default_timeout)
         while True:
             box = self.context.template_box(name, threshold)
             if bool(box) == want:
                 return True, box
+            self._check_deadline(name)
             if self.context.now() >= deadline:
                 return False, None
             self.context.sleep(self.context.poll_interval)
+
+    def _check_deadline(self, name: str) -> None:
+        """只按预算判断（不看步骤），给等待循环用。"""
+        if not self.budget_seconds:
+            return
+        if self.context.now() - self._started > self.budget_seconds:
+            raise FlowBudgetExceeded(
+                f"超出本次时间预算 {self.budget_seconds:.0f}s（等待 {name} 期间）",
+            )
 
     def _check_budget(self, step: FlowStep) -> None:
         if not self.budget_seconds:
             return
         if self.context.now() - self._started > self.budget_seconds:
-            raise FlowError(
+            raise FlowBudgetExceeded(
                 f"超出本次时间预算 {self.budget_seconds:.0f}s",
                 path=step.path,
                 step_type=step.type,
             )
+
+    def _sleep_within_budget(self, seconds: float) -> None:
+        """等待也受预算约束：睡到预算边界就中止，而不是把整个 5 分钟等完。"""
+        if seconds <= 0:
+            return
+        if not self.budget_seconds:
+            self.context.sleep(seconds)
+            return
+        remaining = self.budget_seconds - (self.context.now() - self._started)
+        if remaining <= 0:
+            raise FlowBudgetExceeded(
+                f"超出本次时间预算 {self.budget_seconds:.0f}s",
+            )
+        if seconds <= remaining:
+            self.context.sleep(seconds)
+            return
+        self.context.sleep(remaining)
+        raise FlowBudgetExceeded(
+            f"超出本次时间预算 {self.budget_seconds:.0f}s（等待 {seconds:g}s 期间）",
+        )
 
     def _info(self, message: str) -> None:
         if self._log:
