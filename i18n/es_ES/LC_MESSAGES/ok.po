@@ -1248,3 +1248,66 @@ msgstr "Instalar ejemplos"
 
 msgid "安装示例失败：{error}"
 msgstr "No se pudieron instalar los ejemplos: {error}"
+
+msgid "按账号和任务配置独立参数。先选账号，再选任务，下面会自动出现该任务的属性控件。账号页只需要填写账号名，无需填写密码。系统兼容旧格式 `账号,密码` 但不会保存密码。"
+msgstr "Configura parámetros independientes por cuenta y tarea. Elige una cuenta, luego una tarea, y abajo aparecerán sus ajustes. La página de cuentas solo necesita el nombre — sin contraseña. El formato antiguo `cuenta,contraseña` se acepta pero la contraseña nunca se guarda."
+
+msgid "账号A\n账号B"
+msgstr "CuentaA\nCuentaB"
+
+msgid "safe_back 超时（{time_out}s），目标未出现"
+msgstr "safe_back agotó el tiempo ({time_out}s): el objetivo no apareció"
+
+msgid "账号格式错误，已跳过: {line}"
+msgstr "Entrada de cuenta con formato incorrecto, omitida: {line}"
+
+msgid "第 {idx}/{total} 个账号为空，已跳过"
+msgstr "La cuenta {idx}/{total} está vacía, omitida"
+
+msgid "开始第 {idx}/{total} 个账号({suffix}){log_suffix}"
+msgstr "Iniciando la cuenta {idx}/{total} ({suffix}){log_suffix}"
+
+msgid "任务返回 False"
+msgstr "La tarea devolvió False"
+
+msgid "开始执行日常任务..."
+msgstr "Iniciando las tareas diarias..."
+
+msgid "开始任务: {key}"
+msgstr "Iniciando tarea: {key}"
+
+msgid "任务失败标记 | {name}: {message}"
+msgstr "Tarea marcada como fallida | {name}: {message}"
+
+msgid "多账户模式已开启，但账号列表为空，日常任务结束"
+msgstr "El modo multicuenta está activo pero la lista de cuentas está vacía; se detienen las tareas diarias"
+
+msgid "任务执行"
+msgstr "Ejecución de tareas"
+
+msgid "任务 {key} 执行失败"
+msgstr "La tarea {key} falló"
+
+msgid "日常完成!"
+msgstr "¡Diarias completadas!"
+
+msgid "所有任务均成功完成!"
+msgstr "¡Todas las tareas terminaron con éxito!"
+
+msgid "异常: {err}"
+msgstr "Excepción: {err}"
+
+msgid "开始第 {idx}/{total} 轮任务执行"
+msgstr "Iniciando la ronda {idx}/{total}"
+
+msgid "第 {idx} 轮 | 失败任务: {failed}"
+msgstr "Ronda {idx} | tareas fallidas: {failed}"
+
+msgid "以下任务未完成或失败: {failed}"
+msgstr "Estas tareas no terminaron o fallaron: {failed}"
+
+msgid "第 {idx} 轮 | 日常完成!"
+msgstr "Ronda {idx} | ¡diarias completadas!"
+
+msgid "执行完成，失败统计: {failed}"
+msgstr "Terminado; resumen de fallos: {failed}"

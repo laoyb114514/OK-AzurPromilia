@@ -1246,3 +1246,66 @@ msgstr "Install examples"
 
 msgid "安装示例失败：{error}"
 msgstr "Failed to install examples: {error}"
+
+msgid "按账号和任务配置独立参数。先选账号，再选任务，下面会自动出现该任务的属性控件。账号页只需要填写账号名，无需填写密码。系统兼容旧格式 `账号,密码` 但不会保存密码。"
+msgstr "Set per-account, per-task parameters. Pick an account, then a task, and that task's settings appear below. The account page only needs the account name — no password. The legacy `name,password` format is still accepted but the password is never stored."
+
+msgid "账号A\n账号B"
+msgstr "AccountA\nAccountB"
+
+msgid "safe_back 超时（{time_out}s），目标未出现"
+msgstr "safe_back timed out after {time_out}s: target never appeared"
+
+msgid "账号格式错误，已跳过: {line}"
+msgstr "Malformed account entry, skipped: {line}"
+
+msgid "第 {idx}/{total} 个账号为空，已跳过"
+msgstr "Account {idx}/{total} is empty, skipped"
+
+msgid "开始第 {idx}/{total} 个账号({suffix}){log_suffix}"
+msgstr "Starting account {idx}/{total} ({suffix}){log_suffix}"
+
+msgid "任务返回 False"
+msgstr "Task returned False"
+
+msgid "开始执行日常任务..."
+msgstr "Starting daily tasks..."
+
+msgid "开始任务: {key}"
+msgstr "Starting task: {key}"
+
+msgid "任务失败标记 | {name}: {message}"
+msgstr "Task marked failed | {name}: {message}"
+
+msgid "多账户模式已开启，但账号列表为空，日常任务结束"
+msgstr "Multi-account mode is on but the account list is empty; daily tasks stop here"
+
+msgid "任务执行"
+msgstr "Task run"
+
+msgid "任务 {key} 执行失败"
+msgstr "Task {key} failed"
+
+msgid "日常完成!"
+msgstr "Dailies done!"
+
+msgid "所有任务均成功完成!"
+msgstr "All tasks finished successfully!"
+
+msgid "异常: {err}"
+msgstr "Exception: {err}"
+
+msgid "开始第 {idx}/{total} 轮任务执行"
+msgstr "Starting round {idx}/{total}"
+
+msgid "第 {idx} 轮 | 失败任务: {failed}"
+msgstr "Round {idx} | failed tasks: {failed}"
+
+msgid "以下任务未完成或失败: {failed}"
+msgstr "These tasks did not finish or failed: {failed}"
+
+msgid "第 {idx} 轮 | 日常完成!"
+msgstr "Round {idx} | dailies done!"
+
+msgid "执行完成，失败统计: {failed}"
+msgstr "Finished; failure summary: {failed}"

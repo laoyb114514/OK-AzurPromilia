@@ -1237,3 +1237,66 @@ msgstr "安装示例"
 
 msgid "安装示例失败：{error}"
 msgstr "安装示例失败：{error}"
+
+msgid "按账号和任务配置独立参数。先选账号，再选任务，下面会自动出现该任务的属性控件。账号页只需要填写账号名，无需填写密码。系统兼容旧格式 `账号,密码` 但不会保存密码。"
+msgstr "按账号和任务配置独立参数。先选账号，再选任务，下面会自动出现该任务的属性控件。账号页只需要填写账号名，无需填写密码。系统兼容旧格式 `账号,密码` 但不会保存密码。"
+
+msgid "账号A\n账号B"
+msgstr "账号A\n账号B"
+
+msgid "safe_back 超时（{time_out}s），目标未出现"
+msgstr "safe_back 超时（{time_out}s），目标未出现"
+
+msgid "账号格式错误，已跳过: {line}"
+msgstr "账号格式错误，已跳过: {line}"
+
+msgid "第 {idx}/{total} 个账号为空，已跳过"
+msgstr "第 {idx}/{total} 个账号为空，已跳过"
+
+msgid "开始第 {idx}/{total} 个账号({suffix}){log_suffix}"
+msgstr "开始第 {idx}/{total} 个账号({suffix}){log_suffix}"
+
+msgid "任务返回 False"
+msgstr "任务返回 False"
+
+msgid "开始执行日常任务..."
+msgstr "开始执行日常任务..."
+
+msgid "开始任务: {key}"
+msgstr "开始任务: {key}"
+
+msgid "任务失败标记 | {name}: {message}"
+msgstr "任务失败标记 | {name}: {message}"
+
+msgid "多账户模式已开启，但账号列表为空，日常任务结束"
+msgstr "多账户模式已开启，但账号列表为空，日常任务结束"
+
+msgid "任务执行"
+msgstr "任务执行"
+
+msgid "任务 {key} 执行失败"
+msgstr "任务 {key} 执行失败"
+
+msgid "日常完成!"
+msgstr "日常完成!"
+
+msgid "所有任务均成功完成!"
+msgstr "所有任务均成功完成!"
+
+msgid "异常: {err}"
+msgstr "异常: {err}"
+
+msgid "开始第 {idx}/{total} 轮任务执行"
+msgstr "开始第 {idx}/{total} 轮任务执行"
+
+msgid "第 {idx} 轮 | 失败任务: {failed}"
+msgstr "第 {idx} 轮 | 失败任务: {failed}"
+
+msgid "以下任务未完成或失败: {failed}"
+msgstr "以下任务未完成或失败: {failed}"
+
+msgid "第 {idx} 轮 | 日常完成!"
+msgstr "第 {idx} 轮 | 日常完成!"
+
+msgid "执行完成，失败统计: {failed}"
+msgstr "执行完成，失败统计: {failed}"

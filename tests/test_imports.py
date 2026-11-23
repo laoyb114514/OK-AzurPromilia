@@ -116,5 +116,101 @@ class TestStaticReferences(unittest.TestCase):
         self.assertEqual(duplicates, [], "\n".join(duplicates))
 
 
+    def test_icons_referenced_in_code_exist(self):
+        """``FluentIcon.xxx`` / ``Icons.xxx`` 必须存在（改版后图标名会被删）。
+
+        ``FluentIcon.CALCULATOR`` 与 ``FluentIcon.HEALTH`` 都在开发过程中踩过：
+        代码写得下、跑起来打开那一页才 AttributeError。
+        """
+        import ast
+
+        from qfluentwidgets import FluentIcon
+
+        from src.icons import Icons
+
+        known = {"FluentIcon": FluentIcon, "Icons": Icons}
+        absent: list[str] = []
+        for path in SRC_ROOT.rglob("*.py"):
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"))
+            except (OSError, SyntaxError):
+                continue
+            for node in ast.walk(tree):
+                if (
+                    isinstance(node, ast.Attribute)
+                    and isinstance(node.value, ast.Name)
+                    and node.value.id in known
+                    and not hasattr(known[node.value.id], node.attr)
+                ):
+                    absent.append(f"{path.relative_to(SRC_ROOT)}:{node.lineno} {node.value.id}.{node.attr}")
+        self.assertEqual(absent, [], "\n".join(absent))
+
+    def test_tr_literals_are_translated(self):
+        """代码里每个字面量 ``tr("...")`` 都要在 6 个语种的 .po 里。
+
+        漏翻不会崩（tr 会退回中文），但英文/日文用户会突然看到一段中文，
+        而且没人会主动去发现——所以让测试来发现。
+        """
+        import ast
+        import re
+
+        try:
+            import polib
+        except ImportError:  # pragma: no cover - 开发环境才有 polib
+            self.skipTest("没有 polib")
+
+        repo_root = SRC_ROOT.parent
+        langs = ("zh_CN", "zh_TW", "en_US", "ja_JP", "ko_KR", "es_ES")
+        catalogs = {}
+        for lang in langs:
+            po_path = repo_root / "i18n" / lang / "LC_MESSAGES" / "ok.po"
+            catalogs[lang] = {entry.msgid for entry in polib.pofile(str(po_path))}
+
+        cjk = re.compile(r"[\u4e00-\u9fff]")
+        missing: list[str] = []
+        for path in SRC_ROOT.rglob("*.py"):
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"))
+            except (OSError, SyntaxError):
+                continue
+            for node in ast.walk(tree):
+                if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+                    continue
+                if node.func.attr not in ("tr", "_tr"):
+                    continue
+                for arg in node.args:
+                    if not (isinstance(arg, ast.Constant) and isinstance(arg.value, str)):
+                        continue
+                    if not cjk.search(arg.value):
+                        continue
+                    for lang, msgids in catalogs.items():
+                        if arg.value not in msgids:
+                            missing.append(f"{path.relative_to(SRC_ROOT)}:{node.lineno} [{lang}] {arg.value[:40]}")
+        self.assertEqual(missing, [], "\n".join(missing[:20]))
+
+    def test_translated_placeholders_match(self):
+        """msgstr 里的 ``{占位符}`` 必须和 msgid 一致，否则 ``.format()`` 会 KeyError。"""
+        import re
+
+        try:
+            import polib
+        except ImportError:  # pragma: no cover
+            self.skipTest("没有 polib")
+
+        repo_root = SRC_ROOT.parent
+        pattern = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+        mismatches: list[str] = []
+        for lang in ("zh_TW", "en_US", "ja_JP", "ko_KR", "es_ES"):
+            po_path = repo_root / "i18n" / lang / "LC_MESSAGES" / "ok.po"
+            for entry in polib.pofile(str(po_path)):
+                if not entry.msgstr or entry.obsolete:
+                    continue
+                expected = set(pattern.findall(entry.msgid))
+                actual = set(pattern.findall(entry.msgstr))
+                if expected != actual:
+                    mismatches.append(f"[{lang}] {entry.msgid[:40]}: {sorted(expected)} → {sorted(actual)}")
+        self.assertEqual(mismatches, [], "\n".join(mismatches[:20]))
+
+
 if __name__ == "__main__":
     unittest.main()

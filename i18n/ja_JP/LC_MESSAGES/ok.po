@@ -1242,3 +1242,66 @@ msgstr "サンプルをインストール"
 
 msgid "安装示例失败：{error}"
 msgstr "サンプルのインストールに失敗しました：{error}"
+
+msgid "按账号和任务配置独立参数。先选账号，再选任务，下面会自动出现该任务的属性控件。账号页只需要填写账号名，无需填写密码。系统兼容旧格式 `账号,密码` 但不会保存密码。"
+msgstr "アカウントとタスクごとに個別のパラメーターを設定します。先にアカウント、次にタスクを選ぶと、そのタスクの設定項目が下に表示されます。アカウント欄はアカウント名だけでよく、パスワードは不要です。旧形式 `アカウント,パスワード` も読み込めますが、パスワードは保存しません。"
+
+msgid "账号A\n账号B"
+msgstr "アカウントA\nアカウントB"
+
+msgid "safe_back 超时（{time_out}s），目标未出现"
+msgstr "safe_back がタイムアウト（{time_out}s）、対象が現れませんでした"
+
+msgid "账号格式错误，已跳过: {line}"
+msgstr "アカウントの形式が不正のためスキップしました: {line}"
+
+msgid "第 {idx}/{total} 个账号为空，已跳过"
+msgstr "{idx}/{total} 番目のアカウントが空のためスキップしました"
+
+msgid "开始第 {idx}/{total} 个账号({suffix}){log_suffix}"
+msgstr "{idx}/{total} 番目のアカウントを開始({suffix}){log_suffix}"
+
+msgid "任务返回 False"
+msgstr "タスクが False を返しました"
+
+msgid "开始执行日常任务..."
+msgstr "デイリータスクを開始します..."
+
+msgid "开始任务: {key}"
+msgstr "タスク開始: {key}"
+
+msgid "任务失败标记 | {name}: {message}"
+msgstr "タスク失敗を記録 | {name}: {message}"
+
+msgid "多账户模式已开启，但账号列表为空，日常任务结束"
+msgstr "マルチアカウントモードが有効ですがアカウント一覧が空のため、デイリータスクを終了します"
+
+msgid "任务执行"
+msgstr "タスク実行"
+
+msgid "任务 {key} 执行失败"
+msgstr "タスク {key} が失敗しました"
+
+msgid "日常完成!"
+msgstr "デイリー完了！"
+
+msgid "所有任务均成功完成!"
+msgstr "すべてのタスクが成功しました!"
+
+msgid "异常: {err}"
+msgstr "例外: {err}"
+
+msgid "开始第 {idx}/{total} 轮任务执行"
+msgstr "{idx}/{total} 回目の実行を開始"
+
+msgid "第 {idx} 轮 | 失败任务: {failed}"
+msgstr "{idx} 回目 | 失敗タスク: {failed}"
+
+msgid "以下任务未完成或失败: {failed}"
+msgstr "次のタスクが未完了または失敗しました: {failed}"
+
+msgid "第 {idx} 轮 | 日常完成!"
+msgstr "{idx} 回目 | デイリー完了！"
+
+msgid "执行完成，失败统计: {failed}"
+msgstr "実行完了、失敗集計: {failed}"
