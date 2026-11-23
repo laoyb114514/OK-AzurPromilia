@@ -212,5 +212,81 @@ class TestStaticReferences(unittest.TestCase):
         self.assertEqual(mismatches, [], "\n".join(mismatches[:20]))
 
 
+class TestTaskDeclarations(unittest.TestCase):
+    """注册的每个任务的声明是否自洽。"""
+
+    def _registered(self):
+        from src.config import config
+
+        pairs = []
+        for group in ("onetime_tasks", "trigger_tasks"):
+            for module_name, class_name in config.get(group, []) or []:
+                pairs.append((group, module_name, class_name))
+        return pairs
+
+    def _module_tree(self, module_name):
+        import ast
+
+        repo_root = SRC_ROOT.parent
+        path = repo_root / (module_name.replace(".", "/") + ".py")
+        return ast.parse(path.read_text(encoding="utf-8"))
+
+    def test_task_display_names_unique(self):
+        """任务显示名不能重复：队列按「类名或显示名」找任务，重名会找错。"""
+        import ast
+
+        names: dict[str, list[str]] = {}
+        for _group, module_name, class_name in self._registered():
+            for node in ast.walk(self._module_tree(module_name)):
+                if not isinstance(node, ast.Assign):
+                    continue
+                for target in node.targets:
+                    if (
+                        isinstance(target, ast.Attribute)
+                        and target.attr == "name"
+                        and isinstance(node.value, ast.Constant)
+                        and isinstance(node.value.value, str)
+                    ):
+                        names.setdefault(node.value.value, []).append(class_name)
+        duplicates = {name: classes for name, classes in names.items() if len(set(classes)) > 1}
+        self.assertEqual(duplicates, {}, f"任务显示名重复：{duplicates}")
+
+    def test_config_metadata_keys_match_defaults(self):
+        """``config_description`` / ``config_type`` 的键必须都在 ``default_config`` 里。
+
+        写错键名不会报错，只是**说明/下拉框静默失效**——用户看不到提示。
+        """
+        import ast
+
+        problems: list[str] = []
+        for _group, module_name, class_name in self._registered():
+            tree = self._module_tree(module_name)
+            defaults: set[str] = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        if (
+                            isinstance(target, ast.Attribute)
+                            and target.attr == "default_config"
+                            and isinstance(node.value, ast.Dict)
+                        ):
+                            defaults |= {key.value for key in node.value.keys if isinstance(key, ast.Constant)}
+            if not defaults:
+                continue
+            for attr in ("config_description", "config_type"):
+                for node in ast.walk(tree):
+                    if not isinstance(node, ast.Assign):
+                        continue
+                    for target in node.targets:
+                        if not (isinstance(target, ast.Attribute) and target.attr == attr):
+                            continue
+                        if not isinstance(node.value, ast.Dict):
+                            continue
+                        for key in node.value.keys:
+                            if isinstance(key, ast.Constant) and key.value not in defaults:
+                                problems.append(f"{class_name}.{attr} 的 {key.value!r} 不在 default_config")
+        self.assertEqual(problems, [], "\n".join(problems))
+
+
 if __name__ == "__main__":
     unittest.main()
