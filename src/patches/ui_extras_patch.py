@@ -83,48 +83,61 @@ def start_reminder_thread(stop_event: threading.Event | None = None) -> threadin
 
 
 def start_taskbar_thread(hwnd: int, stop_event: threading.Event | None = None) -> threading.Thread | None:
-    """启动任务栏进度线程（幂等）；``hwnd`` 为 0 时线程直接退出。"""
+    """启动任务栏进度线程（幂等）；``hwnd`` 为 0 时线程直接退出。
+
+    **后端必须在线程内部创建**：``ITaskbarList3`` 是单线程套间（STA）对象，
+    在 A 线程 ``CoCreateInstance`` 出来、跑到 B 线程调用会被拒（或被 Qt 的套间
+    搅成未定义行为）。所以 ``create_backend`` / ``CoInitialize`` 都放在 loop 里，
+    线程退出时再 ``CoUninitialize``。
+    """
     global _threads
     existing = _threads.get("taskbar")
     if existing is not None and existing.is_alive():
         return existing
     stop = stop_event or threading.Event()
-    progress = TaskbarProgress(create_backend(hwnd))
 
     def loop():
+        backend = create_backend(hwnd)
+        progress = TaskbarProgress(backend)
         run_log = default_run_log()
         current = None
         started = 0.0
-        while not stop.is_set():
-            try:
-                if not load_taskbar_enabled():
-                    if progress.last is not None:
-                        progress.clear()
-                    current = None
-                    stop.wait(TASKBAR_INTERVAL)
-                    continue
-                from ok import og
+        try:
+            while not stop.is_set():
+                try:
+                    if not load_taskbar_enabled():
+                        if progress.last is not None:
+                            progress.clear()
+                        current = None
+                        stop.wait(TASKBAR_INTERVAL)
+                        continue
+                    from ok import og
 
-                executor = getattr(og, "executor", None)
-                task = getattr(executor, "current_task", None) if executor is not None else None
-                if task is None:
-                    if progress.last is not None:
-                        progress.clear()
-                    current = None
-                else:
-                    if task is not current:
-                        current = task
-                        started = time.monotonic()
-                    name = getattr(task, "name", None) or task.__class__.__name__
-                    elapsed = time.monotonic() - started
-                    ratio = compute_ratio(run_log, str(name), elapsed)
-                    if ratio is not None:
-                        progress.update(ratio)
-            except Exception:
-                pass
-            stop.wait(TASKBAR_INTERVAL)
-        with contextlib.suppress(Exception):
-            progress.clear()
+                    executor = getattr(og, "executor", None)
+                    task = getattr(executor, "current_task", None) if executor is not None else None
+                    if task is None:
+                        if progress.last is not None:
+                            progress.clear()
+                        current = None
+                    else:
+                        if task is not current:
+                            current = task
+                            started = time.monotonic()
+                        name = getattr(task, "name", None) or task.__class__.__name__
+                        elapsed = time.monotonic() - started
+                        ratio = compute_ratio(run_log, str(name), elapsed)
+                        if ratio is not None:
+                            progress.update(ratio)
+                except Exception:
+                    pass
+                stop.wait(TASKBAR_INTERVAL)
+        finally:
+            with contextlib.suppress(Exception):
+                progress.clear()
+            with contextlib.suppress(Exception):
+                from src.core.taskbar import uninitialize_backend
+
+                uninitialize_backend(backend)
 
     thread = threading.Thread(target=loop, name="ok-ap-taskbar", daemon=True)
     _threads["taskbar"] = thread

@@ -2,6 +2,8 @@
 
 import json
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -512,6 +514,57 @@ class TestTaskbarProgress(unittest.TestCase):
         self.assertFalse(backend.available)
         self.assertFalse(backend.set_progress(0.5))
         self.assertFalse(backend.set_state("normal"))
+
+
+class TestTaskbarThreadPlacement(unittest.TestCase):
+    """COM 对象必须在使用它的线程里创建（``ITaskbarList3`` 是 STA 对象）。"""
+
+    def setUp(self):
+        from src.patches import ui_extras_patch
+
+        self.patch_module = ui_extras_patch
+        self.patch_module.stop_all()
+
+    def tearDown(self):
+        self.patch_module.stop_all()
+
+    def test_backend_is_created_inside_worker_thread(self):
+        created: dict[str, int] = {}
+        real = self.patch_module.create_backend
+
+        def spy(hwnd):
+            created["thread"] = threading.get_ident()
+            return real(hwnd)
+
+        self.patch_module.create_backend = spy
+        try:
+            stop = threading.Event()
+            thread = self.patch_module.start_taskbar_thread(0, stop_event=stop)
+            self.assertIsNotNone(thread)
+            deadline = time.monotonic() + 2.0
+            while "thread" not in created and time.monotonic() < deadline:
+                time.sleep(0.02)
+            stop.set()
+            thread.join(timeout=2.0)
+        finally:
+            self.patch_module.create_backend = real
+
+        self.assertIn("thread", created)
+        self.assertNotEqual(created["thread"], threading.main_thread().ident)
+
+    def test_thread_is_idempotent(self):
+        stop = threading.Event()
+        first = self.patch_module.start_taskbar_thread(0, stop_event=stop)
+        second = self.patch_module.start_taskbar_thread(0, stop_event=stop)
+        self.assertIs(first, second)
+        stop.set()
+        first.join(timeout=2.0)
+
+    def test_backend_cleanup_is_safe(self):
+        from src.core.taskbar import NullTaskbar, WindowsTaskbar, uninitialize_backend
+
+        self.assertIsNone(uninitialize_backend(NullTaskbar()))
+        self.assertTrue(WindowsTaskbar(0).close())  # 没有 COM 也不能抛
 
 
 if __name__ == "__main__":

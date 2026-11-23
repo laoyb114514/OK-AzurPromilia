@@ -12,6 +12,7 @@ Windows 的进度条要 ``ITaskbarList3``（pywin32 / ctypes 都行）。这里�
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from dataclasses import dataclass, field
@@ -90,10 +91,18 @@ class WindowsTaskbar:
                 (ctypes.c_ubyte * 8)(0x90, 0xE9, 0x9E, 0x9F, 0x8A, 0x5E, 0xEF, 0xAF),
             )
             ole32 = ctypes.windll.ole32
+            # COM 是**按线程**初始化的：在哪个线程 CoCreateInstance，就得在那个线程调方法。
+            # 套间模型用默认的 STA（COINIT_APARTMENTTHREADED=2），和 Explorer 的
+            # ITaskbarList3 一致；重复 CoInitialize 返回 S_FALSE(1) 也无所谓。
+            self._com_initialized = False
+            with contextlib.suppress(Exception):
+                hr = ole32.CoInitialize(None)
+                self._com_initialized = hr in (0, 1)
             taskbar = ctypes.c_void_p()
             if ole32.CoCreateInstance(
                 ctypes.byref(clsid), None, 1, ctypes.byref(iid), ctypes.byref(taskbar)
             ) != 0:
+                self._release_com()
                 return False
             self._taskbar = taskbar
             self._ctypes = ctypes
@@ -101,6 +110,25 @@ class WindowsTaskbar:
         except Exception:
             self._taskbar = None
             return False
+
+    def _release_com(self) -> None:
+        """只释放**本线程**初始化过的 COM（别把别人的计数减掉）。"""
+        if not getattr(self, "_com_initialized", False):
+            return
+        self._com_initialized = False
+        with contextlib.suppress(Exception):
+            import ctypes
+
+            ctypes.windll.ole32.CoUninitialize()
+
+    def close(self) -> bool:
+        """在**创建它的那个线程**里调用：撤掉进度条并释放 COM。"""
+        with contextlib.suppress(Exception):
+            self.set_progress(None)
+        self.available = False
+        self._taskbar = None
+        self._release_com()
+        return True
 
     def _method(self, index: int, arg_types: tuple):
         ctypes = self._ctypes
@@ -144,11 +172,22 @@ class WindowsTaskbar:
 
 
 def create_backend(hwnd: int | None = None) -> TaskbarBackend:
-    """拿得到窗口句柄就用真的，否则安静降级。"""
+    """拿得到窗口句柄就用真的，否则安静降级。
+
+    ⚠️ 必须在**要使用它的那个线程**里调用：COM 对象不能跨线程用。
+    """
     if not hwnd:
         return NullTaskbar()
     backend = WindowsTaskbar(hwnd)
     return backend if backend.available else NullTaskbar()
+
+
+def uninitialize_backend(backend: TaskbarBackend) -> None:
+    """在线程退出前收尾：真后端释放 COM，空实现什么都不做。"""
+    close = getattr(backend, "close", None)
+    if callable(close):
+        with contextlib.suppress(Exception):
+            close()
 
 
 @dataclass
