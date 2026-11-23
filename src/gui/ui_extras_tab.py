@@ -42,12 +42,6 @@ from src.core.hotkeys import (
     save_hotkeys,
     validate,
 )
-from src.core.hud import (
-    load_settings as load_hud_settings,
-)
-from src.core.hud import (
-    save_settings as save_hud_settings,
-)
 from src.core.reminders import ReminderSettings
 from src.core.reminders import load_settings as load_reminders
 from src.core.reminders import save_settings as save_reminders
@@ -170,8 +164,6 @@ class UiExtrasTab(CustomTab):
         row.setSpacing(6)
         self.taskbar_enabled = CheckBox(self.tr("在任务栏显示进度"))
         row.addWidget(self.taskbar_enabled)
-        self.hud_enabled = CheckBox(self.tr("显示 HUD 悬浮条"))
-        row.addWidget(self.hud_enabled)
         row.addStretch(1)
         save_taskbar = PushButton(FluentIcon.SAVE, self.tr("保存"))
         save_taskbar.clicked.connect(self._save_taskbar)
@@ -239,8 +231,6 @@ class UiExtrasTab(CustomTab):
 
         if self.taskbar_enabled is not None:
             self.taskbar_enabled.setChecked(load_taskbar_enabled())
-        if self.hud_enabled is not None:
-            self.hud_enabled.setChecked(load_hud_settings().enabled)
         hotkeys = load_hotkeys()
         for action, edit in self.hotkey_edits.items():
             edit.setText(hotkeys.get(action, DEFAULT_HOTKEYS.get(action, "")))
@@ -281,21 +271,14 @@ class UiExtrasTab(CustomTab):
 
     def _save_taskbar(self):
         enabled = bool(self.taskbar_enabled and self.taskbar_enabled.isChecked())
-        hud_enabled = bool(self.hud_enabled and self.hud_enabled.isChecked())
         try:
             save_taskbar_enabled(enabled)
-            current = load_hud_settings()
-            save_hud_settings(
-                type(current)(enabled=hud_enabled, margin=current.margin, show_remaining=current.show_remaining)
-            )
         except Exception as exc:
             self._notify(self.tr("保存失败：{error}").format(error=exc), error=True)
             return
+        # 悬浮窗的开关在「悬浮窗」页（configs/float_window.json），这里只管任务栏进度
         self._notify(
-            self.tr("任务栏进度已{state}，HUD 已{hud}").format(
-                state=self.tr("开启") if enabled else self.tr("关闭"),
-                hud=self.tr("开启") if hud_enabled else self.tr("关闭"),
-            )
+            self.tr("任务栏进度已{state}").format(state=self.tr("开启") if enabled else self.tr("关闭"))
         )
 
     def _collect_hotkeys(self) -> dict[str, str]:

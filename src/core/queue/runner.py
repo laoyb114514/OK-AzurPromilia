@@ -29,6 +29,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from src.core import run_state
 from src.core.queue.model import QueueItem, TaskQueue
 
 Resolver = Callable[[QueueItem], Callable[[float | None], bool] | None]
@@ -107,8 +108,11 @@ class QueueRunner:
     def run(self) -> QueueRunResult:
         result = QueueRunResult(ok=True)
         started = self._clock()
+        # 把队列进度暴露给悬浮窗（结束/异常都要清，否则悬浮窗会一直显示旧队列）
+        with contextlib.suppress(Exception):
+            run_state.set_queue(self.queue.name, self.queue.items, run_log=self._run_log)
 
-        for item in self.queue.items:
+        for index, item in enumerate(self.queue.items):
             if not item.enabled:
                 result.results.append(QueueItemResult(item=item, skipped=True))
                 self._info(f"跳过未启用项 {item.label}")
@@ -133,6 +137,8 @@ class QueueRunner:
                 continue
 
             budget = self._effective_budget(item, remaining)
+            with contextlib.suppress(Exception):
+                run_state.start_item(index)
             item_started = self._clock()
             error = None
             ok = False
@@ -152,6 +158,8 @@ class QueueRunner:
                 budget_exceeded=budget_exceeded,
             )
             result.results.append(item_result)
+            with contextlib.suppress(Exception):
+                run_state.finish_item(index, "完成" if ok else "失败")
             self._info(item_result.summary())
 
             if not ok:

@@ -1403,3 +1403,78 @@ msgstr "录制结束：{summary}"
 
 msgid "有任务正在运行（{name}），先停止任务再录制"
 msgstr "有任务正在运行（{name}），先停止任务再录制"
+
+msgid "悬浮窗"
+msgstr "悬浮窗"
+
+msgid "预计剩余"
+msgstr "预计剩余"
+
+msgid "空闲"
+msgstr "空闲"
+
+msgid "显示悬浮窗（图标可拖动，点一下展开任务队列）"
+msgstr "显示悬浮窗（图标可拖动，点一下展开任务队列）"
+
+msgid "悬浮图标大小"
+msgstr "悬浮图标大小"
+
+msgid "面板宽度"
+msgstr "面板宽度"
+
+msgid "面板高度"
+msgstr "面板高度"
+
+msgid "圆角"
+msgstr "圆角"
+
+msgid "背景颜色"
+msgstr "背景颜色"
+
+msgid "选择颜色"
+msgstr "选择颜色"
+
+msgid "选择悬浮窗背景颜色"
+msgstr "选择悬浮窗背景颜色"
+
+msgid "不透明度"
+msgstr "不透明度"
+
+msgid "在悬浮窗里显示任务队列"
+msgstr "在悬浮窗里显示任务队列"
+
+msgid "最多显示"
+msgstr "最多显示"
+
+msgid "项"
+msgstr "项"
+
+msgid "保存并应用"
+msgstr "保存并应用"
+
+msgid "恢复默认位置与大小"
+msgstr "恢复默认位置与大小"
+
+msgid "悬浮窗显示当前任务与队列里每一项的预计用时；数据来自运行记录与队列执行器。"
+msgstr "悬浮窗显示当前任务与队列里每一项的预计用时；数据来自运行记录与队列执行器。"
+
+msgid "当前状态"
+msgstr "当前状态"
+
+msgid "当前任务"
+msgstr "当前任务"
+
+msgid "队列"
+msgstr "队列"
+
+msgid "无队列"
+msgstr "无队列"
+
+msgid "已保存悬浮窗设置"
+msgstr "已保存悬浮窗设置"
+
+msgid "已保存；重启程序后生效"
+msgstr "已保存；重启程序后生效"
+
+msgid "已恢复默认位置与大小"
+msgstr "已恢复默认位置与大小"

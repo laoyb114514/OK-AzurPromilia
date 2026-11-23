@@ -106,21 +106,35 @@
 
 配置：`configs/hotkeys.json`。
 
-## 5. HUD 悬浮条
+## 5. 悬浮窗（取代旧的 HUD 悬浮条）
 
-`src/core/hud.py`（纯逻辑）+ `src/gui/hud_window.py`（窗口）+ `ui_extras_patch` 里挂载。
+`src/core/float_window.py`（设置与文案，纯逻辑）+ `src/gui/float_window.py`（窗口）+
+`src/gui/float_window_tab.py`（「悬浮窗」设置页）+ `ui_extras_patch` 里挂载。
 
-- **只在有任务运行时显示**，任务结束自动隐藏；
-- 内容：`运行中 · 任务名  42%  预计还剩 12 分 30 秒`；
-- 位置按**屏幕可用区域底部居中**（`hud_position`），用 Qt 的逻辑像素，150% 缩放也不歪；
-- 窗口标志 `WindowStaysOnTopHint | Tool | FramelessWindowHint | WindowDoesNotAcceptFocus` +
+两种形态，「缩放」即在两者间切换：
+
+| 形态 | 外观 | 交互 |
+|------|------|------|
+| **图标态**（默认） | 圆角化的软件图标（`icons/icon.png`），大小 32~160 px 可调 | 拖到屏幕任意位置；**点一下**展开成面板 |
+| **面板态** | 圆角矩形，显示当前任务、预计剩余、队列每项「约 N 分钟」 | 拖动移动；拖**右下角**改大小；双击或点「收起」回图标态 |
+
+- 颜色 `#rrggbb`、不透明度 **10%~100%**（`MIN_OPACITY = 0.10`，低于 10% 等于看不见）、
+  圆角 0~30 px 都在「悬浮窗」页设置，保存后**立刻**作用到已打开的窗口；
+- 位置、大小、形态、图标大小全部写回 `configs/float_window.json`，重启后原地复原；
+  位置有夹取（`clamp_position`），换分辨率也不会跑到屏幕外；
+- 队列 ETA 来自 `src/core/run_state.py`：`QueueRunner` 开始/每项切换/结束时更新，
+  悬浮窗每 `poll_ms`（默认 500ms）读一次快照；单项用时优先取该任务的历史均值
+  （`RunLog.estimate_seconds`），跑完一项后用实测值替换，越跑越准；
+- 窗口标志 `FramelessWindowHint | WindowStaysOnTopHint | Tool | WindowDoesNotAcceptFocus` +
   `WA_ShowWithoutActivating` —— **不抢游戏焦点、不打断输入**；
-- 自带「暂停/继续」「停止」两个按钮（走 `executor.pause()/start()/stop_current_task()`）；
-- 退出时通过 `app.aboutToQuit` 一起关掉，不留残影；
-- 开关在「界面与提醒」页，写到 `configs/ui_extras.json` 的 `hud_enabled`。
+- 退出时通过 `app.aboutToQuit` 一起关掉；开关在「悬浮窗」页（`configs/float_window.json` 的 `enabled`）。
 
-剩余时间格式化（`format_remaining`）：`58 秒` / `12 分 30 秒` / `1 小时 1 分`，
-数据缺失或异常时显示「未知」而不是编一个数。
+旧的 HUD 悬浮条（`src/gui/hud_window.py`）已删除，「界面与提醒」页上的
+「显示 HUD 悬浮条」勾选框一并移除——两个悬浮 UI 会互相打架。`src/core/hud.py` 里的
+`format_remaining` / `build_hud_text` 仍在（纯文本逻辑，被测试复用）。
+
+剩余时间文案：`58 秒` / `12 分 30 秒` / `1 小时 1 分`，数据缺失显示「未知」；
+悬浮窗里的 ETA 用 `约 45 秒` / `约 3 分钟` / `约 1 小时 5 分`（`format_eta`）。
 
 ## 6. 工程质量
 

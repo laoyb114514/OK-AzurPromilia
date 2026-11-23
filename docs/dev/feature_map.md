@@ -86,7 +86,7 @@
 |------|------|------|------|------|
 | 主题（浅色/深色/跟随系统） | 🔧 | 框架 `qfluentwidgets` 设置 | — | [界面行为](ui_behavior.md) §7 |
 | 界面透明度 / 背景图 | ⚠️ | 框架 2.0.6 **无任何透明度 API**（`blurRadius` 是死配置） | — | 同上 §7 |
-| HUD 悬浮条（状态/进度/预计剩余，暂停停止） | ✅ | `src/core/hud.py` + `src/gui/hud_window.py` | `test_ui_behaviors.py` | 同上 §5 |
+| 悬浮窗（图标态 / 面板态：任务列表、队列每项 ETA、颜色与不透明度≥10%、拖动与缩放） | ✅ | `src/core/float_window.py` + `src/gui/float_window.py` + 「悬浮窗」页 | `test_float_window.py` | [界面行为](ui_behavior.md) §5 |
 | 托盘 / 系统通知 | 🔧 | 框架托盘与通知 | — | 同上 |
 | 点 × 时询问（完全关闭 / 收托盘 / 记住） | ✅ | `src/patches/close_behavior_patch.py` | 同上 | 同上 §1 |
 | 任务栏进度条 | ✅ | `src/core/taskbar.py`（ctypes 调 `ITaskbarList3`，可降级） | 同上 | 同上 §3 |

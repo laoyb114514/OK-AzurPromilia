@@ -1,11 +1,14 @@
-"""HUD 悬浮条的状态逻辑：显示什么、放哪里、剩多久。
+"""HUD 的状态文案逻辑：显示什么、放哪里、剩多久。
 
-窗口本身在 :mod:`src.gui.hud_window`，这里只放**可测试的纯逻辑**：
+> 悬浮窗（图标态 / 面板态）已经取代旧的「HUD 悬浮条」：窗口在
+> :mod:`src.gui.float_window`，设置在 :mod:`src.core.float_window`。
+> 这里保留**可测的纯文本逻辑**（``format_remaining`` / ``build_hud_text``）。
 
 - 剩余时间怎么格式化（``12 分 30 秒`` / ``58 秒`` / ``未知``）；
 - 状态文案怎么拼（运行中 / 已暂停 / 任务名 + 预计剩余）；
 - 悬浮条贴在哪（按屏幕可用区域底部居中，留 DPI 无关的逻辑像素边距）；
-- 开关从哪读（``configs/ui_extras.json`` 的 ``hud_enabled``）。
+- 旧 HUD 的开关在 ``configs/ui_extras.json`` 的 ``hud_enabled``；
+  新悬浮窗用 ``configs/float_window.json``。
 """
 
 from __future__ import annotations

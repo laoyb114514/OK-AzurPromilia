@@ -1415,3 +1415,78 @@ msgstr "녹화 종료: {summary}"
 
 msgid "有任务正在运行（{name}），先停止任务再录制"
 msgstr "작업이 실행 중입니다({name}). 먼저 중지한 뒤 녹화하세요"
+
+msgid "悬浮窗"
+msgstr "플로팅 창"
+
+msgid "预计剩余"
+msgstr "남은 시간"
+
+msgid "空闲"
+msgstr "대기 중"
+
+msgid "显示悬浮窗（图标可拖动，点一下展开任务队列）"
+msgstr "플로팅 창 표시 (아이콘을 끌어 이동, 클릭하면 작업 목록)"
+
+msgid "悬浮图标大小"
+msgstr "아이콘 크기"
+
+msgid "面板宽度"
+msgstr "패널 너비"
+
+msgid "面板高度"
+msgstr "패널 높이"
+
+msgid "圆角"
+msgstr "모서리 반경"
+
+msgid "背景颜色"
+msgstr "배경색"
+
+msgid "选择颜色"
+msgstr "색 선택"
+
+msgid "选择悬浮窗背景颜色"
+msgstr "플로팅 창 배경색 선택"
+
+msgid "不透明度"
+msgstr "불투명도"
+
+msgid "在悬浮窗里显示任务队列"
+msgstr "플로팅 창에 작업 목록 표시"
+
+msgid "最多显示"
+msgstr "최대 표시"
+
+msgid "项"
+msgstr "개"
+
+msgid "保存并应用"
+msgstr "저장 및 적용"
+
+msgid "恢复默认位置与大小"
+msgstr "위치와 크기 초기화"
+
+msgid "悬浮窗显示当前任务与队列里每一项的预计用时；数据来自运行记录与队列执行器。"
+msgstr "플로팅 창은 현재 작업과 대기열 각 항목의 예상 소요 시간을 표시합니다(실행 기록과 대기열 실행기 기반)."
+
+msgid "当前状态"
+msgstr "현재 상태"
+
+msgid "当前任务"
+msgstr "현재 작업"
+
+msgid "队列"
+msgstr "대기열"
+
+msgid "无队列"
+msgstr "대기열 없음"
+
+msgid "已保存悬浮窗设置"
+msgstr "플로팅 창 설정을 저장했습니다"
+
+msgid "已保存；重启程序后生效"
+msgstr "저장했습니다. 재시작 후 적용됩니다"
+
+msgid "已恢复默认位置与大小"
+msgstr "위치와 크기를 초기화했습니다"

@@ -1414,3 +1414,78 @@ msgstr "記録終了: {summary}"
 
 msgid "有任务正在运行（{name}），先停止任务再录制"
 msgstr "タスク実行中（{name}）です。停止してから記録してください"
+
+msgid "悬浮窗"
+msgstr "フローティングウィンドウ"
+
+msgid "预计剩余"
+msgstr "残り時間"
+
+msgid "空闲"
+msgstr "待機中"
+
+msgid "显示悬浮窗（图标可拖动，点一下展开任务队列）"
+msgstr "フローティングウィンドウを表示（アイコンはドラッグ可、クリックでタスク一覧）"
+
+msgid "悬浮图标大小"
+msgstr "アイコンの大きさ"
+
+msgid "面板宽度"
+msgstr "パネル幅"
+
+msgid "面板高度"
+msgstr "パネル高さ"
+
+msgid "圆角"
+msgstr "角の丸み"
+
+msgid "背景颜色"
+msgstr "背景色"
+
+msgid "选择颜色"
+msgstr "色を選ぶ"
+
+msgid "选择悬浮窗背景颜色"
+msgstr "フローティングウィンドウの背景色を選択"
+
+msgid "不透明度"
+msgstr "不透明度"
+
+msgid "在悬浮窗里显示任务队列"
+msgstr "フローティングウィンドウにタスク一覧を表示"
+
+msgid "最多显示"
+msgstr "最大表示数"
+
+msgid "项"
+msgstr "件"
+
+msgid "保存并应用"
+msgstr "保存して適用"
+
+msgid "恢复默认位置与大小"
+msgstr "位置とサイズを初期化"
+
+msgid "悬浮窗显示当前任务与队列里每一项的预计用时；数据来自运行记录与队列执行器。"
+msgstr "フローティングウィンドウには現在のタスクと、キュー各項目の予想所要時間が表示されます（実行履歴とキュー実行器のデータ）。"
+
+msgid "当前状态"
+msgstr "現在の状態"
+
+msgid "当前任务"
+msgstr "現在のタスク"
+
+msgid "队列"
+msgstr "キュー"
+
+msgid "无队列"
+msgstr "キューなし"
+
+msgid "已保存悬浮窗设置"
+msgstr "フローティングウィンドウ設定を保存しました"
+
+msgid "已保存；重启程序后生效"
+msgstr "保存しました。再起動後に反映されます"
+
+msgid "已恢复默认位置与大小"
+msgstr "位置とサイズを初期化しました"

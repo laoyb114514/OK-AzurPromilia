@@ -336,27 +336,30 @@ def install_ui_extras_patch() -> bool:
 
 
 def _attach_hud(main_window) -> object | None:
-    """按设置创建 HUD，并在退出时一并关掉（不抢焦点、失败不影响启动）。
+    """挂悬浮窗（图标态 / 面板态），退出时一并关掉。
 
-    幂等：窗口不小心重建第二次时复用已有的 HUD，避免两个悬浮条叠在一起（旧的那个
-    还带着自己的 1 秒 QTimer，谁也停不掉）。
+    幂等：窗口不小心重建第二次时复用已有的悬浮窗，避免两个图标叠在一起
+    （各自还带着自己的刷新 QTimer，谁也停不掉）。
     """
-    existing = getattr(main_window, "_ok_ap_hud", None)
+    existing = getattr(main_window, "_ok_ap_float", None)
     if existing is not None:
         return existing
     try:
-        from src.core.hud import load_settings
+        from src.core.float_window import load_settings
 
-        if not load_settings().enabled:
+        settings = load_settings()
+        if not settings.enabled:
             return None
-        from src.gui.hud_window import HudWindow
+        from src.gui.float_window import FloatWindow, set_current_window
 
-        hud = HudWindow()
-        main_window._ok_ap_hud = hud  # 防止被 GC
+        window = FloatWindow(settings)
+        main_window._ok_ap_float = window  # 防止被 GC
+        set_current_window(window)
         app = getattr(main_window, "app", None)
         if app is not None:
             with contextlib.suppress(Exception):
-                app.aboutToQuit.connect(hud.close)
-        return hud
+                app.aboutToQuit.connect(window.close)
+        window.show()
+        return window
     except Exception:
         return None
