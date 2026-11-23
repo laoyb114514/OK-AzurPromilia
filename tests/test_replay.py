@@ -221,5 +221,80 @@ class TestSchemeExecution(unittest.TestCase):
         self.assertEqual(len([call for call in task.calls if call[0] == "key"]), 2)
 
 
+class TestQueueSchemeIntegration(unittest.TestCase):
+    """轮椅方案作为队列项执行（FlowTask.run_scheme）。"""
+
+    def _task(self):
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = FlowTask.__new__(FlowTask)
+        task.config = {}
+        task.logs: list[str] = []
+        task.log_info = lambda message, notify=False, **kwargs: task.logs.append(str(message))
+        return task
+
+    def test_scheme_is_resolved(self):
+        from src.core.queue import QueueItem
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = self._task()
+        task.run_scheme = lambda budget, name=None: True
+        resolver = FlowTask._queue_resolver(task)
+        self.assertTrue(callable(resolver(QueueItem(kind="scheme", ref="轮椅A"))))
+
+    def test_missing_name(self):
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = self._task()
+        self.assertFalse(FlowTask.run_scheme(task))
+        self.assertTrue(any("没有填写方案文件" in log for log in task.logs))
+
+    def test_load_failure(self):
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = self._task()
+        with mock.patch("src.tasks.onetime.flow_task.load_scheme", side_effect=SchemeFormatError("坏了")):
+            self.assertFalse(FlowTask.run_scheme(task, name="坏方案"))
+        self.assertTrue(any("方案读取失败" in log for log in task.logs))
+
+    def test_success_path(self):
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = self._task()
+        executed = {}
+
+        def fake_execute(flow_arg, budget, resume=False):
+            executed["budget"] = budget
+            executed["steps"] = flow_arg.step_count()
+
+            class Result:
+                ok = True
+
+                def summary(self):
+                    return "流程完成"
+
+            return Result()
+
+        task._execute_flow = fake_execute
+        with mock.patch(
+            "src.tasks.onetime.flow_task.load_scheme",
+            return_value=Scheme.from_dict(two_segment_scheme()),
+        ):
+            self.assertTrue(FlowTask.run_scheme(task, budget_seconds=60, name="轮椅A"))
+        self.assertEqual(executed["budget"], 60)
+        self.assertGreater(executed["steps"], 0)
+
+    def test_execute_returns_none(self):
+        from src.tasks.onetime.flow_task import FlowTask
+
+        task = self._task()
+        task._execute_flow = lambda *args, **kwargs: None
+        with mock.patch(
+            "src.tasks.onetime.flow_task.load_scheme",
+            return_value=Scheme.from_dict(two_segment_scheme()),
+        ):
+            self.assertFalse(FlowTask.run_scheme(task, name="轮椅A"))
+
+
 if __name__ == "__main__":
     unittest.main()

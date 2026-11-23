@@ -1108,3 +1108,9 @@ msgstr "重复模板："
 
 msgid "自检完成：{summary}"
 msgstr "自检完成：{summary}"
+
+msgid "方案文件"
+msgstr "方案文件"
+
+msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
+msgstr "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"

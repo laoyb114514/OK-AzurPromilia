@@ -1111,3 +1111,9 @@ msgstr "중복 템플릿:"
 
 msgid "自检完成：{summary}"
 msgstr "점검 완료: {summary}"
+
+msgid "方案文件"
+msgstr "스킴 파일"
+
+msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
+msgstr "configs/schemes 아래의 스킴 파일 이름입니다. 스킴만 단독 실행할 때 채웁니다"

@@ -1113,3 +1113,9 @@ msgstr "重複テンプレート："
 
 msgid "自检完成：{summary}"
 msgstr "点検完了：{summary}"
+
+msgid "方案文件"
+msgstr "スキームファイル"
+
+msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
+msgstr "configs/schemes 下のスキーム名。スキームを単体で実行するときに指定します"

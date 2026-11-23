@@ -1117,3 +1117,9 @@ msgstr "Duplicate templates:"
 
 msgid "自检完成：{summary}"
 msgstr "Audit finished: {summary}"
+
+msgid "方案文件"
+msgstr "Scheme file"
+
+msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
+msgstr "Scheme file under configs/schemes; fill it in to run a scheme on its own"

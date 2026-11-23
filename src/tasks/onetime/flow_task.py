@@ -26,6 +26,7 @@ from src.core.flow import (
     load_flow_by_name,
 )
 from src.core.queue import QueueFormatError, QueueRunner, list_queues, load_queue
+from src.core.replay import SchemeFormatError, list_schemes, load_scheme
 from src.icons import Icons
 
 JOB_FLOW = "执行流程"
@@ -50,6 +51,7 @@ class FlowTask(BaseGameTask):
             "任务类型": JOB_FLOW,
             "流程文件": "",
             "队列文件": "",
+            "方案文件": "",
             "从断点继续": True,
             "失败后继续": False,
             "预算(分钟)": DEFAULT_BUDGET_MINUTES,
@@ -61,6 +63,7 @@ class FlowTask(BaseGameTask):
             "任务类型": "执行流程：跑一份 JSON 流程；执行队列：按顺序跑队列里的每一项",
             "流程文件": "configs/flows 下的文件名（不带 .json）",
             "队列文件": "configs/queues 下的文件名（不带 .json）",
+            "方案文件": "configs/schemes 下的轮椅方案文件名；单独跑方案时填它",
             "从断点继续": "只对流程生效：跳过上次已经跑完的顶层步骤",
             "失败后继续": "流程里某一步失败后是否继续后面的步骤",
             "预算(分钟)": "0 表示不限；流程会被预算打断，任务类只能事后标记",
@@ -137,11 +140,39 @@ class FlowTask(BaseGameTask):
         def resolve(item):
             if item.kind == "flow":
                 return lambda budget: self.run_flow(budget, name=item.ref, resume=False)
+            if item.kind == "scheme":
+                return lambda budget: self.run_scheme(budget, name=item.ref)
             if item.kind in ("task", "assist"):
                 return lambda budget: self._run_registered_task(item.kind, item.ref)
-            return None  # scheme（轮椅方案）等尚未实现的类型
+            return None
 
         return resolve
+
+    def run_scheme(self, budget_seconds: float | None = None, name: str | None = None) -> bool:
+        """跑一个轮椅方案：拼成流程后交给同一个流程执行器。"""
+        scheme_name = name or str(self.config.get("方案文件", "") or "").strip()
+        if not scheme_name:
+            available = list_schemes()
+            hint = f"可选：{'、'.join(available[:8])}" if available else "还没有任何方案文件"
+            self.log_info(f"没有填写方案文件；{hint}", notify=True)
+            return False
+        try:
+            scheme = load_scheme(scheme_name)
+        except SchemeFormatError as exc:
+            self.log_info(f"方案读取失败：{exc}", notify=True)
+            return False
+        try:
+            flow, report = scheme.to_flow()
+        except SchemeFormatError as exc:
+            self.log_info(f"方案拼装失败：{exc}", notify=True)
+            return False
+
+        self.log_info(f"轮椅方案 {scheme_name}：{report.summary()}")
+        result = self._execute_flow(flow, budget_seconds, resume=False)
+        if result is None:
+            return False
+        self.log_info(result.summary(), notify=True)
+        return result.ok
 
     def _run_registered_task(self, kind: str, ref: str) -> bool:
         source = getattr(self.executor, "onetime_tasks" if kind == "task" else "trigger_tasks", []) or []

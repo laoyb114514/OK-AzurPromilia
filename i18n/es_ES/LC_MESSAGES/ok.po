@@ -1119,3 +1119,9 @@ msgstr "Plantillas duplicadas:"
 
 msgid "自检完成：{summary}"
 msgstr "Auditoría completada: {summary}"
+
+msgid "方案文件"
+msgstr "Archivo de esquema"
+
+msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
+msgstr "Nombre del esquema en configs/schemes; rellénalo para ejecutar un esquema suelto"
