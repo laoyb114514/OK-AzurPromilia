@@ -274,6 +274,9 @@ label_class
 /failure_frames/
 /backups/
 /downloads/
+# 记账与运行报表
+/ledger.jsonl
+/runs.jsonl
 
 
 ############################

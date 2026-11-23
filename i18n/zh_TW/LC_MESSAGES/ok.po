@@ -535,3 +535,195 @@ msgstr "流程裡某一步失敗後是否繼續後面的步驟"
 
 msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
 msgstr "0 表示不限；流程會被預算打斷，任務類只能事後標記"
+
+msgid "离线工具"
+msgstr "離線工具"
+
+msgid "养成计算"
+msgstr "養成計算"
+
+msgid "抽卡分析"
+msgstr "抽卡分析"
+
+msgid "记账与报表"
+msgstr "記帳與報表"
+
+msgid "还没有目标：选好参数后点「添加目标」"
+msgstr "還沒有目標：選好參數後點「新增目標」"
+
+msgid "每行一个：材料=数量，例如 尤尼=20000"
+msgstr "每行一個：材料=數量，例如 尤尼=20000"
+
+msgid "可选：2.8%,28.8%,100% 这样的表，长度需等于硬保底"
+msgstr "選填：2.8%,28.8%,100% 這樣的表，長度需等於硬保底"
+
+msgid "计算"
+msgstr "計算"
+
+msgid "例如：获得的奖励：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脉结晶 ×3"
+msgstr "例如：獲得的獎勵：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脈結晶 ×3"
+
+msgid "计算完成"
+msgstr "計算完成"
+
+msgid "材料清单："
+msgstr "材料清單："
+
+msgid "保存养成材料单"
+msgstr "儲存養成材料單"
+
+msgid "运行报表："
+msgstr "執行報表："
+
+msgid "导出 CSV"
+msgstr "匯出 CSV"
+
+msgid "CSV 文件 (*.csv)"
+msgstr "CSV 檔案 (*.csv)"
+
+msgid "养成目标"
+msgstr "養成目標"
+
+msgid "起始等级"
+msgstr "起始等級"
+
+msgid "目标等级"
+msgstr "目標等級"
+
+msgid "份数"
+msgstr "份數"
+
+msgid "潜能等级"
+msgstr "潛能等級"
+
+msgid "升星"
+msgstr "升星"
+
+msgid "添加目标"
+msgstr "新增目標"
+
+msgid "清空目标"
+msgstr "清空目標"
+
+msgid "导出 PNG"
+msgstr "匯出 PNG"
+
+msgid "重新载入数据"
+msgstr "重新載入資料"
+
+msgid "库存"
+msgstr "庫存"
+
+msgid "目标份数"
+msgstr "目標份數"
+
+msgid "已垫抽数"
+msgstr "已墊抽數"
+
+msgid "预算抽数"
+msgstr "預算抽數"
+
+msgid "出目标概率"
+msgstr "出目標機率"
+
+msgid "自定义概率表"
+msgstr "自訂機率表"
+
+msgid "把结算界面的文字粘进来记账；要直接识别画面，请在任务列表运行「结算记账」。"
+msgstr "把結算介面的文字貼進來記帳；要直接辨識畫面，請在任務列表執行「結算記帳」。"
+
+msgid "记账"
+msgstr "記帳"
+
+msgid "刷新统计"
+msgstr "重新整理統計"
+
+msgid "导出记账 CSV"
+msgstr "匯出記帳 CSV"
+
+msgid "导出报表 CSV"
+msgstr "匯出報表 CSV"
+
+msgid "没有可用的养成目标"
+msgstr "沒有可用的養成目標"
+
+msgid "请先添加至少一个目标"
+msgstr "請先新增至少一個目標"
+
+msgid "请先点「计算」"
+msgstr "請先點「計算」"
+
+msgid "PNG 图片 (*.png)"
+msgstr "PNG 圖片 (*.png)"
+
+msgid "请先粘贴结算文字"
+msgstr "請先貼上結算文字"
+
+msgid "  还没有运行记录"
+msgstr "  還沒有執行記錄"
+
+msgid "今日明细："
+msgstr "今日明細："
+
+msgid "（没有可用数据）"
+msgstr "（沒有可用資料）"
+
+msgid "没有可用的养成数据"
+msgstr "沒有可用的養成資料"
+
+msgid "已选 {count} 个目标：{items}"
+msgstr "已選 {count} 個目標：{items}"
+
+msgid "货币凑法："
+msgstr "貨幣湊法："
+
+msgid "经验道具："
+msgstr "經驗道具："
+
+msgid "已导出：{path}"
+msgstr "已匯出：{path}"
+
+msgid "软保底关键点：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+msgstr "軟保底關鍵點：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+
+msgid "参数：目标 {copies} 份，已垫 {pity} 抽，出目标 {rate}"
+msgstr "參數：目標 {copies} 份，已墊 {pity} 抽，出目標 {rate}"
+
+msgid "手动记账"
+msgstr "手動記帳"
+
+msgid "已记录 {count} 条"
+msgstr "已記錄 {count} 筆"
+
+msgid "今日：收入 {income:g} / 支出 {expense:g}"
+msgstr "今日：收入 {income:g} / 支出 {expense:g}"
+
+msgid "累计：收入 {income:g} / 支出 {expense:g} / 净 {net:g}"
+msgstr "累計：收入 {income:g} / 支出 {expense:g} / 淨 {net:g}"
+
+msgid "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+msgstr "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+
+msgid "数据载入成功：{summary}（共 {total} 个目标）"
+msgstr "資料載入成功：{summary}（共 {total} 個目標）"
+
+msgid "导出失败：{error}"
+msgstr "匯出失敗：{error}"
+
+msgid "结算记账"
+msgstr "結算記帳"
+
+msgid "识别结算界面（或任意物品列表界面）上的「物品 ×数量」，把收益记进 ledger.jsonl，并给出今日与累计收支。"
+msgstr "辨識結算介面（或任意物品列表介面）上的「物品 ×數量」，把收益記進 ledger.jsonl，並給出今日與累計收支。"
+
+msgid "记录来源"
+msgstr "記錄來源"
+
+msgid "最低置信度"
+msgstr "最低信賴度"
+
+msgid "写进记账本的来源标记，用来区分结算 / 手动 / 商店等场景"
+msgstr "寫進記帳本的來源標記，用來區分結算 / 手動 / 商店等場景"
+
+msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
+msgstr "OCR 信賴度低於此值的文字會被丟棄，0 表示全部保留"

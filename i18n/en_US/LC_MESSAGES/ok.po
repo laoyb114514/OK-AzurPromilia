@@ -544,3 +544,195 @@ msgstr "Whether to continue with later steps after a step fails"
 
 msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
 msgstr "0 means unlimited; flows are interrupted by the budget, tasks are only flagged afterwards"
+
+msgid "离线工具"
+msgstr "Offline tools"
+
+msgid "养成计算"
+msgstr "Growth calculator"
+
+msgid "抽卡分析"
+msgstr "Gacha analysis"
+
+msgid "记账与报表"
+msgstr "Ledger & reports"
+
+msgid "还没有目标：选好参数后点「添加目标」"
+msgstr "No targets yet: set the parameters and click \"Add target\""
+
+msgid "每行一个：材料=数量，例如 尤尼=20000"
+msgstr "One per line: material=amount, e.g. Unia=20000"
+
+msgid "可选：2.8%,28.8%,100% 这样的表，长度需等于硬保底"
+msgstr "Optional: a table like 2.8%,28.8%,100%; its length must equal the hard pity"
+
+msgid "计算"
+msgstr "Calculate"
+
+msgid "例如：获得的奖励：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脉结晶 ×3"
+msgstr "e.g. Rewards: Unia ×1,500 / 12 × Boli Fruit / Cost: Star Crystal ×3"
+
+msgid "计算完成"
+msgstr "Calculation finished"
+
+msgid "材料清单："
+msgstr "Materials:"
+
+msgid "保存养成材料单"
+msgstr "Save growth material list"
+
+msgid "运行报表："
+msgstr "Run report:"
+
+msgid "导出 CSV"
+msgstr "Export CSV"
+
+msgid "CSV 文件 (*.csv)"
+msgstr "CSV files (*.csv)"
+
+msgid "养成目标"
+msgstr "Growth target"
+
+msgid "起始等级"
+msgstr "From level"
+
+msgid "目标等级"
+msgstr "To level"
+
+msgid "份数"
+msgstr "Copies"
+
+msgid "潜能等级"
+msgstr "Potential level"
+
+msgid "升星"
+msgstr "Star up"
+
+msgid "添加目标"
+msgstr "Add target"
+
+msgid "清空目标"
+msgstr "Clear targets"
+
+msgid "导出 PNG"
+msgstr "Export PNG"
+
+msgid "重新载入数据"
+msgstr "Reload data"
+
+msgid "库存"
+msgstr "Inventory"
+
+msgid "目标份数"
+msgstr "Copies wanted"
+
+msgid "已垫抽数"
+msgstr "Pity built up"
+
+msgid "预算抽数"
+msgstr "Budget pulls"
+
+msgid "出目标概率"
+msgstr "Target chance"
+
+msgid "自定义概率表"
+msgstr "Custom rate table"
+
+msgid "把结算界面的文字粘进来记账；要直接识别画面，请在任务列表运行「结算记账」。"
+msgstr "Paste the settlement text to record it; to read the screen directly, run \"Settlement ledger\" from the task list."
+
+msgid "记账"
+msgstr "Record"
+
+msgid "刷新统计"
+msgstr "Refresh stats"
+
+msgid "导出记账 CSV"
+msgstr "Export ledger CSV"
+
+msgid "导出报表 CSV"
+msgstr "Export report CSV"
+
+msgid "没有可用的养成目标"
+msgstr "No growth target available"
+
+msgid "请先添加至少一个目标"
+msgstr "Add at least one target first"
+
+msgid "请先点「计算」"
+msgstr "Click \"Calculate\" first"
+
+msgid "PNG 图片 (*.png)"
+msgstr "PNG images (*.png)"
+
+msgid "请先粘贴结算文字"
+msgstr "Paste the settlement text first"
+
+msgid "  还没有运行记录"
+msgstr "  no runs recorded yet"
+
+msgid "今日明细："
+msgstr "Today's detail:"
+
+msgid "（没有可用数据）"
+msgstr "(no data available)"
+
+msgid "没有可用的养成数据"
+msgstr "No growth data available"
+
+msgid "已选 {count} 个目标：{items}"
+msgstr "{count} target(s) selected: {items}"
+
+msgid "货币凑法："
+msgstr "Currency make-up:"
+
+msgid "经验道具："
+msgstr "EXP items:"
+
+msgid "已导出：{path}"
+msgstr "Exported: {path}"
+
+msgid "软保底关键点：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+msgstr "Soft pity milestones: pull 71 {p71}, pull 81 {p81}, pull 90 guaranteed"
+
+msgid "参数：目标 {copies} 份，已垫 {pity} 抽，出目标 {rate}"
+msgstr "Parameters: {copies} copies, {pity} pity built up, target chance {rate}"
+
+msgid "手动记账"
+msgstr "manual entry"
+
+msgid "已记录 {count} 条"
+msgstr "Recorded {count} entries"
+
+msgid "今日：收入 {income:g} / 支出 {expense:g}"
+msgstr "Today: income {income:g} / expense {expense:g}"
+
+msgid "累计：收入 {income:g} / 支出 {expense:g} / 净 {net:g}"
+msgstr "Total: income {income:g} / expense {expense:g} / net {net:g}"
+
+msgid "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+msgstr "  {count} run(s), {success} succeeded, {rate:.1f}% success rate, {avg:.0f}s average"
+
+msgid "数据载入成功：{summary}（共 {total} 个目标）"
+msgstr "Data loaded: {summary} ({total} targets in total)"
+
+msgid "导出失败：{error}"
+msgstr "Export failed: {error}"
+
+msgid "结算记账"
+msgstr "Settlement ledger"
+
+msgid "识别结算界面（或任意物品列表界面）上的「物品 ×数量」，把收益记进 ledger.jsonl，并给出今日与累计收支。"
+msgstr "Read \"item ×count\" entries on the settlement screen (or any item list) and record them into ledger.jsonl, reporting today's and total income/expense."
+
+msgid "记录来源"
+msgstr "Entry source"
+
+msgid "最低置信度"
+msgstr "Minimum confidence"
+
+msgid "写进记账本的来源标记，用来区分结算 / 手动 / 商店等场景"
+msgstr "Source tag written into the ledger, to tell settlement / manual / shop apart"
+
+msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
+msgstr "OCR text below this confidence is dropped; 0 keeps everything"

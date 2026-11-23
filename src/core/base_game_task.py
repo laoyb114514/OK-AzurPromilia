@@ -707,3 +707,56 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         except Exception:
             pass
         return False
+
+    # ── OCR 文本行 ────────────────────────────────────────
+    def ocr_lines(self, box=None, min_confidence: float = 0.0, line_tolerance: float = 0.6) -> list[str]:
+        """把当前画面的 OCR 结果**按视觉行**输出。
+
+        框架的 ``ocr()`` 不传 match 时返回全部文本框（``.name`` 是文本），
+        但它们是散装的：同一行的「尤尼」和「×1,500」是两个框，直接拼会拆行。
+        这里按 y 中心聚类成行、行内按 x 排序，结算记账就靠这个把
+        「物品 ×数量」拼回同一行。
+        """
+        try:
+            boxes = self.ocr(box=box) if box is not None else self.ocr()
+        except Exception as exc:
+            self._log_failure_store(f"OCR 失败: {exc}")
+            return []
+
+        items = []
+        for item in boxes or []:
+            text = str(getattr(item, "name", "") or "").strip()
+            if not text:
+                continue
+            try:
+                confidence = float(getattr(item, "confidence", 1.0) or 0.0)
+            except (TypeError, ValueError):
+                confidence = 1.0
+            if confidence < min_confidence:
+                continue
+            height = float(getattr(item, "height", 0) or 0)
+            items.append((float(getattr(item, "y", 0) or 0), float(getattr(item, "x", 0) or 0), height, text))
+
+        if not items:
+            return []
+        items.sort()
+
+        heights = [height for _, _, height, _ in items if height > 0]
+        typical = sorted(heights)[len(heights) // 2] if heights else 16.0
+        tolerance = max(4.0, typical * max(0.1, float(line_tolerance)))
+
+        lines: list[list[tuple[float, str]]] = []
+        current_y = None
+        current: list[tuple[float, str]] = []
+        for y, x, _height, text in items:
+            if current_y is None or abs(y - current_y) <= tolerance:
+                current.append((x, text))
+                current_y = y if current_y is None else (current_y + y) / 2.0
+            else:
+                lines.append(current)
+                current = [(x, text)]
+                current_y = y
+        if current:
+            lines.append(current)
+
+        return ["  ".join(text for _x, text in sorted(line)) for line in lines]

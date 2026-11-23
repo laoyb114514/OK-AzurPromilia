@@ -546,3 +546,195 @@ msgstr "Si continuar con los pasos siguientes cuando uno falla"
 
 msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
 msgstr "0 significa sin límite; los flujos se interrumpen por el presupuesto, las tareas solo se marcan después"
+
+msgid "离线工具"
+msgstr "Herramientas sin conexión"
+
+msgid "养成计算"
+msgstr "Calculadora de progresión"
+
+msgid "抽卡分析"
+msgstr "Análisis de gacha"
+
+msgid "记账与报表"
+msgstr "Registro e informes"
+
+msgid "还没有目标：选好参数后点「添加目标」"
+msgstr "Sin objetivos: ajusta los parámetros y pulsa «Añadir objetivo»"
+
+msgid "每行一个：材料=数量，例如 尤尼=20000"
+msgstr "Uno por línea: material=cantidad, p. ej. Unia=20000"
+
+msgid "可选：2.8%,28.8%,100% 这样的表，长度需等于硬保底"
+msgstr "Opcional: una tabla como 2.8%,28.8%,100%; su longitud debe igualar el pity máximo"
+
+msgid "计算"
+msgstr "Calcular"
+
+msgid "例如：获得的奖励：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脉结晶 ×3"
+msgstr "p. ej. Recompensas: Unia ×1,500 / 12 × Fruta Boli / Coste: Cristal Estelar ×3"
+
+msgid "计算完成"
+msgstr "Cálculo completado"
+
+msgid "材料清单："
+msgstr "Materiales:"
+
+msgid "保存养成材料单"
+msgstr "Guardar lista de materiales"
+
+msgid "运行报表："
+msgstr "Informe de ejecuciones:"
+
+msgid "导出 CSV"
+msgstr "Exportar CSV"
+
+msgid "CSV 文件 (*.csv)"
+msgstr "Archivos CSV (*.csv)"
+
+msgid "养成目标"
+msgstr "Objetivo de progresión"
+
+msgid "起始等级"
+msgstr "Nivel inicial"
+
+msgid "目标等级"
+msgstr "Nivel objetivo"
+
+msgid "份数"
+msgstr "Copias"
+
+msgid "潜能等级"
+msgstr "Nivel de potencial"
+
+msgid "升星"
+msgstr "Subir estrellas"
+
+msgid "添加目标"
+msgstr "Añadir objetivo"
+
+msgid "清空目标"
+msgstr "Vaciar objetivos"
+
+msgid "导出 PNG"
+msgstr "Exportar PNG"
+
+msgid "重新载入数据"
+msgstr "Recargar datos"
+
+msgid "库存"
+msgstr "Inventario"
+
+msgid "目标份数"
+msgstr "Copias deseadas"
+
+msgid "已垫抽数"
+msgstr "Pity acumulado"
+
+msgid "预算抽数"
+msgstr "Tiradas de presupuesto"
+
+msgid "出目标概率"
+msgstr "Probabilidad de objetivo"
+
+msgid "自定义概率表"
+msgstr "Tabla de probabilidades propia"
+
+msgid "把结算界面的文字粘进来记账；要直接识别画面，请在任务列表运行「结算记账」。"
+msgstr "Pega el texto del resultado para registrarlo; para leer la pantalla directamente, ejecuta «Registro de liquidación» en la lista de tareas."
+
+msgid "记账"
+msgstr "Registrar"
+
+msgid "刷新统计"
+msgstr "Actualizar estadísticas"
+
+msgid "导出记账 CSV"
+msgstr "Exportar CSV del registro"
+
+msgid "导出报表 CSV"
+msgstr "Exportar CSV del informe"
+
+msgid "没有可用的养成目标"
+msgstr "No hay objetivos de progresión disponibles"
+
+msgid "请先添加至少一个目标"
+msgstr "Añade al menos un objetivo primero"
+
+msgid "请先点「计算」"
+msgstr "Pulsa primero «Calcular»"
+
+msgid "PNG 图片 (*.png)"
+msgstr "Imágenes PNG (*.png)"
+
+msgid "请先粘贴结算文字"
+msgstr "Pega primero el texto del resultado"
+
+msgid "  还没有运行记录"
+msgstr "  aún no hay ejecuciones registradas"
+
+msgid "今日明细："
+msgstr "Detalle de hoy:"
+
+msgid "（没有可用数据）"
+msgstr "(sin datos disponibles)"
+
+msgid "没有可用的养成数据"
+msgstr "No hay datos de progresión disponibles"
+
+msgid "已选 {count} 个目标：{items}"
+msgstr "{count} objetivo(s) seleccionado(s): {items}"
+
+msgid "货币凑法："
+msgstr "Composición de moneda:"
+
+msgid "经验道具："
+msgstr "Objetos de EXP:"
+
+msgid "已导出：{path}"
+msgstr "Exportado: {path}"
+
+msgid "软保底关键点：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+msgstr "Hitos del pity suave: tirada 71 {p71}, tirada 81 {p81}, tirada 90 garantizada"
+
+msgid "参数：目标 {copies} 份，已垫 {pity} 抽，出目标 {rate}"
+msgstr "Parámetros: {copies} copias, pity {pity}, probabilidad de objetivo {rate}"
+
+msgid "手动记账"
+msgstr "registro manual"
+
+msgid "已记录 {count} 条"
+msgstr "Se registraron {count} entradas"
+
+msgid "今日：收入 {income:g} / 支出 {expense:g}"
+msgstr "Hoy: ingresos {income:g} / gastos {expense:g}"
+
+msgid "累计：收入 {income:g} / 支出 {expense:g} / 净 {net:g}"
+msgstr "Total: ingresos {income:g} / gastos {expense:g} / neto {net:g}"
+
+msgid "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+msgstr "  {count} ejecución(es), {success} con éxito, {rate:.1f}% de acierto, {avg:.0f}s de media"
+
+msgid "数据载入成功：{summary}（共 {total} 个目标）"
+msgstr "Datos cargados: {summary} ({total} objetivos en total)"
+
+msgid "导出失败：{error}"
+msgstr "Error al exportar: {error}"
+
+msgid "结算记账"
+msgstr "Registro de liquidación"
+
+msgid "识别结算界面（或任意物品列表界面）上的「物品 ×数量」，把收益记进 ledger.jsonl，并给出今日与累计收支。"
+msgstr "Lee las entradas «objeto ×cantidad» de la pantalla de resultado (o de cualquier lista de objetos) y las registra en ledger.jsonl, mostrando el balance de hoy y el acumulado."
+
+msgid "记录来源"
+msgstr "Origen del registro"
+
+msgid "最低置信度"
+msgstr "Confianza mínima"
+
+msgid "写进记账本的来源标记，用来区分结算 / 手动 / 商店等场景"
+msgstr "Etiqueta de origen guardada en el registro, para distinguir liquidación, manual y tienda"
+
+msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
+msgstr "Se descarta el texto OCR por debajo de esta confianza; 0 lo conserva todo"

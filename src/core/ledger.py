@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import json
 import re
@@ -43,6 +44,15 @@ _NAME_FIRST = re.compile(rf"(?P<name>{_NAME})\s*[×✕xX*]\s*(?P<count>{_NUMBER}
 _COUNT_FIRST = re.compile(rf"(?P<count>{_NUMBER})\s*[×✕xX*]\s*(?P<name>{_NAME})")
 
 _SKIP_NAMES = {"个", "件", "次", "共"}
+
+
+def _valid_name(name: str) -> bool:
+    """物品名必须含至少一个非数字字符。
+
+    否则「材料2 ×3」会被「数量在前」的正则再匹配一次（``2 ×3`` → 物品 ``3``），
+    凭空多出一条记录。
+    """
+    return any(not ch.isdigit() for ch in name) and name not in _SKIP_NAMES
 
 
 class SettlementFormatError(ValueError):
@@ -110,7 +120,7 @@ def parse_settlement_text(text: str, source: str = "settlement") -> list[LedgerE
             for match in pattern.finditer(line):
                 name = match.group("name").strip()
                 amount = _to_amount(match.group("count"))
-                if not name or amount <= 0 or name in _SKIP_NAMES:
+                if not name or amount <= 0 or not _valid_name(name):
                     continue
                 found.append((match.start(), name, amount))
 
@@ -169,10 +179,8 @@ class JsonlStore:
             return
 
     def clear(self) -> None:
-        try:
+        with contextlib.suppress(OSError):
             self.path.unlink(missing_ok=True)
-        except OSError:
-            pass
 
 
 class Ledger:
@@ -222,7 +230,7 @@ class Ledger:
         return summary
 
     def today_summary(self) -> dict[str, dict[str, float]]:
-        start = time.mktime(time.localtime()[:3] + (0, 0, 0, 0, 0, -1))
+        start = time.mktime((*time.localtime()[:3], 0, 0, 0, 0, 0, -1))
         return self.summary(since=start)
 
     def totals(self, since: float | None = None) -> dict[str, float]:

@@ -31,7 +31,8 @@
 - **离线工具（纯计算，不碰游戏）**：
   - **养成计算 (`src/core/growth/`)**：角色/奇波/灵子/装备的材料与体力折算、库存缺口、多目标合并、CSV/PNG 导出。
   - **抽卡分析 (`src/core/gacha/`)**：保底层 + 伯努利层模型，算期望抽数、预算内完成概率与最坏情况。
-  - **记账与报表 (`src/core/ledger.py`)**：结算文字解析成 `ledger.jsonl`，任务结果写 `runs.jsonl`，都能导出 CSV。
+  - **记账与报表 (`src/core/ledger.py`)**：结算文字解析成 `ledger.jsonl`（「结算记账」任务可 OCR 画面），一条龙每项执行写入 `runs.jsonl`，都能导出 CSV。
+  - 界面在「离线工具」页（`src/gui/offline_tools_tab.py`）。
 
 ## 快速导航
 
@@ -70,12 +71,12 @@
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
-│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow）
+│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow、Settlement）
 │   │   ├── trigger/            触发式任务（AutoJenga、AutoRhythm、SkipDialog、StarLink、TreasureUnlock）
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
-│   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计）
+│   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计、运行报表）
 │   │   └── account/            账号作用域配置存储
-│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 流程与队列 / 工具与诊断）
+│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 流程与队列 / 离线工具 / 工具与诊断）
 │   ├── interaction/            游戏交互（GameInteraction 模拟键鼠、ScreenPosition）
 │   ├── image/                  图像算法（旋转模板匹配、连通域、圆弧拟合、音游/叠叠乐检测等）
 │   ├── yolo/                   YOLO 模型注册与 OpenVINO 推理

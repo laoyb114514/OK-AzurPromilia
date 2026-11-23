@@ -20,7 +20,11 @@
 
 from __future__ import annotations
 
+import contextlib
+import time
 from collections.abc import Callable, Iterable
+
+from src.core.ledger import RunLog
 
 TaskItem = tuple[str, Callable[[], object]]
 # 可选的第三元素：开关谓词。提供时替代默认的 config.get(key) 判断（例如多开关 OR 逻辑）。
@@ -51,6 +55,7 @@ class DailyTaskRunner:
         task_items: Iterable[TaskItem | TaskItemWithSwitch],
         ensure_main_kwargs: dict | None = None,
         publish_info: bool = False,
+        run_log: RunLog | None = None,
     ):
         """
         Args:
@@ -58,11 +63,13 @@ class DailyTaskRunner:
             task_items: 任务清单，元素为 (任务名, 执行函数) 或 (任务名, 执行函数, 开关谓词)。
             ensure_main_kwargs: 传给 task.ensure_main 的参数，默认沿用 ``recheck_time=2, time_out=90``。
             publish_info: 是否把四态写入 UI info。默认关闭，开启后会在面板上多出统计信息。
+            run_log: 运行报表写入器；默认写 ``runs.jsonl``。测试可注入临时路径的实例。
         """
         self.task = task
         self.task_items = list(task_items)
         self.ensure_main_kwargs = dict(ensure_main_kwargs or {"time_out": 90})
         self.publish_info = publish_info
+        self.run_log = run_log if run_log is not None else RunLog()
         self.task_status = _new_task_status(self.task_items)
         self.current_task_key: str | None = None
         # {account_id: {任务名: 失败消息}}；单账户模式下 account_id 为空字符串
@@ -90,6 +97,21 @@ class DailyTaskRunner:
             return self.task.tr(message)
         except Exception:
             return message
+
+    def _clock(self) -> float:
+        """暂停感知的计时器：优先用任务的 active_time（暂停期间冻结）。"""
+        active_time = getattr(self.task, "active_time", None)
+        if callable(active_time):
+            try:
+                return float(active_time())
+            except Exception:
+                pass
+        return time.monotonic()
+
+    def _record_run(self, key: str, ok: bool, elapsed: float) -> None:
+        """把这一项的成败与用时写进运行报表（失败不影响主流程）。"""
+        with contextlib.suppress(Exception):
+            self.run_log.record(key, ok, elapsed)
 
     def _is_multi_account(self) -> bool:
         return bool(self.task.config.get("多账户模式", False)) and callable(
@@ -221,7 +243,9 @@ class DailyTaskRunner:
         self.final_summary["current_task"] = key
         self.task.log_info(self._tr("开始任务: {key}").format(key=self._tr(key)))
         self.task.ensure_main(**self.ensure_main_kwargs)
+        started = self._clock()
         result = func()
+        self._record_run(key, result is not False, self._clock() - started)
 
         if result is False:
             self.task_status["failed"].append(key)

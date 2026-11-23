@@ -538,3 +538,195 @@ msgstr "단계가 실패한 뒤 다음 단계를 계속할지 여부"
 
 msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
 msgstr "0은 무제한입니다. 플로우는 예산에 따라 중단되지만 작업은 사후에 표시만 됩니다"
+
+msgid "离线工具"
+msgstr "오프라인 도구"
+
+msgid "养成计算"
+msgstr "육성 계산"
+
+msgid "抽卡分析"
+msgstr "가챠 분석"
+
+msgid "记账与报表"
+msgstr "기록 및 리포트"
+
+msgid "还没有目标：选好参数后点「添加目标」"
+msgstr "목표가 없습니다. 매개변수를 설정하고 '목표 추가'를 누르세요"
+
+msgid "每行一个：材料=数量，例如 尤尼=20000"
+msgstr "한 줄에 하나: 재료=수량, 예: 유니=20000"
+
+msgid "可选：2.8%,28.8%,100% 这样的表，长度需等于硬保底"
+msgstr "선택: 2.8%,28.8%,100% 같은 표. 길이는 천장 횟수와 같아야 합니다"
+
+msgid "计算"
+msgstr "계산"
+
+msgid "例如：获得的奖励：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脉结晶 ×3"
+msgstr "예: 획득 보상: 유니 ×1,500 / 12 × 폴리열매 / 소모: 성맥결정 ×3"
+
+msgid "计算完成"
+msgstr "계산 완료"
+
+msgid "材料清单："
+msgstr "재료 목록:"
+
+msgid "保存养成材料单"
+msgstr "육성 재료 목록 저장"
+
+msgid "运行报表："
+msgstr "실행 리포트:"
+
+msgid "导出 CSV"
+msgstr "CSV 내보내기"
+
+msgid "CSV 文件 (*.csv)"
+msgstr "CSV 파일 (*.csv)"
+
+msgid "养成目标"
+msgstr "육성 목표"
+
+msgid "起始等级"
+msgstr "시작 레벨"
+
+msgid "目标等级"
+msgstr "목표 레벨"
+
+msgid "份数"
+msgstr "개수"
+
+msgid "潜能等级"
+msgstr "잠재력 레벨"
+
+msgid "升星"
+msgstr "성급 상승"
+
+msgid "添加目标"
+msgstr "목표 추가"
+
+msgid "清空目标"
+msgstr "목표 비우기"
+
+msgid "导出 PNG"
+msgstr "PNG 내보내기"
+
+msgid "重新载入数据"
+msgstr "데이터 다시 불러오기"
+
+msgid "库存"
+msgstr "보유량"
+
+msgid "目标份数"
+msgstr "목표 개수"
+
+msgid "已垫抽数"
+msgstr "누적 천장 횟수"
+
+msgid "预算抽数"
+msgstr "예산 횟수"
+
+msgid "出目标概率"
+msgstr "목표 획득 확률"
+
+msgid "自定义概率表"
+msgstr "사용자 확률표"
+
+msgid "把结算界面的文字粘进来记账；要直接识别画面，请在任务列表运行「结算记账」。"
+msgstr "정산 화면 텍스트를 붙여넣어 기록합니다. 화면을 직접 인식하려면 작업 목록에서 '정산 기록'을 실행하세요."
+
+msgid "记账"
+msgstr "기록"
+
+msgid "刷新统计"
+msgstr "통계 새로 고침"
+
+msgid "导出记账 CSV"
+msgstr "기록 CSV 내보내기"
+
+msgid "导出报表 CSV"
+msgstr "리포트 CSV 내보내기"
+
+msgid "没有可用的养成目标"
+msgstr "사용 가능한 육성 목표가 없습니다"
+
+msgid "请先添加至少一个目标"
+msgstr "먼저 목표를 하나 이상 추가하세요"
+
+msgid "请先点「计算」"
+msgstr "먼저 '계산'을 누르세요"
+
+msgid "PNG 图片 (*.png)"
+msgstr "PNG 이미지 (*.png)"
+
+msgid "请先粘贴结算文字"
+msgstr "먼저 정산 텍스트를 붙여넣으세요"
+
+msgid "  还没有运行记录"
+msgstr "  아직 실행 기록이 없습니다"
+
+msgid "今日明细："
+msgstr "오늘 내역:"
+
+msgid "（没有可用数据）"
+msgstr "(사용 가능한 데이터 없음)"
+
+msgid "没有可用的养成数据"
+msgstr "사용 가능한 육성 데이터가 없습니다"
+
+msgid "已选 {count} 个目标：{items}"
+msgstr "{count}개 목표 선택: {items}"
+
+msgid "货币凑法："
+msgstr "재화 구성:"
+
+msgid "经验道具："
+msgstr "경험치 아이템:"
+
+msgid "已导出：{path}"
+msgstr "내보냈습니다: {path}"
+
+msgid "软保底关键点：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+msgstr "소프트 천장 요점: 71회 {p71}, 81회 {p81}, 90회 확정"
+
+msgid "参数：目标 {copies} 份，已垫 {pity} 抽，出目标 {rate}"
+msgstr "매개변수: 목표 {copies}개, 누적 {pity}회, 목표 확률 {rate}"
+
+msgid "手动记账"
+msgstr "수동 기록"
+
+msgid "已记录 {count} 条"
+msgstr "{count}건을 기록했습니다"
+
+msgid "今日：收入 {income:g} / 支出 {expense:g}"
+msgstr "오늘: 수입 {income:g} / 지출 {expense:g}"
+
+msgid "累计：收入 {income:g} / 支出 {expense:g} / 净 {net:g}"
+msgstr "누계: 수입 {income:g} / 지출 {expense:g} / 순액 {net:g}"
+
+msgid "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+msgstr "  총 {count}회, 성공 {success}회, 성공률 {rate:.1f}%, 평균 {avg:.0f}초"
+
+msgid "数据载入成功：{summary}（共 {total} 个目标）"
+msgstr "데이터를 불러왔습니다: {summary} (총 {total}개)"
+
+msgid "导出失败：{error}"
+msgstr "내보내기 실패: {error}"
+
+msgid "结算记账"
+msgstr "정산 기록"
+
+msgid "识别结算界面（或任意物品列表界面）上的「物品 ×数量」，把收益记进 ledger.jsonl，并给出今日与累计收支。"
+msgstr "정산 화면(또는 임의의 아이템 목록)의 '아이템 ×수량'을 인식해 ledger.jsonl에 기록하고, 오늘과 누적 수지를 보여줍니다."
+
+msgid "记录来源"
+msgstr "기록 출처"
+
+msgid "最低置信度"
+msgstr "최소 신뢰도"
+
+msgid "写进记账本的来源标记，用来区分结算 / 手动 / 商店等场景"
+msgstr "기록장에 쓰는 출처 태그입니다. 정산/수동/상점 등을 구분합니다"
+
+msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
+msgstr "이 신뢰도보다 낮은 OCR 텍스트는 버립니다. 0이면 모두 유지"

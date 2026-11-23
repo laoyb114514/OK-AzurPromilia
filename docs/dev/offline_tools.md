@@ -105,7 +105,33 @@ custom = PityBernoulliModel(GachaParams(custom_rates=parse_rate_table("2.8%,28.8
 
 ## 3. 记账与运行报表
 
-### 结算记账
+### 界面：「离线工具」页
+
+`src/gui/offline_tools_tab.py`，三张卡片：
+
+- **养成计算**：选目标（按 角色/奇波/灵子/装备 分组）→ 设起始等级 / 目标等级 / 份数 /
+  潜能等级 / 升星 → 「添加目标」（可加多个，最多 12 个）→ 填库存 → 「计算」→
+  材料单（需求/缺口/体力/次数/无来源标注）→ 「导出 CSV」/「导出 PNG」。
+- **抽卡分析**：目标份数 / 已垫抽数 / 预算抽数 / 出目标概率（100% 或 50%）/
+  可选自定义概率表 → 「计算」→ 期望、预算内概率、最坏情况与软保底关键点。
+- **记账与报表**：粘贴结算文字 → 「记账」；显示今日/累计收支、运行报表统计与今日明细；
+  可导出记账 CSV 与报表 CSV。
+
+这一页**不发键鼠、不截图**，只读文件与算数，所以能在界面线程里直接跑。
+需要 OCR 的「识别当前画面记账」放在任务里（见下）。
+
+### 结算记账任务
+
+`src/tasks/onetime/settlement_task.py`（「结算记账」，`support_schedule_task=True`）：
+
+1. `ocr_lines()` 把当前画面的 OCR 结果**按视觉行**拼回去 —— 框架返回的文本框是散装的，
+   「尤尼」和「×1,500」是两个框，不聚类就会拆行、解析不到数量；
+2. `parse_settlement_text()` 解析成收支条目；
+3. 写进 `ledger.jsonl`，并报出今日与累计收支。
+
+配置项：`记录来源`（写进 ledger 的来源标记）、`最低置信度`（低于该值的 OCR 文本丢弃）。
+
+### 结算文字解析规则
 
 `parse_settlement_text()` 支持这些写法（`×` 也可以写成 `x` / `*`）：
 
@@ -117,7 +143,8 @@ custom = PityBernoulliModel(GachaParams(custom_rates=parse_rate_table("2.8%,28.8
 ```
 
 - 含「消耗 / 花费 / 扣除 / 支出 / 使用」的行记为**支出**，其余记为收入；
-- 同一条条目被两个正则同时匹配时按位置去重；
+- 同一条条目被两个正则同时匹配时按位置去重；**纯数字的“名字”会被拒绝**
+  （否则「材料2 ×3」会被「数量在前」再匹配一次，凭空多出一条）；
 - 一条都没解析出来会抛 `SettlementFormatError`，不会静默记 0。
 
 存储是 `ledger.jsonl`（一行一条 JSON，追加写，坏行读取时跳过）：
@@ -132,19 +159,18 @@ ledger.today_summary()   # 按物品的今日收支
 ledger.export_csv("ledger.csv")
 ```
 
-### 运行报表
+### 运行报表（已接进一条龙）
 
-`RunLog` 写 `runs.jsonl`，用于成功率、平均用时与「预计剩余时间」：
+`RunLog` 写 `runs.jsonl`。`DailyTaskRunner.execute_task()` 现在会在每个任务项前后
+用**暂停感知**的 `active_time()` 计时，并把「成功/失败 + 用时」写进报表：
 
 ```python
-from src.core.ledger import RunLog
-
-log = RunLog("runs.jsonl")
-log.record("DailyTask", ok=True, seconds=312.0)
-log.stats("DailyTask")               # count / success / failed / success_rate / avg_seconds
-log.estimate_seconds("DailyTask")    # 任务栏「预计剩余」用
+log.stats("家园每日")               # count / success / failed / success_rate / avg_seconds
+log.estimate_seconds("家园每日")    # 任务栏「预计剩余」用
 log.export_csv("runs.csv")
 ```
+
+写报表失败**不会影响任务**（失败被吞掉），测试里也固化了这一点。
 
 两个文件都是**追加写 + 读取时容错**，所以手工编辑、断电截断都不会让统计整个崩掉。
 
@@ -154,7 +180,9 @@ log.export_csv("runs.csv")
 |------|------|
 | `tests/test_growth.py` | 数据载入与校验、区间比例切分、份数/潜能/升星、库存缺口、最优体力来源、无来源标注、大单位优先凑货币、经验道具贪心、12 目标上限、CSV/PNG 导出 |
 | `tests/test_gacha_model.py` | 概率表数值、单调性、硬保底、垫抽、期望区间、预算内概率单调、50% 概率的 82.85% 基准、最坏情况、自定义概率表校验 |
-| `tests/test_ledger.py` | 四种结算写法、支出识别、去重、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算 |
+| `tests/test_ledger.py` | 四种结算写法、支出识别、去重、纯数字名字拒绝、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算 |
+| `tests/test_ocr_lines.py` | OCR 文本框按行聚类、行内 x 排序、置信度过滤、异常吞掉、聚类后能被结算解析器吃下 |
+| `tests/test_settlement_and_reporting.py` | 结算任务写入 ledger、来源取配置、长列表预览截断；一条龙每项写入 runs.jsonl、禁用项不记、报表失败不影响任务 |
 
 ```bash
 uv run python -m unittest discover -s tests

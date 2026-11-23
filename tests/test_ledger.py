@@ -59,6 +59,22 @@ class TestSettlementParsing(unittest.TestCase):
         with self.assertRaises(SettlementFormatError):
             parse_settlement_text("尤尼 ×0")
 
+    def test_numeric_name_suffix_does_not_create_phantom_entry(self):
+        """「材料2 ×3」里的 2 是名字的一部分，不能又被「数量在前」匹配成一条。"""
+        entries = parse_settlement_text("材料2 ×3")
+        self.assertEqual([(e.item, e.amount) for e in entries], [("材料2", 3)])
+
+    def test_numbered_material_list(self):
+        text = "\n".join(f"材料{i} ×{i + 1}" for i in range(8))
+        entries = parse_settlement_text(text)
+        self.assertEqual(len(entries), 8)
+        self.assertEqual(entries[0].item, "材料0")
+        self.assertEqual(entries[7].amount, 8)
+
+    def test_pure_number_name_rejected(self):
+        with self.assertRaises(SettlementFormatError):
+            parse_settlement_text("12 × 34")
+
 
 class StoreTestBase(unittest.TestCase):
     def setUp(self):

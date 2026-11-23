@@ -540,3 +540,195 @@ msgstr "ステップが失敗した後、続きのステップを実行するか
 
 msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
 msgstr "0 は無制限。フローは予算で打ち切られ、タスクは事後に記録されるだけです"
+
+msgid "离线工具"
+msgstr "オフラインツール"
+
+msgid "养成计算"
+msgstr "育成計算"
+
+msgid "抽卡分析"
+msgstr "ガチャ分析"
+
+msgid "记账与报表"
+msgstr "記帳とレポート"
+
+msgid "还没有目标：选好参数后点「添加目标」"
+msgstr "目標がありません。パラメータを設定して「目標を追加」を押してください"
+
+msgid "每行一个：材料=数量，例如 尤尼=20000"
+msgstr "1 行に 1 つ：素材=数量（例：ユニ=20000）"
+
+msgid "可选：2.8%,28.8%,100% 这样的表，长度需等于硬保底"
+msgstr "任意：2.8%,28.8%,100% のような表。長さは天井回数と同じにしてください"
+
+msgid "计算"
+msgstr "計算"
+
+msgid "例如：获得的奖励：尤尼 ×1,500 / 12 × 波力果 / 消耗：星脉结晶 ×3"
+msgstr "例：獲得報酬：ユニ ×1,500 / 12 × ポリの実 / 消費：星脈結晶 ×3"
+
+msgid "计算完成"
+msgstr "計算完了"
+
+msgid "材料清单："
+msgstr "素材一覧："
+
+msgid "保存养成材料单"
+msgstr "育成素材リストを保存"
+
+msgid "运行报表："
+msgstr "実行レポート："
+
+msgid "导出 CSV"
+msgstr "CSV を書き出す"
+
+msgid "CSV 文件 (*.csv)"
+msgstr "CSV ファイル (*.csv)"
+
+msgid "养成目标"
+msgstr "育成目標"
+
+msgid "起始等级"
+msgstr "開始レベル"
+
+msgid "目标等级"
+msgstr "目標レベル"
+
+msgid "份数"
+msgstr "個数"
+
+msgid "潜能等级"
+msgstr "潜在能力レベル"
+
+msgid "升星"
+msgstr "星上げ"
+
+msgid "添加目标"
+msgstr "目標を追加"
+
+msgid "清空目标"
+msgstr "目標をクリア"
+
+msgid "导出 PNG"
+msgstr "PNG を書き出す"
+
+msgid "重新载入数据"
+msgstr "データを再読み込み"
+
+msgid "库存"
+msgstr "所持数"
+
+msgid "目标份数"
+msgstr "目標個数"
+
+msgid "已垫抽数"
+msgstr "既存の天井カウント"
+
+msgid "预算抽数"
+msgstr "予算の回数"
+
+msgid "出目标概率"
+msgstr "目標が出る確率"
+
+msgid "自定义概率表"
+msgstr "カスタム確率表"
+
+msgid "把结算界面的文字粘进来记账；要直接识别画面，请在任务列表运行「结算记账」。"
+msgstr "精算画面のテキストを貼り付けて記帳します。画面を直接読み取るにはタスク一覧で「精算記帳」を実行してください。"
+
+msgid "记账"
+msgstr "記帳"
+
+msgid "刷新统计"
+msgstr "統計を更新"
+
+msgid "导出记账 CSV"
+msgstr "記帳 CSV を書き出す"
+
+msgid "导出报表 CSV"
+msgstr "レポート CSV を書き出す"
+
+msgid "没有可用的养成目标"
+msgstr "利用できる育成目標がありません"
+
+msgid "请先添加至少一个目标"
+msgstr "先に目標を 1 つ以上追加してください"
+
+msgid "请先点「计算」"
+msgstr "先に「計算」を押してください"
+
+msgid "PNG 图片 (*.png)"
+msgstr "PNG 画像 (*.png)"
+
+msgid "请先粘贴结算文字"
+msgstr "先に精算テキストを貼り付けてください"
+
+msgid "  还没有运行记录"
+msgstr "  実行記録はまだありません"
+
+msgid "今日明细："
+msgstr "本日の内訳："
+
+msgid "（没有可用数据）"
+msgstr "（利用できるデータなし）"
+
+msgid "没有可用的养成数据"
+msgstr "利用できる育成データがありません"
+
+msgid "已选 {count} 个目标：{items}"
+msgstr "{count} 個の目標を選択：{items}"
+
+msgid "货币凑法："
+msgstr "通貨の組み方："
+
+msgid "经验道具："
+msgstr "経験値アイテム："
+
+msgid "已导出：{path}"
+msgstr "書き出しました：{path}"
+
+msgid "软保底关键点：71 抽 {p71}、81 抽 {p81}、90 抽必出"
+msgstr "ソフト天井の要点：71 回 {p71}、81 回 {p81}、90 回は確定"
+
+msgid "参数：目标 {copies} 份，已垫 {pity} 抽，出目标 {rate}"
+msgstr "パラメータ：目標 {copies} 個、既存 {pity} 回、目標確率 {rate}"
+
+msgid "手动记账"
+msgstr "手動記帳"
+
+msgid "已记录 {count} 条"
+msgstr "{count} 件を記録しました"
+
+msgid "今日：收入 {income:g} / 支出 {expense:g}"
+msgstr "本日：収入 {income:g} / 支出 {expense:g}"
+
+msgid "累计：收入 {income:g} / 支出 {expense:g} / 净 {net:g}"
+msgstr "累計：収入 {income:g} / 支出 {expense:g} / 純計 {net:g}"
+
+msgid "  共 {count} 次，成功 {success} 次，成功率 {rate:.1f}%，平均 {avg:.0f} 秒"
+msgstr "  計 {count} 回、成功 {success} 回、成功率 {rate:.1f}%、平均 {avg:.0f} 秒"
+
+msgid "数据载入成功：{summary}（共 {total} 个目标）"
+msgstr "データを読み込みました：{summary}（全 {total} 件）"
+
+msgid "导出失败：{error}"
+msgstr "書き出し失敗：{error}"
+
+msgid "结算记账"
+msgstr "精算記帳"
+
+msgid "识别结算界面（或任意物品列表界面）上的「物品 ×数量」，把收益记进 ledger.jsonl，并给出今日与累计收支。"
+msgstr "精算画面（または任意のアイテム一覧）の「アイテム ×数量」を読み取り、ledger.jsonl に記録して、本日と累計の収支を表示します。"
+
+msgid "记录来源"
+msgstr "記録元"
+
+msgid "最低置信度"
+msgstr "最低信頼度"
+
+msgid "写进记账本的来源标记，用来区分结算 / 手动 / 商店等场景"
+msgstr "記帳帳簿に書き込む出所タグ。精算・手動・ショップなどを区別します"
+
+msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
+msgstr "この信頼度を下回る OCR テキストは破棄されます。0 はすべて保持"
