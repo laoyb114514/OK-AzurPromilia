@@ -150,5 +150,69 @@ class TestEdgeCases(unittest.TestCase):
             self.assertIsNone(result.backup_dir)
 
 
+class TestSafety(ProfileTestBase):
+    """手改坏的档 / 中途失败，都不能把用户配置搞成半套。"""
+
+    def test_apply_rejects_traversal_in_meta(self):
+        self.store.save("危险")
+        meta_path = self.configs / PROFILES_FOLDER / "危险" / "profile.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["files"]["../../evil.json"] = {"size": 1}
+        write(meta_path, meta)
+        with self.assertRaises(ProfileError) as ctx:
+            self.store.apply("危险")
+        self.assertIn("越界路径", str(ctx.exception))
+        self.assertFalse((self.configs.parent / "evil.json").exists())
+
+    def test_apply_failure_rolls_back(self):
+        self.store.save("旧档")
+        # 改掉当前配置，再应用旧档，但让「写入 configs」那一步失败
+        write(self.configs / "DailyTask.json", {"多账户模式": False})
+
+        from unittest import mock
+
+        real_copy = __import__("shutil").copy2
+
+        def flaky_copy(source, destination, *args, **kwargs):
+            # apply 先写 .tmp 再 os.replace；备份写的是原名，所以只让 apply 失败
+            if str(destination).endswith(".tmp"):
+                raise OSError("磁盘满了")
+            return real_copy(source, destination, *args, **kwargs)
+
+        with mock.patch("src.core.profile_store.shutil.copy2", side_effect=flaky_copy), self.assertRaises(
+            ProfileError
+        ) as ctx:
+            self.store.apply("旧档")
+        self.assertIn("回滚", str(ctx.exception))
+        # 回滚后仍然是「应用前」的那份配置
+        current = json.loads((self.configs / "DailyTask.json").read_text(encoding="utf-8"))
+        self.assertFalse(current["多账户模式"])
+
+    def test_save_failure_keeps_old_profile(self):
+        self.store.save("档A")
+        meta_path = self.configs / PROFILES_FOLDER / "档A" / "profile.json"
+        before = meta_path.read_text(encoding="utf-8")
+
+        from unittest import mock
+
+        with mock.patch(
+            "src.core.profile_store.shutil.copy2", side_effect=OSError("没空间")
+        ), self.assertRaises(ProfileError):
+            self.store.save("档A")
+        # 旧档仍然可用，且没有残留的暂存目录
+        self.assertTrue(self.store.exists("档A"))
+        self.assertEqual(meta_path.read_text(encoding="utf-8"), before)
+        self.assertFalse((self.configs / PROFILES_FOLDER / "档A" / "files.new").exists())
+
+    def test_rollback_removes_newly_added_files(self):
+        write(self.configs / "extra.json", {"x": 1})
+        self.store.save("新档")
+        (self.configs / "extra.json").unlink()
+        self.assertTrue(self.store.exists("新档"))
+        result = self.store.apply("新档")
+        self.assertIn("extra.json", result.restored)
+        self.assertTrue((self.configs / "extra.json").is_file())
+
+
 if __name__ == "__main__":
     unittest.main()

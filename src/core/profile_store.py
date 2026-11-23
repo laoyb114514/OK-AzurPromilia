@@ -19,7 +19,11 @@
 - 快照范围 = ``configs/`` 下除 ``profiles/`` 以外的全部文件（递归）；
 - 应用时只覆盖档里存在的文件，**不删除**档里没有的文件（避免误删用户数据），
   返回值里会如实报告``extra``（当前有、档里没有的文件数）；
-- 所有写盘都是 ``.tmp`` + ``os.replace``。
+- 所有写盘都是 ``.tmp`` + ``os.replace``；
+- **应用失败会回滚**：先自动备份当前配置，中途出错就按备份恢复，不留半套配置；
+- **保存不会毁掉已有档**：先写到 ``files.new``，全部成功后才替换旧快照；
+- 档里的相对路径会做校验（拒绝绝对路径与 ``..``）——``profile.json`` 是磁盘上的文件，
+  手改坏了也不能让它把文件写到 ``configs/`` 外面去。
 """
 
 from __future__ import annotations
@@ -29,12 +33,13 @@ import os
 import shutil
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 PROFILES_FOLDER = "profiles"
 BACKUP_PREFIX = ".backup_"
 META_NAME = "profile.json"
 FILES_FOLDER = "files"
+TEMP_FOLDER = "files.new"
 
 
 class ProfileError(RuntimeError):
@@ -136,24 +141,43 @@ class ProfileStore:
 
     # ── 保存 ─────────────────────────────────────────────
     def save(self, name: str, overwrite: bool = True) -> ProfileInfo:
+        """把当前配置存成档。
+
+        先写到 ``files.new``，全部成功后才替换旧快照 —— 否则中途失败（磁盘满、
+        文件被占用）会把用户**已有的档**毁掉，而那是他最不该丢的东西。
+        """
         target = self.profile_dir(name)
         if target.exists() and not overwrite:
             raise ProfileError(f"配置档已存在: {name}")
-        files_dir = target / FILES_FOLDER
-        if files_dir.exists():
-            shutil.rmtree(files_dir)
-        files_dir.mkdir(parents=True, exist_ok=True)
+        target.mkdir(parents=True, exist_ok=True)
+        staging = target / TEMP_FOLDER
+        if staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
+        staging.mkdir(parents=True, exist_ok=True)
 
         manifest: dict[str, dict] = {}
         total = 0
-        for source in self._config_files():
-            relative = source.relative_to(self.config_folder).as_posix()
-            destination = files_dir / relative
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, destination)
-            size = destination.stat().st_size
-            total += size
-            manifest[relative] = {"size": size}
+        try:
+            for source in self._config_files():
+                relative = source.relative_to(self.config_folder).as_posix()
+                destination = staging / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, destination)
+                size = destination.stat().st_size
+                total += size
+                manifest[relative] = {"size": size}
+        except Exception as exc:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise ProfileError(f"保存配置档失败（原档未改动）: {exc}") from exc
+
+        files_dir = target / FILES_FOLDER
+        if files_dir.exists():
+            shutil.rmtree(files_dir, ignore_errors=True)
+        try:
+            os.replace(staging, files_dir)
+        except OSError as exc:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise ProfileError(f"保存配置档失败（原档未改动）: {exc}") from exc
 
         saved_at = time.time()
         meta = {
@@ -165,32 +189,70 @@ class ProfileStore:
         self._write_json(target / META_NAME, meta)
         return ProfileInfo(name=target.name, saved_at=saved_at, files=len(manifest), size=total)
 
+    @staticmethod
+    def _safe_relative(relative: str) -> PurePosixPath:
+        """校验档里的相对路径：不许绝对路径、不许 ``..``。"""
+        raw = str(relative or "").replace("\\", "/").strip()
+        if not raw or raw.startswith("/") or (len(raw) > 1 and raw[1] == ":"):
+            raise ProfileError(f"配置档里有非法路径: {relative!r}")
+        parts = PurePosixPath(raw).parts
+        if any(part in ("..", "") for part in parts):
+            raise ProfileError(f"配置档里有越界路径: {relative!r}")
+        return PurePosixPath(*parts)
+
     # ── 应用 ─────────────────────────────────────────────
     def apply(self, name: str) -> ApplyResult:
+        """把档里的配置覆盖回 ``configs/``；失败按备份回滚。"""
         target = self.profile_dir(name)
         meta = self._read_meta(target)
         if meta is None:
             raise ProfileError(f"配置档不存在或已损坏: {name}")
         files_dir = target / FILES_FOLDER
 
+        planned = [
+            (relative, self._safe_relative(relative)) for relative in (meta.get("files") or {})
+        ]
         backup_dir = self._backup_current()
         restored: list[str] = []
-        for relative in (meta.get("files") or {}):
-            source = files_dir / relative
-            if not source.is_file():
-                continue
-            destination = self.config_folder / relative
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            tmp = destination.with_suffix(destination.suffix + ".tmp")
-            shutil.copy2(source, tmp)
-            os.replace(tmp, destination)
-            restored.append(relative)
+        try:
+            for relative, safe in planned:
+                source = files_dir / Path(*safe.parts)
+                if not source.is_file():
+                    continue
+                destination = self.config_folder / Path(*safe.parts)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                tmp = destination.with_suffix(destination.suffix + ".tmp")
+                shutil.copy2(source, tmp)
+                os.replace(tmp, destination)
+                restored.append(relative)
+        except Exception as exc:
+            rolled_back = self._rollback(backup_dir, restored)
+            detail = "已按备份回滚" if rolled_back else "回滚也未完全成功，请检查 configs/ 与备份目录"
+            raise ProfileError(f"应用配置档失败（{detail}）: {exc}") from exc
 
         current = {
             path.relative_to(self.config_folder).as_posix() for path in self._config_files()
         }
         extra = len(current - set(meta.get("files") or {}))
         return ApplyResult(profile=target.name, restored=restored, backup_dir=backup_dir, extra=extra)
+
+    def _rollback(self, backup_dir: Path | None, restored: list[str]) -> bool:
+        """把已经覆盖的文件按备份写回去；返回是否全部成功。"""
+        if backup_dir is None:
+            return False
+        ok = True
+        for relative in restored:
+            source = backup_dir / relative
+            destination = self.config_folder / relative
+            try:
+                if source.is_file():
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source, destination)
+                else:
+                    destination.unlink(missing_ok=True)
+            except OSError:
+                ok = False
+        return ok
 
     def _backup_current(self) -> Path | None:
         files = self._config_files()
