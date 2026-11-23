@@ -1125,3 +1125,66 @@ msgstr "Archivo de esquema"
 
 msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
 msgstr "Nombre del esquema en configs/schemes; rellénalo para ejecutar un esquema suelto"
+
+msgid "分享仓库"
+msgstr "Repositorio compartido"
+
+msgid "在线仓库"
+msgstr "Repositorio en línea"
+
+msgid "填入索引地址后点「加载」。索引就是一个返回 JSON 的链接，也可以填本地文件路径"
+msgstr "Escribe la dirección del índice y pulsa Cargar. El índice es un enlace que devuelve JSON o una ruta local"
+
+msgid "https://…/index.json 或本地 index.json 路径"
+msgstr "https://…/index.json o una ruta local a index.json"
+
+msgid "加载"
+msgstr "Cargar"
+
+msgid "安装选中"
+msgstr "Instalar seleccionado"
+
+msgid "允许覆盖同名文件"
+msgstr "Permitir sobrescribir archivos con el mismo nombre"
+
+msgid "打开流程目录"
+msgstr "Abrir carpeta de flujos"
+
+msgid "索引已加载"
+msgstr "Índice cargado"
+
+msgid "索引地址"
+msgstr "Dirección del índice"
+
+msgid "类型"
+msgstr "Tipo"
+
+msgid "名称"
+msgstr "Nombre"
+
+msgid "说明"
+msgstr "Descripción"
+
+msgid "标签"
+msgstr "Etiquetas"
+
+msgid "先填索引地址"
+msgstr "Primero escribe la dirección del índice"
+
+msgid "先在列表里选中一项"
+msgstr "Selecciona primero una entrada de la lista"
+
+msgid "已加载「{name}」：共 {count} 项（{detail}）"
+msgstr "Cargado «{name}»: {count} entradas ({detail})"
+
+msgid "没有条目"
+msgstr "sin entradas"
+
+msgid "打不开目录：{error}"
+msgstr "No se puede abrir la carpeta: {error}"
+
+msgid "选择养成数据 JSON"
+msgstr "Elegir el JSON de datos de progresión"
+
+msgid "导入数据"
+msgstr "Importar datos"

@@ -1117,3 +1117,66 @@ msgstr "스킴 파일"
 
 msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
 msgstr "configs/schemes 아래의 스킴 파일 이름입니다. 스킴만 단독 실행할 때 채웁니다"
+
+msgid "分享仓库"
+msgstr "공유 저장소"
+
+msgid "在线仓库"
+msgstr "온라인 저장소"
+
+msgid "填入索引地址后点「加载」。索引就是一个返回 JSON 的链接，也可以填本地文件路径"
+msgstr "인덱스 주소를 입력하고 '불러오기'를 누르세요. 인덱스는 JSON을 반환하는 링크이거나 로컬 파일 경로입니다"
+
+msgid "https://…/index.json 或本地 index.json 路径"
+msgstr "https://…/index.json 또는 로컬 index.json 경로"
+
+msgid "加载"
+msgstr "불러오기"
+
+msgid "安装选中"
+msgstr "선택 항목 설치"
+
+msgid "允许覆盖同名文件"
+msgstr "같은 이름 파일 덮어쓰기 허용"
+
+msgid "打开流程目录"
+msgstr "플로 폴더 열기"
+
+msgid "索引已加载"
+msgstr "인덱스를 불러왔습니다"
+
+msgid "索引地址"
+msgstr "인덱스 주소"
+
+msgid "类型"
+msgstr "종류"
+
+msgid "名称"
+msgstr "이름"
+
+msgid "说明"
+msgstr "설명"
+
+msgid "标签"
+msgstr "태그"
+
+msgid "先填索引地址"
+msgstr "먼저 인덱스 주소를 입력하세요"
+
+msgid "先在列表里选中一项"
+msgstr "먼저 목록에서 항목을 선택하세요"
+
+msgid "已加载「{name}」：共 {count} 项（{detail}）"
+msgstr "\"{name}\"을 불러왔습니다: 총 {count}개({detail})"
+
+msgid "没有条目"
+msgstr "항목 없음"
+
+msgid "打不开目录：{error}"
+msgstr "폴더를 열 수 없습니다: {error}"
+
+msgid "选择养成数据 JSON"
+msgstr "육성 데이터 JSON 선택"
+
+msgid "导入数据"
+msgstr "데이터 가져오기"

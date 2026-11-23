@@ -115,6 +115,9 @@ ok-ap-diagnostics-<时间戳>.zip
 - 给了 `sha256` 就校验，不匹配不落盘；
 - 下载失败、内容不是合法 JSON、本地文件不存在，都返回 `InstallOutcome(ok=False)` 而不是抛异常。
 
+页面在**「分享仓库」**：填地址 → 加载 → 列表（类型/名称/说明/标签，双击也能装）→ 安装选中，
+可勾选「允许覆盖同名文件」；失败弹红框并把原因写回状态行。
+
 ## 7. 任务栏进度估算
 
 `RunLog.progress_ratio(task, elapsed, cap=0.97, fallback_seconds=None)`：

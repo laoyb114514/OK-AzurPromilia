@@ -1,6 +1,7 @@
-"""养成计算测试：数据载入、区间切分、潜能/升星、库存缺口、体力折算、导出。"""
+"""养成计算测试：数据载入、区间切分、潜能/升星、库存缺口、体力折算、导出、导入。"""
 
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,6 +14,7 @@ from src.core.growth import (
     compute_plan,
     export_csv,
     export_png,
+    import_dataset,
     material_rows,
     target_rows,
 )
@@ -256,6 +258,76 @@ class TestExport(unittest.TestCase):
         with Image.open(path) as image:
             self.assertEqual(image.width, 1280)
             self.assertGreater(image.height, 200)
+
+
+class TestImportDataset(unittest.TestCase):
+    def _valid_payload(self):
+        return {
+            "version": 1,
+            "entries": [
+                {
+                    "key": "char_a",
+                    "name": "A",
+                    "kind": "character",
+                    "levels": [{"from": 1, "to": 2, "exp": 10}],
+                }
+            ],
+        }
+
+    def test_import_creates_backup_and_replaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "ok.json"
+            source.write_text(json.dumps(self._valid_payload(), ensure_ascii=False), encoding="utf-8")
+            target = root / "growth.json"
+            target.write_text(json.dumps({"version": 1, "entries": []}), encoding="utf-8")
+            backups = root / "backups"
+            result = import_dataset(source, target=target, backup_dir=backups)
+            self.assertTrue(result.ok, result.describe())
+            self.assertIn("character 1", result.describe())
+            self.assertTrue(backups.is_dir())
+            self.assertEqual(len(list(backups.glob("growth_*.json"))), 1)
+            self.assertEqual(len(Dataset.from_file(target).entries), 1)
+
+    def test_invalid_source_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad = root / "bad.json"
+            bad.write_text(json.dumps({"entries": [{"kind": "nope"}]}), encoding="utf-8")
+            target = root / "growth.json"
+            target.write_text(json.dumps({"version": 1, "entries": []}), encoding="utf-8")
+            before = target.read_text(encoding="utf-8")
+            result = import_dataset(bad, target=target, backup_dir=root / "backups")
+            self.assertFalse(result.ok)
+            self.assertIn("导入失败", result.describe())
+            self.assertEqual(target.read_text(encoding="utf-8"), before)
+
+    def test_missing_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = import_dataset(Path(tmp) / "nope.json", target=Path(tmp) / "g.json")
+            self.assertFalse(result.ok)
+
+    def test_import_without_existing_target(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "ok.json"
+            source.write_text(json.dumps(self._valid_payload()), encoding="utf-8")
+            result = import_dataset(source, target=root / "growth.json", backup_dir=root / "backups")
+            self.assertTrue(result.ok)
+            self.assertIsNone(result.backup)
+
+    def test_backup_name_is_unique(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "ok.json"
+            source.write_text(json.dumps(self._valid_payload()), encoding="utf-8")
+            target = root / "growth.json"
+            target.write_text("{}", encoding="utf-8")
+            backups = root / "backups"
+            first = import_dataset(source, target=target, backup_dir=backups)
+            second = import_dataset(source, target=target, backup_dir=backups)
+            self.assertTrue(first.ok and second.ok)
+            self.assertNotEqual(first.backup, second.backup)
 
 
 if __name__ == "__main__":

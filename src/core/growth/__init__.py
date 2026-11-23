@@ -26,6 +26,7 @@ from src.core.growth.calc import (
 )
 from src.core.growth.export import export_csv, export_png
 from src.core.growth.model import (
+    BACKUP_FOLDER,
     DEFAULT_DATA_PATH,
     GROWTH_KINDS,
     MAX_TARGETS,
@@ -33,12 +34,15 @@ from src.core.growth.model import (
     Dungeon,
     Entry,
     GrowthDataError,
+    ImportResult,
     LevelSpan,
     Potential,
     StarStage,
+    import_dataset,
 )
 
 __all__ = [
+    "BACKUP_FOLDER",
     "DEFAULT_DATA_PATH",
     "GROWTH_KINDS",
     "MAX_TARGETS",
@@ -48,6 +52,7 @@ __all__ = [
     "GrowthDataError",
     "GrowthInputError",
     "GrowthPlan",
+    "ImportResult",
     "LevelSpan",
     "Potential",
     "StarStage",
@@ -56,6 +61,7 @@ __all__ = [
     "compute_plan",
     "export_csv",
     "export_png",
+    "import_dataset",
     "material_rows",
     "target_rows",
 ]

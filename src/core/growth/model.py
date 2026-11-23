@@ -39,6 +39,9 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -46,6 +49,7 @@ from typing import Any
 
 GROWTH_KINDS = ("character", "pet", "spirit", "equipment")
 DEFAULT_DATA_PATH = Path("assets") / "data" / "growth.json"
+BACKUP_FOLDER = Path("assets") / "data" / "backups"
 MAX_TARGETS = 12
 
 
@@ -360,3 +364,60 @@ def _parse_entry(data: Mapping[str, Any], path: str) -> Entry:
         potentials=tuple(potentials),
         star_stages=tuple(sorted(star_stages, key=lambda stage: stage.star)),
     )
+
+
+# ── 导入（把 wiki 导出的 JSON 换成内置数据） ──────────────
+@dataclass
+class ImportResult:
+    ok: bool = False
+    path: Path | None = None
+    backup: Path | None = None
+    message: str = ""
+    summary: dict[str, int] = field(default_factory=dict)
+
+    def describe(self) -> str:
+        if not self.ok:
+            return f"导入失败：{self.message}"
+        detail = "、".join(f"{name} {count}" for name, count in self.summary.items() if count) or "没有条目"
+        backup = f"；原文件备份在 {self.backup}" if self.backup else ""
+        return f"已导入：{detail}{backup}"
+
+
+def import_dataset(
+    source: str | Path,
+    target: str | Path | None = None,
+    backup_dir: str | Path | None = None,
+) -> ImportResult:
+    """校验并导入一份养成数据（默认覆盖 ``assets/data/growth.json``）。
+
+    先 ``Dataset.from_file`` 校验，**校验不过一个字节都不写**；通过后把原文件备份到
+    ``assets/data/backups/growth_<时间戳>.json``，再原子替换。
+    """
+    source_path = Path(source)
+    target_path = Path(target) if target is not None else DEFAULT_DATA_PATH
+    try:
+        dataset = Dataset.from_file(source_path)
+    except GrowthDataError as exc:
+        return ImportResult(ok=False, message=str(exc))
+
+    backup: Path | None = None
+    try:
+        if target_path.is_file():
+            folder = Path(backup_dir) if backup_dir is not None else BACKUP_FOLDER
+            folder.mkdir(parents=True, exist_ok=True)
+            stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+            backup = folder / f"growth_{stamp}.json"
+            index = 0
+            while backup.exists():
+                index += 1
+                backup = folder / f"growth_{stamp}_{index}.json"
+            shutil.copy2(target_path, backup)
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = target_path.with_suffix(".json.tmp")
+        shutil.copy2(source_path, tmp)
+        os.replace(tmp, target_path)
+    except OSError as exc:
+        return ImportResult(ok=False, message=f"写入失败: {exc}", backup=backup)
+
+    return ImportResult(ok=True, path=target_path, backup=backup, summary=dataset.kinds_summary())

@@ -1119,3 +1119,66 @@ msgstr "スキームファイル"
 
 msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
 msgstr "configs/schemes 下のスキーム名。スキームを単体で実行するときに指定します"
+
+msgid "分享仓库"
+msgstr "共有リポジトリ"
+
+msgid "在线仓库"
+msgstr "オンラインリポジトリ"
+
+msgid "填入索引地址后点「加载」。索引就是一个返回 JSON 的链接，也可以填本地文件路径"
+msgstr "索引のアドレスを入れて「読み込む」を押してください。索引は JSON を返すリンク、またはローカルファイルのパスです"
+
+msgid "https://…/index.json 或本地 index.json 路径"
+msgstr "https://…/index.json またはローカルの index.json パス"
+
+msgid "加载"
+msgstr "読み込む"
+
+msgid "安装选中"
+msgstr "選択項目をインストール"
+
+msgid "允许覆盖同名文件"
+msgstr "同名ファイルの上書きを許可"
+
+msgid "打开流程目录"
+msgstr "フローフォルダーを開く"
+
+msgid "索引已加载"
+msgstr "インデックスを読み込みました"
+
+msgid "索引地址"
+msgstr "インデックスのアドレス"
+
+msgid "类型"
+msgstr "種類"
+
+msgid "名称"
+msgstr "名前"
+
+msgid "说明"
+msgstr "説明"
+
+msgid "标签"
+msgstr "タグ"
+
+msgid "先填索引地址"
+msgstr "先に索引のアドレスを入力してください"
+
+msgid "先在列表里选中一项"
+msgstr "先に一覧から項目を選んでください"
+
+msgid "已加载「{name}」：共 {count} 项（{detail}）"
+msgstr "「{name}」を読み込みました：全 {count} 件（{detail}）"
+
+msgid "没有条目"
+msgstr "項目なし"
+
+msgid "打不开目录：{error}"
+msgstr "フォルダーを開けません：{error}"
+
+msgid "选择养成数据 JSON"
+msgstr "育成データの JSON を選択"
+
+msgid "导入数据"
+msgstr "データをインポート"

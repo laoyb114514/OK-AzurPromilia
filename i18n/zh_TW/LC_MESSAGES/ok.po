@@ -1114,3 +1114,66 @@ msgstr "方案檔案"
 
 msgid "configs/schemes 下的轮椅方案文件名；单独跑方案时填它"
 msgstr "configs/schemes 下的輪椅方案檔案名；單獨跑方案時填它"
+
+msgid "分享仓库"
+msgstr "分享倉庫"
+
+msgid "在线仓库"
+msgstr "線上倉庫"
+
+msgid "填入索引地址后点「加载」。索引就是一个返回 JSON 的链接，也可以填本地文件路径"
+msgstr "填入索引位址後點「載入」。索引就是一個回傳 JSON 的連結，也可以填本機檔案路徑"
+
+msgid "https://…/index.json 或本地 index.json 路径"
+msgstr "https://…/index.json 或本機 index.json 路徑"
+
+msgid "加载"
+msgstr "載入"
+
+msgid "安装选中"
+msgstr "安裝選取項"
+
+msgid "允许覆盖同名文件"
+msgstr "允許覆蓋同名檔案"
+
+msgid "打开流程目录"
+msgstr "開啟流程目錄"
+
+msgid "索引已加载"
+msgstr "索引已載入"
+
+msgid "索引地址"
+msgstr "索引位址"
+
+msgid "类型"
+msgstr "類型"
+
+msgid "名称"
+msgstr "名稱"
+
+msgid "说明"
+msgstr "說明"
+
+msgid "标签"
+msgstr "標籤"
+
+msgid "先填索引地址"
+msgstr "先填索引位址"
+
+msgid "先在列表里选中一项"
+msgstr "先在清單裡選取一項"
+
+msgid "已加载「{name}」：共 {count} 项（{detail}）"
+msgstr "已載入「{name}」：共 {count} 項（{detail}）"
+
+msgid "没有条目"
+msgstr "沒有項目"
+
+msgid "打不开目录：{error}"
+msgstr "打不開目錄：{error}"
+
+msgid "选择养成数据 JSON"
+msgstr "選擇養成資料 JSON"
+
+msgid "导入数据"
+msgstr "匯入資料"

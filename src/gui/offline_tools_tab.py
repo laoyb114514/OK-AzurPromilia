@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from ok.gui.widget.CustomTab import CustomTab
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QPlainTextEdit, QVBoxLayout, QWidget
@@ -34,6 +36,7 @@ from src.core.growth import (
     compute_plan,
     export_csv,
     export_png,
+    import_dataset,
     material_rows,
 )
 from src.core.ledger import Ledger, RunLog, SettlementFormatError, parse_settlement_text
@@ -172,6 +175,7 @@ class OfflineToolsTab(CustomTab):
             (self.tr("计算"), FluentIcon.SPEED_HIGH, self._compute_growth),
             (self.tr("导出 CSV"), FluentIcon.SAVE, lambda: self._export_growth("csv")),
             (self.tr("导出 PNG"), FluentIcon.PHOTO, lambda: self._export_growth("png")),
+            (self.tr("导入数据"), FluentIcon.DOWNLOAD, self._import_growth_data),
             (self.tr("重新载入数据"), FluentIcon.SYNC, self.refresh_growth_entries),
         ):
             button = PushButton(icon, text)
@@ -286,6 +290,23 @@ class OfflineToolsTab(CustomTab):
         return card
 
     # ── 养成 ─────────────────────────────────────────────
+    def _import_growth_data(self):
+        """导入一份从 wiki 导出的养成数据（覆盖 assets/data/growth.json，先备份）。"""
+        path, _selected = QFileDialog.getOpenFileName(
+            self,
+            self.tr("选择养成数据 JSON"),
+            str(Path.cwd()),
+            "JSON (*.json)",
+        )
+        if not path:
+            return
+        result = import_dataset(path)
+        if result.ok:
+            self._notify(result.describe())
+            self.refresh_growth_entries()
+        else:
+            self._notify(result.describe(), error=True)
+
     def refresh_growth_entries(self):
         self._dataset = None
         self._dataset_error = ""
