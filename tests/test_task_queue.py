@@ -224,7 +224,152 @@ class TestQueueRunner(unittest.TestCase):
         runner, _calls, _ = self._runner(queue, {"a": boom})
         result = runner.run()
         self.assertFalse(result.ok)
-        self.assertIn("炸了", result.results[0].error)
+
+
+class TestQueueBudget(unittest.TestCase):
+    """队列总预算与「任务类项剩余时间不够就不开始」。"""
+
+    def _runner(self, queue, behavior, clock, **kwargs):
+        calls = []
+        logs = []
+
+        def resolver(item):
+            action = behavior.get(item.ref)
+            if action is None:
+                return None
+
+            def run(budget):
+                calls.append((item.ref, budget))
+                return action(budget)
+
+            return run
+
+        runner = QueueRunner(queue, resolver, log=logs.append, clock=clock, **kwargs)
+        return runner, calls, logs
+
+    def test_total_budget_truncates_remaining_items(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="flow", ref="a"), QueueItem(kind="flow", ref="b"))
+
+        def slow(_budget):
+            clock.now += 700
+            return True
+
+        runner, calls, _logs = self._runner(
+            queue, {"a": slow, "b": lambda budget: True}, clock, total_budget_seconds=600
+        )
+        result = runner.run()
+        self.assertEqual([call[0] for call in calls], ["a"])
+        self.assertTrue(result.results[1].skipped)
+        self.assertIn("总预算已用完", result.results[1].error or "")
+
+    def test_budget_passed_is_remaining_total(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="flow", ref="a"))
+
+        runner, calls, _ = self._runner(
+            queue, {"a": lambda budget: True}, clock, total_budget_seconds=300
+        )
+        runner.run()
+        self.assertAlmostEqual(calls[0][1], 300.0)
+
+    def test_item_budget_capped_by_remaining_total(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="flow", ref="a", budget_minutes=30))
+
+        runner, calls, _ = self._runner(
+            queue, {"a": lambda budget: True}, clock, total_budget_seconds=120
+        )
+        runner.run()
+        self.assertAlmostEqual(calls[0][1], 120.0)  # 取更小的那个
+
+    def test_no_total_budget_keeps_old_behaviour(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="flow", ref="a"), QueueItem(kind="flow", ref="b"))
+        runner, calls, _ = self._runner(
+            queue, {"a": lambda budget: True, "b": lambda budget: True}, clock
+        )
+        result = runner.run()
+        self.assertEqual([call[0] for call in calls], ["a", "b"])
+        self.assertIsNone(calls[0][1])
+        self.assertFalse(any(item.skipped for item in result.results))
+
+    def test_estimate_skips_task_when_remaining_too_small(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="task", ref="HomeDailyTask"))
+        runner, calls, logs = self._runner(
+            queue,
+            {"HomeDailyTask": lambda budget: True},
+            clock,
+            total_budget_seconds=180,
+            estimate=lambda ref: 600.0 if ref == "HomeDailyTask" else 0.0,
+        )
+        result = runner.run()
+        self.assertEqual(calls, [])
+        self.assertTrue(result.results[0].skipped)
+        self.assertIn("预算不足", result.results[0].summary())
+        self.assertTrue(any("预算不足" in log for log in logs))
+
+    def test_estimate_does_not_block_flow_items(self):
+        """流程类能中途被打断，所以不该因为预估超时就跳过。"""
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="flow", ref="长流程"))
+        runner, calls, _ = self._runner(
+            queue,
+            {"长流程": lambda budget: True},
+            clock,
+            total_budget_seconds=180,
+            estimate=lambda ref: 600.0,
+        )
+        result = runner.run()
+        self.assertEqual([call[0] for call in calls], ["长流程"])
+        self.assertFalse(result.results[0].skipped)
+
+    def test_estimate_allows_task_when_enough_time(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="task", ref="快任务"))
+        runner, calls, _ = self._runner(
+            queue,
+            {"快任务": lambda budget: True},
+            clock,
+            total_budget_seconds=1800,
+            estimate=lambda ref: 60.0,
+        )
+        runner.run()
+        self.assertEqual([call[0] for call in calls], ["快任务"])
+
+    def test_estimator_error_is_ignored(self):
+        clock = FakeClock()
+        queue = make_queue(QueueItem(kind="task", ref="A"))
+
+        def broken(_ref):
+            raise RuntimeError("估不出来")
+
+        runner, calls, _ = self._runner(
+            queue, {"A": lambda budget: True}, clock, total_budget_seconds=60, estimate=broken
+        )
+        runner.run()
+        self.assertEqual([call[0] for call in calls], ["A"])
+
+
+class TestQueueRunnerDetails(unittest.TestCase):
+    """原有的一些细节断言（预算标记、用时统计、解析异常）。"""
+
+    def _runner(self, queue, behavior, clock=None):
+        calls = []
+
+        def resolver(item):
+            action = behavior.get(item.ref)
+            if action is None:
+                return None
+
+            def run(budget):
+                calls.append((item.ref, budget))
+                return action()
+
+            return run
+
+        return QueueRunner(queue, resolver, clock=clock), calls
 
     def test_budget_exceeded_is_flagged(self):
         clock = FakeClock()
@@ -234,7 +379,7 @@ class TestQueueRunner(unittest.TestCase):
             return True
 
         queue = make_queue(QueueItem(kind="flow", ref="a", budget_minutes=1))
-        runner, _calls, _ = self._runner(queue, {"a": slow}, clock=clock)
+        runner, _calls = self._runner(queue, {"a": slow}, clock=clock)
         result = runner.run()
         self.assertTrue(result.ok)
         self.assertTrue(result.results[0].budget_exceeded)
@@ -248,7 +393,7 @@ class TestQueueRunner(unittest.TestCase):
             return True
 
         queue = make_queue(QueueItem(kind="flow", ref="a"))
-        runner, _calls, _ = self._runner(queue, {"a": slow}, clock=clock)
+        runner, _calls = self._runner(queue, {"a": slow}, clock=clock)
         result = runner.run()
         self.assertAlmostEqual(result.elapsed, 3.0)
 

@@ -177,9 +177,39 @@ class FlowTask(BaseGameTask):
             self.log_info("队列里没有启用的项", notify=True)
             return False
 
-        result = QueueRunner(queue, self._queue_resolver(), log=self.log_info).run()
+        result = QueueRunner(
+            queue,
+            self._queue_resolver(),
+            log=self.log_info,
+            total_budget_seconds=budget_seconds,
+            estimate=self._estimate_task_seconds,
+        ).run()
         self.log_info(result.summary(), notify=True)
         return result.ok
+
+    def _estimate_task_seconds(self, ref: str) -> float:
+        """按运行报表的历史均值预估某项要跑多久（给队列的预算判断用）。
+
+        报表是按**任务显示名**记的，队列里写的是类名或显示名，所以两种都试一次；
+        没有历史数据就返回 0（表示「不知道」，队列就不会因为它跳过）。
+        """
+        names = [ref]
+        for task in (getattr(self.executor, "onetime_tasks", None) or []) + (
+            getattr(self.executor, "trigger_tasks", None) or []
+        ):
+            display = str(getattr(task, "name", "") or "")
+            if ref in (task.__class__.__name__, display) and display:
+                names.append(display)
+                break
+        log = self._run_log()
+        for name in names:
+            try:
+                value = float(log.estimate_seconds(name) or 0.0)
+            except Exception:
+                continue
+            if value > 0:
+                return value
+        return 0.0
 
     def _queue_resolver(self):
         """把队列项翻译成「跑一下、返回是否成功」的函数。"""

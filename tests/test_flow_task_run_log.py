@@ -11,6 +11,7 @@ from unittest import mock
 
 from src.core.ledger import RunLog
 from src.tasks.onetime.flow_task import JOB_FLOW, JOB_QUEUE, FlowTask
+from src.tasks.onetime.home_daily_task import HomeDailyTask
 
 
 class Harness:
@@ -119,6 +120,46 @@ class TestFlowTaskRunLog(unittest.TestCase):
         self.task.run_flow = make_run(self.task, duration=120.0)
         FlowTask.run(self.task)
         self.assertGreater(self.harness.run_log.estimate_seconds("我的流程"), 0)
+
+
+class TestQueueEstimate(unittest.TestCase):
+    """队列预算判断用的预估：按运行报表的历史均值，类名与显示名都认。"""
+
+    def _fake_task(self):
+        """造一个类名就是 ``HomeDailyTask`` 的实例（不跑真实初始化）。"""
+
+        def init(self):
+            self.name = "家园每日"
+
+        cls = type("HomeDailyTask", (HomeDailyTask,), {"__init__": init})
+        return cls()
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        fake = self._fake_task()
+
+        class Executor:
+            def __init__(self):
+                self.onetime_tasks = [fake]
+                self.trigger_tasks = []
+
+        self.task = FlowTask.__new__(FlowTask)
+        self.task.__dict__["_executor"] = Executor()
+        self.task._run_log_instance = RunLog(self.root / "runs.jsonl")
+        self.task._run_log_instance.record("家园每日", True, 300.0)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_by_class_name(self):
+        self.assertAlmostEqual(FlowTask._estimate_task_seconds(self.task, "HomeDailyTask"), 300.0)
+
+    def test_by_display_name(self):
+        self.assertAlmostEqual(FlowTask._estimate_task_seconds(self.task, "家园每日"), 300.0)
+
+    def test_unknown_returns_zero(self):
+        self.assertEqual(FlowTask._estimate_task_seconds(self.task, "Nope"), 0.0)
 
 
 if __name__ == "__main__":

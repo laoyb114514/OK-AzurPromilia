@@ -12,7 +12,14 @@ def resolver(item):
 ```
 
 这样队列不知道任务怎么跑，只知道「这一项有没有成功、花了多久」。
-"轮椅方案"（``scheme``）在批次 D 才落地，这里先按未知项处理。
+
+预算分两层：
+
+- **队列总预算**（``total_budget_seconds``）：累计用时超了就**不再开始新项**，
+  剩下的记成「跳过：总预算已用完」；
+- **单项预算**（``item.budget_minutes``）：流程/方案类会真的被它打断（执行器收得到），
+  任务类没法中途打断 —— 所以用 ``estimate(ref)`` 预估：**剩余时间不够就不开始**，
+  而不是等它跑完再标一个「超预算」。
 """
 
 from __future__ import annotations
@@ -25,6 +32,11 @@ from dataclasses import dataclass, field
 from src.core.queue.model import QueueItem, TaskQueue
 
 Resolver = Callable[[QueueItem], Callable[[float | None], bool] | None]
+#: 预估「这个任务大概要跑多久」（秒）；拿不到就返回 0 / None
+Estimator = Callable[[str], float]
+
+#: 这两类项的预算只能事后核对：它们不收 budget 参数，也没法中途打断
+NON_INTERRUPTIBLE_KINDS = ("task", "assist")
 
 
 @dataclass
@@ -38,7 +50,8 @@ class QueueItemResult:
 
     def summary(self) -> str:
         if self.skipped:
-            return f"跳过 {self.item.label}"
+            reason = f"：{self.error}" if self.error else ""
+            return f"跳过 {self.item.label}{reason}"
         state = "完成" if self.ok else "失败"
         text = f"{state} {self.item.label}（{self.elapsed:.1f}s）"
         if self.budget_exceeded:
@@ -79,11 +92,17 @@ class QueueRunner:
         resolver: Resolver,
         log: Callable[[str], None] | None = None,
         clock: Callable[[], float] | None = None,
+        total_budget_seconds: float | None = None,
+        estimate: Estimator | None = None,
     ):
         self.queue = queue
         self.resolver = resolver
         self._log = log
         self._clock = clock or time.monotonic
+        self.total_budget_seconds = (
+            max(0.0, float(total_budget_seconds)) if total_budget_seconds else None
+        )
+        self._estimate = estimate
 
     def run(self) -> QueueRunResult:
         result = QueueRunResult(ok=True)
@@ -95,11 +114,25 @@ class QueueRunner:
                 self._info(f"跳过未启用项 {item.label}")
                 continue
 
+            remaining = self._remaining(started)
+            if remaining is not None and remaining <= 0:
+                result.results.append(
+                    QueueItemResult(item=item, skipped=True, error="总预算已用完")
+                )
+                self._info(f"跳过 {item.label}：总预算已用完")
+                continue
+
+            skip_reason = self._skip_reason(item, remaining)
+            if skip_reason:
+                result.results.append(QueueItemResult(item=item, skipped=True, error=skip_reason))
+                self._info(f"跳过 {item.label}：{skip_reason}")
+                continue
+
             runner = self._resolve(item, result)
             if runner is None:
                 continue
 
-            budget = item.budget_seconds
+            budget = self._effective_budget(item, remaining)
             item_started = self._clock()
             error = None
             ok = False
@@ -129,6 +162,36 @@ class QueueRunner:
 
         result.elapsed = self._clock() - started
         return result
+
+    # ── 预算 ─────────────────────────────────────────────
+    def _remaining(self, started: float) -> float | None:
+        """距离总预算还剩多少秒；没设总预算返回 ``None``（不限制）。"""
+        if self.total_budget_seconds is None:
+            return None
+        return self.total_budget_seconds - (self._clock() - started)
+
+    def _effective_budget(self, item: QueueItem, remaining: float | None) -> float | None:
+        """传给执行器的预算：单项预算与「总预算剩余」取更小的那个。"""
+        item_budget = item.budget_seconds
+        if remaining is None:
+            return item_budget
+        if item_budget is None:
+            return remaining
+        return min(item_budget, remaining)
+
+    def _skip_reason(self, item: QueueItem, remaining: float | None) -> str:
+        """任务类项没法中途打断：剩余时间不够就不开始。"""
+        if remaining is None or self._estimate is None:
+            return ""
+        if item.kind not in NON_INTERRUPTIBLE_KINDS:
+            return ""
+        try:
+            expected = float(self._estimate(item.ref) or 0.0)
+        except Exception:
+            return ""
+        if expected <= 0 or expected <= remaining:
+            return ""
+        return f"预算不足（预计需要 {expected / 60:.0f} 分钟，只剩 {remaining / 60:.0f} 分钟）"
 
     def _resolve(self, item: QueueItem, result: QueueRunResult):
         try:
