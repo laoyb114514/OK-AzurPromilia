@@ -128,6 +128,13 @@ failure_frames/
 3. **按当前分辨率解析模板名**（`resolution_resolver(width)`，规则与
    `RuntimeMixin.get_feature_by_resolution` 一致，`tests/test_template_rescorer.py` 有等价性测试）。
 
+**这套参数是真的能用的**，`tests/test_template_rescorer_e2e.py` 用真实
+`FeatureSet` 验证过：把一个真实模板贴进 1920×1080 的暗背景，它拿到 **+1.000** 并排第一，
+其余模板最高 0.58（判定「偏弱」）——分数确实有区分度，不是一排无用数字。
+
+⏱️ **耗时**：1080p 全屏 × 54 个模板约 **5 秒**（每个约 100ms，`TM_CCOEFF_NORMED` 全图搜索）。
+GUI 里这一步在后台线程跑、带进度，卡住几秒是正常的；嫌慢可以在「复测」时只选单个模板。
+
 判定分档（离阈值还差 `gap = threshold - score`）：
 
 | gap | 判定 | 含义 |
@@ -271,6 +278,7 @@ uv run python tools/health_check.py --strict  # 有 warning 也返回 1（CI 可
 | `tests/test_stuck_and_recovery.py` | 卡死阈值/去重告警/低配放大、返回次数上限、异常不外抛、失败帧落盘 |
 | `tests/test_failure_frame_store.py` | 落盘/索引/读取/修剪/清空/损坏容错/同名毫秒去重 |
 | `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |
+| `tests/test_template_rescorer_e2e.py` | **真模板端到端**：贴进画面的模板拿 +1.000 且排第一、没贴的得分明显更低、全黑画面不命中、summary 带计数与耗时 |
 | `tests/test_template_audit.py` | 纯色块拒绝、有纹理通过、偏弱/尺寸过小/空区域、灰度图、SHA-256 稳定性与分数排序、COCO 批量自检（重复分组、越界 bbox、缺图报错） |
 | `tests/test_asset_pack.py` | 清单读写、篡改检测、zip slip、前缀白名单、备份、dry-run、回滚 |
 | `tests/test_feature_reload.py` | 刷新必须持有 `feature_set.lock`、返回 load_success、任务运行中告警、异常不外抛、无锁/无 feature_set 也不崩 |
