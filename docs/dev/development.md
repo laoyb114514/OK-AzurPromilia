@@ -590,6 +590,10 @@ uv run python tools/health_check.py             # 流程/队列/方案/路线/�
   确认不了这一段构造代码跑不跑得通；另有一组用例验证**按扩展名分流**的按钮真的分流了
   （养成「导入数据」：`.csv/.tsv` 走表格解析、`.json` 走直投校验、取消时不做事）——
   这类「过滤器加了但处理函数没改」的漏法，只有把按钮真的点一次才会露出来；
+- `tests/test_repo_hygiene.py` 静态扫 `tests/` 里 `FailureFrameStore()` / `CheckpointStore()` /
+  `Ledger()` / `RunLog()` 这种**一个路径都不给**的构造（不给路径就会写进仓库根）；
+  CI 还有一条 `git status --porcelain` 门禁兜住没想到的写法——真实事故是养成导入的备份
+  默认落仓库，8 个 `growth_*.json` 被 `git add -A` 一起提交了；
 - 「导入体检」能抓到 GUI 页/补丁里拼错的名字——这类错误否则要等用户点开那一页才炸；
   它顺带还查这几类「只有跑到那一步才会炸」的引用：
   - 流程 `ACTION_ALLOWLIST` 里每个动作在 `BaseGameTask` 上真的存在（`dodge` 就曾经只有名字）；

@@ -97,7 +97,7 @@
 
 ## 6. 工程质量
 
-CI（`.github/workflows/pr-test.yml`）在 PR 上跑四道门禁：
+CI（`.github/workflows/pr-test.yml`）在 PR 上跑五道门禁：
 
 | 门禁 | 跑什么 | 挡住什么 |
 |------|--------|----------|
@@ -105,6 +105,7 @@ CI（`.github/workflows/pr-test.yml`）在 PR 上跑四道门禁：
 | **只对改动文件跑 ruff** | `git diff base...HEAD -- "*.py"` | 基线里有历史告警，全量检查会挡住所有 PR；新代码必须干净，确需保留用 `# noqa: 规则名` |
 | 全量离线测试 | `unittest discover -s tests` | 逻辑回归（1200+ 项，不需要游戏） |
 | **i18n 校验 + 安装自检** | `scripts/validate_all.py`、`tools/health_check.py --strict` | 加了 UI 文案没翻译（6 语种有空 msgstr）、示例流程/队列装上打不开 |
+| **测试后工作区必须干净** | `git status --porcelain` 非空即失败 | 测试往仓库里写文件（真实事故：养成导入的备份默认落仓库，8 个 `growth_*.json` 被 `git add -A` 提交） |
 
 `pyproject.toml` 里把 `RUF003`（注释里的 `×`、`—` 等中文标点）加入 ignore：
 本项目注释大量引用游戏内文案，这类字符是故意的。顺手把碰过的文件里的历史告警清零

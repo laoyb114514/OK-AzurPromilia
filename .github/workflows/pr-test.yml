@@ -115,3 +115,18 @@ jobs:
 
       - name: Install health check (flows / queues / routes / schemes / configs / i18n)
         run: python tools/health_check.py --strict
+
+      # 测试不许往仓库里写文件：真实事故是 import_dataset 的备份默认落到仓库，
+      # 几轮下来 8 个 growth_*.json 被 git add -A 一起提交了。测试自己不报错，
+      # 只有跑完看一眼工作区才发现。这里在 CI 里强制看一眼。
+      - name: Working tree must stay clean after tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dirty = @(git status --porcelain)
+          if ($dirty.Count -gt 0) {
+            Write-Host "::error::测试跑完后工作区不干净（有测试往仓库里写了文件）"
+            $dirty | ForEach-Object { Write-Host "  $_" }
+            exit 1
+          }
+          Write-Host "工作区干净"
