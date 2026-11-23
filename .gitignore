@@ -281,6 +281,8 @@ label_class
 /runs.jsonl
 # 崩溃记录
 /crashes/
+# 单实例互斥锁的 PID 文件（框架启动时写，跑一次 headless 就会留下）
+/ok-script-*.pid
 # tempfile 偶尔会退化到当前目录（临时目录不可写时），_ 这类残留目录不该进库
 /tmp*/
 

@@ -635,6 +635,18 @@ uv run python main_debug.py    # Debug（更多日志、overlay、热重载）
 命令行参数只有三个：`-t <1 起的序号>`、`-e`（跑完退出）、`-h`（headless）。
 注意 `-t` **只接受序号**，不接受任务名。
 
+### 启动时这两行日志是正常的
+
+实际 headless 跑一次 `main_debug.py` 会看到：
+
+| 日志 | 含义 | 要不要处理 |
+|------|------|-----------|
+| `TaskExecutor:install ocr translations error for <lang>` | 框架在找 `i18n/<lang>/LC_MESSAGES/ocr.mo`（OCR 文本纠错目录），本项目**故意不提供**——识别文本按 `assets/lang/*.json` 的多语言 pattern 匹配，不用这层 gettext 纠错 | 不用，功能不受影响 |
+| `setHighDpiScaleFactorRoundingPolicy must be called before creating the QGuiApplication instance` | 框架自己在 `QApplication()` 之后才设 DPI 取整策略，被 Qt 忽略。本项目在入口（`main.py` / `main_debug.py`）最前面调用 `apply_high_dpi_policy()`，**真正生效的是我们这次**（`tests/test_dpi_policy.py` 断言了策略确实是 `PassThrough`） | 不用，只是框架那行警告消不掉 |
+
+顺带：`app_dpi 1.0 / devicePixelRatio 1.0` 在离屏与无缩放环境下是 1.0，150% 缩放的机器上
+会变成 1.5——HUD 与坐标拾取都用逻辑像素换算，不受影响。
+
 ## 发布
 
 - 发版流程：`.github/workflows/release.yml`，支持手动触发 `workflow_dispatch`（提供主版本/次版本/补丁版本递增选项，自动给主分支 HEAD 打 tag），也支持直接推送 tag（`v*`）。
