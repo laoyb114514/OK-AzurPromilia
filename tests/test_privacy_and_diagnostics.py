@@ -293,6 +293,34 @@ class TestLangPack(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("不允许的路径", result.message)
 
+    def test_apply_rejects_wrong_suffix(self):
+        pack = self.root / "语言包exe"
+        target = pack / "assets" / "lang"
+        target.mkdir(parents=True)
+        (target / "payload.exe").write_bytes(b"MZ")
+        result = apply_pack(pack, self.app, self.backups)
+        self.assertFalse(result.ok)
+        self.assertIn("不允许的文件类型", result.message)
+
+    def test_apply_rejects_oversized_file(self):
+        pack = self.root / "语言包大"
+        target = pack / "assets" / "lang"
+        target.mkdir(parents=True)
+        (target / "big.json").write_text("x" * 2048, encoding="utf-8")
+        result = apply_pack(pack, self.app, self.backups, max_file_bytes=1024)
+        self.assertFalse(result.ok)
+        self.assertIn("文件太大", result.message)
+
+    def test_apply_rejects_oversized_total(self):
+        pack = self.root / "语言包总计"
+        target = pack / "assets" / "lang"
+        target.mkdir(parents=True)
+        for index in range(3):
+            (target / f"f{index}.json").write_text("y" * 600, encoding="utf-8")
+        result = apply_pack(pack, self.app, self.backups, max_total_bytes=1000)
+        self.assertFalse(result.ok)
+        self.assertIn("总体积", result.message)
+
     def test_apply_missing_dir(self):
         result = apply_pack(self.root / "没有", self.app, self.backups)
         self.assertFalse(result.ok)

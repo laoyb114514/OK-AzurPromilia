@@ -234,5 +234,52 @@ class TestProgressRatio(unittest.TestCase):
         self.assertEqual(self.log.progress_ratio("A", -5.0), 0.0)
 
 
+class TestRepoPathSafety(unittest.TestCase):
+    """在线仓库的条目名字是别人给的：不能借名字跳出配置目录，也不能把安装搞崩。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.app = self.root / "app"
+        self.app.mkdir()
+        self.payload = write_json(
+            self.root / "src" / "p.json", {"name": "x", "steps": [{"type": "wait", "seconds": 1}]}
+        )
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_traversal_is_neutralized(self):
+        outcome = RepoClient(app_root=self.app).install(
+            RepoEntry(kind="flow", name="../../evil", url=str(self.payload))
+        )
+        self.assertTrue(outcome.ok, outcome.message)
+        self.assertEqual(outcome.path.parent, self.app / "configs" / "flows")
+        self.assertEqual(outcome.path.name, "evil.json")
+        # 除了下载缓存，没有任何文件写到 configs/flows 之外
+        written = {
+            path.relative_to(self.app).as_posix()
+            for path in self.app.rglob("*.json")
+            if "downloads" not in path.as_posix()
+        }
+        self.assertEqual(written, {"configs/flows/evil.json"})
+
+    def test_separators_become_underscores(self):
+        outcome = RepoClient(app_root=self.app).install(
+            RepoEntry(kind="flow", name="a/b", url=str(self.payload))
+        )
+        self.assertTrue(outcome.ok, outcome.message)
+        self.assertEqual(outcome.path.name, "a_b.json")
+
+    def test_empty_name_fails_gracefully(self):
+        for name in ("..", "   ", "."):
+            with self.subTest(name=name):
+                outcome = RepoClient(app_root=self.app).install(
+                    RepoEntry(kind="flow", name=name, url=str(self.payload))
+                )
+                self.assertFalse(outcome.ok)
+                self.assertIn("名字不能为空", outcome.message)
+
+
 if __name__ == "__main__":
     unittest.main()
