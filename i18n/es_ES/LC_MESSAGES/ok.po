@@ -1183,8 +1183,8 @@ msgstr "sin entradas"
 msgid "打不开目录：{error}"
 msgstr "No se puede abrir la carpeta: {error}"
 
-msgid "选择养成数据 JSON"
-msgstr "Elegir el JSON de datos de progresión"
+msgid "选择养成数据（JSON 或 CSV）"
+msgstr "Elegir los datos de progresión (JSON o CSV)"
 
 msgid "导入数据"
 msgstr "Importar datos"

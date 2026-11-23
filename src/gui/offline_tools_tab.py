@@ -39,6 +39,7 @@ from src.core.growth import (
     import_dataset,
     material_rows,
 )
+from src.core.growth.table_import import import_table
 from src.core.ledger import Ledger, RunLog, SettlementFormatError, parse_settlement_text
 
 PREBUILD_DELAY_MS = 3000
@@ -291,16 +292,21 @@ class OfflineToolsTab(CustomTab):
 
     # ── 养成 ─────────────────────────────────────────────
     def _import_growth_data(self):
-        """导入一份从 wiki 导出的养成数据（覆盖 assets/data/growth.json，先备份）。"""
+        """导入养成数据（JSON 直投，或从 wiki 抄出来的 CSV/TSV 表格）。
+
+        表格走 :mod:`src.core.growth.table_import`，命令行版本见 ``tools/import_growth.py``——
+        两边同一套解析与校验，报错都指到第几行哪一列。
+        """
         path, _selected = QFileDialog.getOpenFileName(
             self,
-            self.tr("选择养成数据 JSON"),
+            self.tr("选择养成数据（JSON 或 CSV）"),
             str(Path.cwd()),
-            "JSON (*.json)",
+            "养成数据 (*.json *.csv *.tsv *.txt);;JSON (*.json);;表格 (*.csv *.tsv *.txt)",
         )
         if not path:
             return
-        result = import_dataset(path)
+        is_table = Path(path).suffix.lower() in (".csv", ".tsv", ".txt")
+        result = import_table(path) if is_table else import_dataset(path)
         if result.ok:
             self._notify(result.describe())
             self.refresh_growth_entries()

@@ -1181,8 +1181,8 @@ msgstr "no entries"
 msgid "打不开目录：{error}"
 msgstr "Cannot open the folder: {error}"
 
-msgid "选择养成数据 JSON"
-msgstr "Choose the growth data JSON"
+msgid "选择养成数据（JSON 或 CSV）"
+msgstr "Choose the growth data (JSON or CSV)"
 
 msgid "导入数据"
 msgstr "Import data"

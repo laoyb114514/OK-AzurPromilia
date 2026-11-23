@@ -40,7 +40,9 @@ char_amber,琥珀,character,80,21,40,12000,7200,风之碎晶=6
 - 报错会指到**第几行、哪一列**（「第 3 行的 exp 不是数字」），改一行就能过；
 - 表格里出现的材料会自动登记进 `materials`（分类先记 `other`，可事后手改）。
 
-**JSON 直投**：「离线工具 → 养成」页的**「导入数据」**按钮，或代码里 `import_dataset(路径)`：
+**JSON 直投**：「离线工具 → 养成」页的**「导入数据」**按钮也认 `.csv/.tsv`——
+按扩展名自动分流（表格走 `table_import`，JSON 走 `import_dataset`），
+所以命令行和界面是同一套解析与校验。代码里直接调 `import_dataset(路径)`：
 
 1. 先 `Dataset.from_file` **完整校验**，校验不过一个字节都不写（不会出现「导入一半」）；
 2. 通过后把原文件备份到 `assets/data/backups/growth_<时间戳>.json`（同秒重名自动加序号）；

@@ -88,5 +88,69 @@ class TestGuiTabs(unittest.TestCase):
         self.assertEqual(problems, [], "\n".join(problems))
 
 
+class TestGrowthImportRouting(unittest.TestCase):
+    """「导入数据」按钮要按扩展名分流：CSV/TSV 走表格解析，JSON 走直投校验。
+
+    这条容易漏：按钮改了过滤器但处理函数还只认 json，用户选了 .csv 会得到
+    「不是合法 JSON」这种看不懂的报错。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        if _make_app() is None:
+            raise unittest.SkipTest("Qt 离屏不可用")
+
+    def _tab(self):
+        from src.gui.offline_tools_tab import OfflineToolsTab
+
+        with mock.patch("ok.og.app", _StubApp(), create=True):
+            tab = OfflineToolsTab()
+            build = getattr(tab, "_build", None)
+            if callable(build):
+                build()
+        tab._notify = lambda *args, **kwargs: None
+        tab.refresh_growth_entries = lambda: None
+        return tab
+
+    def test_csv_goes_to_table_import(self):
+        tab = self._tab()
+        with mock.patch(
+            "src.gui.offline_tools_tab.QFileDialog.getOpenFileName",
+            return_value=("养成表.csv", ""),
+        ), mock.patch(
+            "src.gui.offline_tools_tab.import_table",
+            return_value=mock.Mock(ok=True, describe=lambda: "ok"),
+        ) as table_mock, mock.patch(
+            "src.gui.offline_tools_tab.import_dataset",
+        ) as dataset_mock:
+            tab._import_growth_data()
+        table_mock.assert_called_once_with("养成表.csv")
+        dataset_mock.assert_not_called()
+
+    def test_json_goes_to_dataset_import(self):
+        tab = self._tab()
+        with mock.patch(
+            "src.gui.offline_tools_tab.QFileDialog.getOpenFileName",
+            return_value=("growth.json", ""),
+        ), mock.patch(
+            "src.gui.offline_tools_tab.import_table",
+        ) as table_mock, mock.patch(
+            "src.gui.offline_tools_tab.import_dataset",
+            return_value=mock.Mock(ok=True, describe=lambda: "ok"),
+        ) as dataset_mock:
+            tab._import_growth_data()
+        dataset_mock.assert_called_once_with("growth.json")
+        table_mock.assert_not_called()
+
+    def test_cancel_does_nothing(self):
+        tab = self._tab()
+        with mock.patch(
+            "src.gui.offline_tools_tab.QFileDialog.getOpenFileName",
+            return_value=("", ""),
+        ), mock.patch("src.gui.offline_tools_tab.import_table") as table_mock:
+            tab._import_growth_data()
+        table_mock.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

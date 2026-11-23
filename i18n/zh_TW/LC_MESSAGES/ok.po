@@ -1172,8 +1172,8 @@ msgstr "沒有項目"
 msgid "打不开目录：{error}"
 msgstr "打不開目錄：{error}"
 
-msgid "选择养成数据 JSON"
-msgstr "選擇養成資料 JSON"
+msgid "选择养成数据（JSON 或 CSV）"
+msgstr "選擇養成資料（JSON 或 CSV）"
 
 msgid "导入数据"
 msgstr "匯入資料"
