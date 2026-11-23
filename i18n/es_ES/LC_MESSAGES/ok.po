@@ -348,3 +348,201 @@ msgstr "Número máximo de pulsaciones de Atrás tras un fallo"
 
 msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
 msgstr "Cuántos fotogramas fallidos se conservan; los más antiguos se descartan"
+
+msgid "流程与队列"
+msgstr "Flujos y colas"
+
+msgid "新队列"
+msgstr "Cola nueva"
+
+msgid "流程"
+msgstr "Flujo"
+
+msgid "任务队列"
+msgstr "Cola de tareas"
+
+msgid "配置档"
+msgstr "Perfil"
+
+msgid "还没有流程文件：用「导入 JSON」或「从录制 JSON 生成」创建"
+msgstr "Todavía no hay flujos: créalo con «Importar JSON» o «Generar desde grabación»"
+
+msgid "队列在「流程 / 队列」任务里执行：任务类型选「执行队列」并填队列名字"
+msgstr "Las colas se ejecutan en la tarea «Flujo / Cola»: elige «Ejecutar cola» y escribe el nombre de la cola"
+
+msgid "新配置档名字"
+msgstr "Nombre del perfil nuevo"
+
+msgid "保存当前配置"
+msgstr "Guardar configuración actual"
+
+msgid "应用"
+msgstr "Aplicar"
+
+msgid "删除"
+msgstr "Eliminar"
+
+msgid "应用配置档前会自动把当前 configs/ 备份到 configs/profiles/.backup_<时间戳>/"
+msgstr "Antes de aplicar un perfil, la carpeta configs/ actual se respalda en configs/profiles/.backup_<marca de tiempo>/"
+
+msgid "（没有流程）"
+msgstr "(sin flujos)"
+
+msgid "（没有队列）"
+msgstr "(sin colas)"
+
+msgid "（没有配置档）"
+msgstr "(sin perfiles)"
+
+msgid "选择流程 JSON"
+msgstr "Seleccionar JSON de flujo"
+
+msgid "JSON 文件 (*.json)"
+msgstr "Archivos JSON (*.json)"
+
+msgid "选择录制 JSON"
+msgstr "Seleccionar JSON de grabación"
+
+msgid "流程文件"
+msgstr "Archivo de flujo"
+
+msgid "校验"
+msgstr "Validar"
+
+msgid "导入 JSON"
+msgstr "Importar JSON"
+
+msgid "从录制 JSON 生成"
+msgstr "Generar desde grabación"
+
+msgid "队列文件"
+msgstr "Archivo de cola"
+
+msgid "新建模板"
+msgstr "Nueva plantilla"
+
+msgid "还没有流程文件"
+msgstr "Todavía no hay flujos"
+
+msgid "用「导入 JSON」或「从录制 JSON 生成」创建第一份流程"
+msgstr "Crea el primer flujo con «Importar JSON» o «Generar desde grabación»"
+
+msgid "断点：无"
+msgstr "Punto de control: ninguno"
+
+msgid "没有选中流程"
+msgstr "Ningún flujo seleccionado"
+
+msgid "校验通过，没有发现问题"
+msgstr "Validación correcta, no se encontraron problemas"
+
+msgid "校验完成：{errors} 个错误"
+msgstr "Validación completada: {errors} error(es)"
+
+msgid "录制文件里没有 events 数组"
+msgstr "El archivo de grabación no tiene un arreglo events"
+
+msgid "还没有队列文件"
+msgstr "Todavía no hay colas"
+
+msgid "（已禁用）"
+msgstr "(desactivado)"
+
+msgid "不限时"
+msgstr "sin límite"
+
+msgid "没有选中队列"
+msgstr "Ninguna cola seleccionada"
+
+msgid "队列校验通过：{enabled} 项启用"
+msgstr "Validación de cola correcta: {enabled} elemento(s) activo(s)"
+
+msgid "示例队列：把一条龙和流程串起来"
+msgstr "Cola de ejemplo: encadena la rutina diaria y los flujos"
+
+msgid "请填写配置档名字"
+msgstr "Introduce un nombre de perfil"
+
+msgid "没有选中配置档"
+msgstr "Ningún perfil seleccionado"
+
+msgid "共 {steps} 步，嵌套 {depth} 层，容器 {containers} 个"
+msgstr "{steps} paso(s), profundidad {depth}, {containers} contenedor(es)"
+
+msgid "已导入流程：{name}"
+msgstr "Flujo importado: {name}"
+
+msgid "已生成流程 {name}：{summary}"
+msgstr "Flujo creado: {name} — {summary}"
+
+msgid "已删除流程：{name}"
+msgstr "Flujo eliminado: {name}"
+
+msgid "失败策略：{policy}"
+msgstr "Política de fallos: {policy}"
+
+msgid "启用 {enabled} 项，总预算 {budget} 分钟"
+msgstr "{enabled} elemento(s) activo(s), presupuesto total {budget} minuto(s)"
+
+msgid "已创建空队列模板：{name}"
+msgstr "Plantilla de cola vacía creada: {name}"
+
+msgid "已删除队列：{name}"
+msgstr "Cola eliminada: {name}"
+
+msgid "已保存配置档：{name}"
+msgstr "Perfil guardado: {name}"
+
+msgid "断点：已完成 {completed}/{total} 个顶层步骤，任务里勾「从断点继续」即可续跑"
+msgstr "Punto de control: {completed}/{total} pasos de nivel superior hechos; activa «Continuar desde el punto de control» en la tarea"
+
+msgid "失败即停"
+msgstr "detener al fallar"
+
+msgid "失败后继续"
+msgstr "continuar tras fallar"
+
+msgid "已删除配置档：{name}"
+msgstr "Perfil eliminado: {name}"
+
+msgid "导入失败：{error}"
+msgstr "Error al importar: {error}"
+
+msgid "读取录制失败：{error}"
+msgstr "No se pudo leer la grabación: {error}"
+
+msgid "删除失败：{error}"
+msgstr "Error al eliminar: {error}"
+
+msgid "流程 / 队列"
+msgstr "Flujo / Cola"
+
+msgid "按 JSON 流程逐步操作游戏，或按队列依次执行多个流程/任务。流程与队列文件在「流程与队列」页里管理。"
+msgstr "Controla el juego paso a paso con un flujo JSON, o ejecuta varios flujos y tareas en orden como una cola. Los archivos de flujo y cola se gestionan en la página «Flujos y colas»."
+
+msgid "任务类型"
+msgstr "Tipo de trabajo"
+
+msgid "从断点继续"
+msgstr "Continuar desde el punto de control"
+
+msgid "预算(分钟)"
+msgstr "Presupuesto (minutos)"
+
+msgid "执行流程：跑一份 JSON 流程；执行队列：按顺序跑队列里的每一项"
+msgstr "Ejecutar flujo: ejecuta un flujo JSON; Ejecutar cola: ejecuta cada elemento de una cola en orden"
+
+msgid "configs/flows 下的文件名（不带 .json）"
+msgstr "Nombre de archivo en configs/flows (sin .json)"
+
+msgid "configs/queues 下的文件名（不带 .json）"
+msgstr "Nombre de archivo en configs/queues (sin .json)"
+
+msgid "只对流程生效：跳过上次已经跑完的顶层步骤"
+msgstr "Solo para flujos: omite los pasos de nivel superior ya completados"
+
+msgid "流程里某一步失败后是否继续后面的步骤"
+msgstr "Si continuar con los pasos siguientes cuando uno falla"
+
+msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
+msgstr "0 significa sin límite; los flujos se interrumpen por el presupuesto, las tareas solo se marcan después"

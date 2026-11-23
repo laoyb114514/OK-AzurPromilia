@@ -337,3 +337,201 @@ msgstr "失敗後最多按幾次返回鍵"
 
 msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
 msgstr "失敗幀庫最多保留多少幀，超出後丟棄最舊的"
+
+msgid "流程与队列"
+msgstr "流程與佇列"
+
+msgid "新队列"
+msgstr "新佇列"
+
+msgid "流程"
+msgstr "流程"
+
+msgid "任务队列"
+msgstr "任務佇列"
+
+msgid "配置档"
+msgstr "設定檔"
+
+msgid "还没有流程文件：用「导入 JSON」或「从录制 JSON 生成」创建"
+msgstr "還沒有流程檔案：用「匯入 JSON」或「從錄製 JSON 產生」建立"
+
+msgid "队列在「流程 / 队列」任务里执行：任务类型选「执行队列」并填队列名字"
+msgstr "佇列在「流程 / 佇列」任務裡執行：任務類型選「執行佇列」並填佇列名字"
+
+msgid "新配置档名字"
+msgstr "新設定檔名字"
+
+msgid "保存当前配置"
+msgstr "儲存目前設定"
+
+msgid "应用"
+msgstr "套用"
+
+msgid "删除"
+msgstr "刪除"
+
+msgid "应用配置档前会自动把当前 configs/ 备份到 configs/profiles/.backup_<时间戳>/"
+msgstr "套用設定檔前會自動把目前 configs/ 備份到 configs/profiles/.backup_<時間戳>/"
+
+msgid "（没有流程）"
+msgstr "（沒有流程）"
+
+msgid "（没有队列）"
+msgstr "（沒有佇列）"
+
+msgid "（没有配置档）"
+msgstr "（沒有設定檔）"
+
+msgid "选择流程 JSON"
+msgstr "選擇流程 JSON"
+
+msgid "JSON 文件 (*.json)"
+msgstr "JSON 檔案 (*.json)"
+
+msgid "选择录制 JSON"
+msgstr "選擇錄製 JSON"
+
+msgid "流程文件"
+msgstr "流程檔案"
+
+msgid "校验"
+msgstr "校驗"
+
+msgid "导入 JSON"
+msgstr "匯入 JSON"
+
+msgid "从录制 JSON 生成"
+msgstr "從錄製 JSON 產生"
+
+msgid "队列文件"
+msgstr "佇列檔案"
+
+msgid "新建模板"
+msgstr "新建範本"
+
+msgid "还没有流程文件"
+msgstr "還沒有流程檔案"
+
+msgid "用「导入 JSON」或「从录制 JSON 生成」创建第一份流程"
+msgstr "用「匯入 JSON」或「從錄製 JSON 產生」建立第一份流程"
+
+msgid "断点：无"
+msgstr "斷點：無"
+
+msgid "没有选中流程"
+msgstr "沒有選中流程"
+
+msgid "校验通过，没有发现问题"
+msgstr "校驗通過，沒有發現問題"
+
+msgid "校验完成：{errors} 个错误"
+msgstr "校驗完成：{errors} 個錯誤"
+
+msgid "录制文件里没有 events 数组"
+msgstr "錄製檔案裡沒有 events 陣列"
+
+msgid "还没有队列文件"
+msgstr "還沒有佇列檔案"
+
+msgid "（已禁用）"
+msgstr "（已停用）"
+
+msgid "不限时"
+msgstr "不限時"
+
+msgid "没有选中队列"
+msgstr "沒有選中佇列"
+
+msgid "队列校验通过：{enabled} 项启用"
+msgstr "佇列校驗通過：{enabled} 項啟用"
+
+msgid "示例队列：把一条龙和流程串起来"
+msgstr "範例佇列：把一條龍和流程串起來"
+
+msgid "请填写配置档名字"
+msgstr "請填寫設定檔名字"
+
+msgid "没有选中配置档"
+msgstr "沒有選中設定檔"
+
+msgid "共 {steps} 步，嵌套 {depth} 层，容器 {containers} 个"
+msgstr "共 {steps} 步，巢狀 {depth} 層，容器 {containers} 個"
+
+msgid "已导入流程：{name}"
+msgstr "已匯入流程：{name}"
+
+msgid "已生成流程 {name}：{summary}"
+msgstr "已產生流程 {name}：{summary}"
+
+msgid "已删除流程：{name}"
+msgstr "已刪除流程：{name}"
+
+msgid "失败策略：{policy}"
+msgstr "失敗策略：{policy}"
+
+msgid "启用 {enabled} 项，总预算 {budget} 分钟"
+msgstr "啟用 {enabled} 項，總預算 {budget} 分鐘"
+
+msgid "已创建空队列模板：{name}"
+msgstr "已建立空佇列範本：{name}"
+
+msgid "已删除队列：{name}"
+msgstr "已刪除佇列：{name}"
+
+msgid "已保存配置档：{name}"
+msgstr "已儲存設定檔：{name}"
+
+msgid "断点：已完成 {completed}/{total} 个顶层步骤，任务里勾「从断点继续」即可续跑"
+msgstr "斷點：已完成 {completed}/{total} 個頂層步驟，任務裡勾「從斷點繼續」即可續跑"
+
+msgid "失败即停"
+msgstr "失敗即停"
+
+msgid "失败后继续"
+msgstr "失敗後繼續"
+
+msgid "已删除配置档：{name}"
+msgstr "已刪除設定檔：{name}"
+
+msgid "导入失败：{error}"
+msgstr "匯入失敗：{error}"
+
+msgid "读取录制失败：{error}"
+msgstr "讀取錄製失敗：{error}"
+
+msgid "删除失败：{error}"
+msgstr "刪除失敗：{error}"
+
+msgid "流程 / 队列"
+msgstr "流程 / 佇列"
+
+msgid "按 JSON 流程逐步操作游戏，或按队列依次执行多个流程/任务。流程与队列文件在「流程与队列」页里管理。"
+msgstr "按 JSON 流程逐步操作遊戲，或按佇列依次執行多個流程/任務。流程與佇列檔案在「流程與佇列」頁裡管理。"
+
+msgid "任务类型"
+msgstr "任務類型"
+
+msgid "从断点继续"
+msgstr "從斷點繼續"
+
+msgid "预算(分钟)"
+msgstr "預算(分鐘)"
+
+msgid "执行流程：跑一份 JSON 流程；执行队列：按顺序跑队列里的每一项"
+msgstr "執行流程：跑一份 JSON 流程；執行佇列：按順序跑佇列裡的每一項"
+
+msgid "configs/flows 下的文件名（不带 .json）"
+msgstr "configs/flows 下的檔案名（不帶 .json）"
+
+msgid "configs/queues 下的文件名（不带 .json）"
+msgstr "configs/queues 下的檔案名（不帶 .json）"
+
+msgid "只对流程生效：跳过上次已经跑完的顶层步骤"
+msgstr "只對流程生效：跳過上次已經跑完的頂層步驟"
+
+msgid "流程里某一步失败后是否继续后面的步骤"
+msgstr "流程裡某一步失敗後是否繼續後面的步驟"
+
+msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
+msgstr "0 表示不限；流程會被預算打斷，任務類只能事後標記"

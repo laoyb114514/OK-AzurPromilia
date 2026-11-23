@@ -22,12 +22,19 @@
   - **素材包热更新**：装一个 zip 换掉识别素材，逐文件 SHA-256 校验、旧素材带时间戳备份，坏包不动任何文件。
   - **可调超时与低配模式**：「全局配置 → 自动化策略」里调单步超时/重试间隔/卡死阈值。
   - **卡死检测与失败自恢复**：画面长时间不变记录警告；任务失败后按返回键退回主菜单（只退菜单不重跑）。
+- **流程编排与配置档（`src/core/flow` `src/core/queue` + 「流程与队列」页）**：
+  - **JSON 流程**：移动/点击/按键/等待/等模板/循环/条件，支持嵌套（500 步 / 1000 次 / 4 层上限）。
+  - **断点续跑**：按顶层步骤记录进度，失败后可继续。
+  - **录制转流程**：把键鼠录制一键转成流程步骤，如实报告跳过的输入。
+  - **任务队列**：把流程 / 一次性任务 / 触发任务串成队列，每项可设分钟预算，失败即停或继续。
+  - **配置档**：把 `configs/` 打成命名快照，应用前自动备份。
 
 ## 快速导航
 
 - [从源码运行 / 快速上手](dev/quickstart.md)
 - [开发指南](dev/development.md)
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
+- [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 
@@ -50,14 +57,17 @@
 │   │   ├── failure_frame_store.py 失败帧库（独立目录 + 索引）
 │   │   ├── template_rescorer.py 全模板打分（失败帧复测）
 │   │   ├── asset_pack.py       素材包热更新（SHA-256 + 原子安装 + 回滚）
+│   │   ├── flow/               JSON 流程：模型/校验、执行器、断点、录制转流程
+│   │   ├── queue/              任务队列：模型、执行器
+│   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
-│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily）
+│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow）
 │   │   ├── trigger/            触发式任务（AutoJenga、AutoRhythm、SkipDialog、StarLink、TreasureUnlock）
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
 │   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计）
 │   │   └── account/            账号作用域配置存储
-│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 工具与诊断）
+│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 流程与队列 / 工具与诊断）
 │   ├── interaction/            游戏交互（GameInteraction 模拟键鼠、ScreenPosition）
 │   ├── image/                  图像算法（旋转模板匹配、连通域、圆弧拟合、音游/叠叠乐检测等）
 │   ├── yolo/                   YOLO 模型注册与 OpenVINO 推理

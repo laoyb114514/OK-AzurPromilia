@@ -346,3 +346,201 @@ msgstr "Maximum number of Back presses after a failure"
 
 msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
 msgstr "How many failure frames to keep; the oldest are dropped"
+
+msgid "流程与队列"
+msgstr "Flows & Queues"
+
+msgid "新队列"
+msgstr "New queue"
+
+msgid "流程"
+msgstr "Flow"
+
+msgid "任务队列"
+msgstr "Task queue"
+
+msgid "配置档"
+msgstr "Profile"
+
+msgid "还没有流程文件：用「导入 JSON」或「从录制 JSON 生成」创建"
+msgstr "No flows yet: create one with \"Import JSON\" or \"Generate from recording\""
+
+msgid "队列在「流程 / 队列」任务里执行：任务类型选「执行队列」并填队列名字"
+msgstr "Queues run in the \"Flow / Queue\" task: pick \"Run queue\" and fill in the queue name"
+
+msgid "新配置档名字"
+msgstr "New profile name"
+
+msgid "保存当前配置"
+msgstr "Save current config"
+
+msgid "应用"
+msgstr "Apply"
+
+msgid "删除"
+msgstr "Delete"
+
+msgid "应用配置档前会自动把当前 configs/ 备份到 configs/profiles/.backup_<时间戳>/"
+msgstr "Before applying a profile, the current configs/ is backed up to configs/profiles/.backup_<timestamp>/"
+
+msgid "（没有流程）"
+msgstr "(no flows)"
+
+msgid "（没有队列）"
+msgstr "(no queues)"
+
+msgid "（没有配置档）"
+msgstr "(no profiles)"
+
+msgid "选择流程 JSON"
+msgstr "Select flow JSON"
+
+msgid "JSON 文件 (*.json)"
+msgstr "JSON files (*.json)"
+
+msgid "选择录制 JSON"
+msgstr "Select recording JSON"
+
+msgid "流程文件"
+msgstr "Flow file"
+
+msgid "校验"
+msgstr "Validate"
+
+msgid "导入 JSON"
+msgstr "Import JSON"
+
+msgid "从录制 JSON 生成"
+msgstr "Generate from recording"
+
+msgid "队列文件"
+msgstr "Queue file"
+
+msgid "新建模板"
+msgstr "New template"
+
+msgid "还没有流程文件"
+msgstr "No flows yet"
+
+msgid "用「导入 JSON」或「从录制 JSON 生成」创建第一份流程"
+msgstr "Create the first flow with \"Import JSON\" or \"Generate from recording\""
+
+msgid "断点：无"
+msgstr "Checkpoint: none"
+
+msgid "没有选中流程"
+msgstr "No flow selected"
+
+msgid "校验通过，没有发现问题"
+msgstr "Validation passed, no problems found"
+
+msgid "校验完成：{errors} 个错误"
+msgstr "Validation finished: {errors} error(s)"
+
+msgid "录制文件里没有 events 数组"
+msgstr "The recording file has no events array"
+
+msgid "还没有队列文件"
+msgstr "No queues yet"
+
+msgid "（已禁用）"
+msgstr "(disabled)"
+
+msgid "不限时"
+msgstr "no limit"
+
+msgid "没有选中队列"
+msgstr "No queue selected"
+
+msgid "队列校验通过：{enabled} 项启用"
+msgstr "Queue validation passed: {enabled} item(s) enabled"
+
+msgid "示例队列：把一条龙和流程串起来"
+msgstr "Example queue: chain the daily run and flows together"
+
+msgid "请填写配置档名字"
+msgstr "Enter a profile name"
+
+msgid "没有选中配置档"
+msgstr "No profile selected"
+
+msgid "共 {steps} 步，嵌套 {depth} 层，容器 {containers} 个"
+msgstr "{steps} step(s), nesting depth {depth}, {containers} container(s)"
+
+msgid "已导入流程：{name}"
+msgstr "Flow imported: {name}"
+
+msgid "已生成流程 {name}：{summary}"
+msgstr "Flow created: {name} — {summary}"
+
+msgid "已删除流程：{name}"
+msgstr "Flow deleted: {name}"
+
+msgid "失败策略：{policy}"
+msgstr "Failure policy: {policy}"
+
+msgid "启用 {enabled} 项，总预算 {budget} 分钟"
+msgstr "{enabled} item(s) enabled, total budget {budget} minute(s)"
+
+msgid "已创建空队列模板：{name}"
+msgstr "Empty queue template created: {name}"
+
+msgid "已删除队列：{name}"
+msgstr "Queue deleted: {name}"
+
+msgid "已保存配置档：{name}"
+msgstr "Profile saved: {name}"
+
+msgid "断点：已完成 {completed}/{total} 个顶层步骤，任务里勾「从断点继续」即可续跑"
+msgstr "Checkpoint: {completed}/{total} top-level steps done; tick \"Resume from checkpoint\" in the task to continue"
+
+msgid "失败即停"
+msgstr "stop on failure"
+
+msgid "失败后继续"
+msgstr "continue on failure"
+
+msgid "已删除配置档：{name}"
+msgstr "Profile deleted: {name}"
+
+msgid "导入失败：{error}"
+msgstr "Import failed: {error}"
+
+msgid "读取录制失败：{error}"
+msgstr "Cannot read the recording: {error}"
+
+msgid "删除失败：{error}"
+msgstr "Delete failed: {error}"
+
+msgid "流程 / 队列"
+msgstr "Flow / Queue"
+
+msgid "按 JSON 流程逐步操作游戏，或按队列依次执行多个流程/任务。流程与队列文件在「流程与队列」页里管理。"
+msgstr "Drive the game step by step from a JSON flow, or run several flows/tasks in order as a queue. Flow and queue files are managed on the \"Flows & Queues\" page."
+
+msgid "任务类型"
+msgstr "Job type"
+
+msgid "从断点继续"
+msgstr "Resume from checkpoint"
+
+msgid "预算(分钟)"
+msgstr "Budget (minutes)"
+
+msgid "执行流程：跑一份 JSON 流程；执行队列：按顺序跑队列里的每一项"
+msgstr "Run flow: execute one JSON flow; Run queue: execute every item of a queue in order"
+
+msgid "configs/flows 下的文件名（不带 .json）"
+msgstr "File name under configs/flows (without .json)"
+
+msgid "configs/queues 下的文件名（不带 .json）"
+msgstr "File name under configs/queues (without .json)"
+
+msgid "只对流程生效：跳过上次已经跑完的顶层步骤"
+msgstr "Flows only: skip the top-level steps already finished last time"
+
+msgid "流程里某一步失败后是否继续后面的步骤"
+msgstr "Whether to continue with later steps after a step fails"
+
+msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
+msgstr "0 means unlimited; flows are interrupted by the budget, tasks are only flagged afterwards"

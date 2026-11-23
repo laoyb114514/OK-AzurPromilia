@@ -342,3 +342,201 @@ msgstr "失敗後に戻るキーを押す最大回数"
 
 msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
 msgstr "失敗フレームを保存する最大件数。超えた分は古い順に削除されます"
+
+msgid "流程与队列"
+msgstr "フローとキュー"
+
+msgid "新队列"
+msgstr "新しいキュー"
+
+msgid "流程"
+msgstr "フロー"
+
+msgid "任务队列"
+msgstr "タスクキュー"
+
+msgid "配置档"
+msgstr "プロファイル"
+
+msgid "还没有流程文件：用「导入 JSON」或「从录制 JSON 生成」创建"
+msgstr "フローがまだありません。「JSON をインポート」か「録画 JSON から生成」で作成してください"
+
+msgid "队列在「流程 / 队列」任务里执行：任务类型选「执行队列」并填队列名字"
+msgstr "キューは「フロー / キュー」タスクで実行します。タスク種別で「キューを実行」を選び、キュー名を入力してください"
+
+msgid "新配置档名字"
+msgstr "新しいプロファイル名"
+
+msgid "保存当前配置"
+msgstr "現在の設定を保存"
+
+msgid "应用"
+msgstr "適用"
+
+msgid "删除"
+msgstr "削除"
+
+msgid "应用配置档前会自动把当前 configs/ 备份到 configs/profiles/.backup_<时间戳>/"
+msgstr "プロファイルを適用する前に、現在の configs/ を configs/profiles/.backup_<タイムスタンプ>/ に自動でバックアップします"
+
+msgid "（没有流程）"
+msgstr "（フローなし）"
+
+msgid "（没有队列）"
+msgstr "（キューなし）"
+
+msgid "（没有配置档）"
+msgstr "（プロファイルなし）"
+
+msgid "选择流程 JSON"
+msgstr "フロー JSON を選択"
+
+msgid "JSON 文件 (*.json)"
+msgstr "JSON ファイル (*.json)"
+
+msgid "选择录制 JSON"
+msgstr "録画 JSON を選択"
+
+msgid "流程文件"
+msgstr "フローファイル"
+
+msgid "校验"
+msgstr "検証"
+
+msgid "导入 JSON"
+msgstr "JSON をインポート"
+
+msgid "从录制 JSON 生成"
+msgstr "録画 JSON から生成"
+
+msgid "队列文件"
+msgstr "キューファイル"
+
+msgid "新建模板"
+msgstr "テンプレートを作成"
+
+msgid "还没有流程文件"
+msgstr "フローがまだありません"
+
+msgid "用「导入 JSON」或「从录制 JSON 生成」创建第一份流程"
+msgstr "「JSON をインポート」か「録画 JSON から生成」で最初のフローを作成してください"
+
+msgid "断点：无"
+msgstr "チェックポイント：なし"
+
+msgid "没有选中流程"
+msgstr "フローが選択されていません"
+
+msgid "校验通过，没有发现问题"
+msgstr "検証に合格しました。問題はありません"
+
+msgid "校验完成：{errors} 个错误"
+msgstr "検証完了：{errors} 件のエラー"
+
+msgid "录制文件里没有 events 数组"
+msgstr "録画ファイルに events 配列がありません"
+
+msgid "还没有队列文件"
+msgstr "キューがまだありません"
+
+msgid "（已禁用）"
+msgstr "（無効）"
+
+msgid "不限时"
+msgstr "時間制限なし"
+
+msgid "没有选中队列"
+msgstr "キューが選択されていません"
+
+msgid "队列校验通过：{enabled} 项启用"
+msgstr "キューの検証に合格しました：{enabled} 件有効"
+
+msgid "示例队列：把一条龙和流程串起来"
+msgstr "サンプルキュー：デイリー一式とフローをつなげます"
+
+msgid "请填写配置档名字"
+msgstr "プロファイル名を入力してください"
+
+msgid "没有选中配置档"
+msgstr "プロファイルが選択されていません"
+
+msgid "共 {steps} 步，嵌套 {depth} 层，容器 {containers} 个"
+msgstr "{steps} ステップ、ネスト {depth} 階層、コンテナ {containers} 個"
+
+msgid "已导入流程：{name}"
+msgstr "フローをインポートしました：{name}"
+
+msgid "已生成流程 {name}：{summary}"
+msgstr "フローを作成しました：{name} — {summary}"
+
+msgid "已删除流程：{name}"
+msgstr "フローを削除しました：{name}"
+
+msgid "失败策略：{policy}"
+msgstr "失敗時の方針：{policy}"
+
+msgid "启用 {enabled} 项，总预算 {budget} 分钟"
+msgstr "{enabled} 件有効、合計予算 {budget} 分"
+
+msgid "已创建空队列模板：{name}"
+msgstr "空のキューテンプレートを作成しました：{name}"
+
+msgid "已删除队列：{name}"
+msgstr "キューを削除しました：{name}"
+
+msgid "已保存配置档：{name}"
+msgstr "プロファイルを保存しました：{name}"
+
+msgid "断点：已完成 {completed}/{total} 个顶层步骤，任务里勾「从断点继续」即可续跑"
+msgstr "チェックポイント：{completed}/{total} 個の最上位ステップが完了。タスクで「チェックポイントから再開」をオンにすると続行できます"
+
+msgid "失败即停"
+msgstr "失敗で停止"
+
+msgid "失败后继续"
+msgstr "失敗しても続行"
+
+msgid "已删除配置档：{name}"
+msgstr "プロファイルを削除しました：{name}"
+
+msgid "导入失败：{error}"
+msgstr "インポート失敗：{error}"
+
+msgid "读取录制失败：{error}"
+msgstr "録画の読み込みに失敗：{error}"
+
+msgid "删除失败：{error}"
+msgstr "削除失敗：{error}"
+
+msgid "流程 / 队列"
+msgstr "フロー / キュー"
+
+msgid "按 JSON 流程逐步操作游戏，或按队列依次执行多个流程/任务。流程与队列文件在「流程与队列」页里管理。"
+msgstr "JSON フローでゲームを段階的に操作するか、キューで複数のフロー／タスクを順に実行します。フローとキューのファイルは「フローとキュー」ページで管理します。"
+
+msgid "任务类型"
+msgstr "タスク種別"
+
+msgid "从断点继续"
+msgstr "チェックポイントから再開"
+
+msgid "预算(分钟)"
+msgstr "予算 (分)"
+
+msgid "执行流程：跑一份 JSON 流程；执行队列：按顺序跑队列里的每一项"
+msgstr "フローを実行：1 つの JSON フローを実行します。キューを実行：キューの各項目を順に実行します"
+
+msgid "configs/flows 下的文件名（不带 .json）"
+msgstr "configs/flows 下のファイル名（.json を除く）"
+
+msgid "configs/queues 下的文件名（不带 .json）"
+msgstr "configs/queues 下のファイル名（.json を除く）"
+
+msgid "只对流程生效：跳过上次已经跑完的顶层步骤"
+msgstr "フローのみ有効：前回完了した最上位ステップを飛ばします"
+
+msgid "流程里某一步失败后是否继续后面的步骤"
+msgstr "ステップが失敗した後、続きのステップを実行するか"
+
+msgid "0 表示不限；流程会被预算打断，任务类只能事后标记"
+msgstr "0 は無制限。フローは予算で打ち切られ、タスクは事後に記録されるだけです"
