@@ -561,6 +561,13 @@ class MyTask(BaseGameTask):
 - **OCR 匹配文本**：放进 `assets/lang/<模块>.json`，每 key 下 6 种语言节点，
   代码用 `self.lang.<模块>.<key>` 读取。
 
+  ⚠️ **缺语种不会报错**：`LangAccessor` 的回退链是「当前语言 → `zh_CN`/`zh_TW` → 第一个可用语言」，
+  所以少一个日语节点时，日服客户端上拿到的是**中文原文**，OCR 匹配不到但日志干净、测试全绿。
+  `tests/test_lang_json.py` 因此强制「每个 key 6 语种都非空」，只允许**显式登记**的例外
+  （`KNOWN_GAPS`，要写原因；补上翻译后必须删条目，否则那条测试会红）。
+  目前唯一例外是 `home.json:little_bobo`（只确认了简中「小份波波饼」，其它语言译名待确认）。
+  文件里可以写 `_note` 之类的说明键，读取器与同步脚本都会跳过。
+
 其它相关工具：
 
 ```bash
@@ -568,6 +575,9 @@ python tools/gen_lang_stubs.py          # 重新生成 src/data/lang/_lang_typed
 python scripts/lang_fill_missing.py     # 补全 assets/lang/*.json 缺失语言（--dry-run 可预览）
 python tools/repair_po_locales.py --apply   # 修复 .po 中语言写错的条目
 ```
+
+`lang_fill_missing.py` 只补「索引里能唯一确定」的译文（同一原文对应多个译文就跳过，不猜），
+并且容忍文件里的说明键/坏节点（`tests/test_lang_fill_missing_script.py` 守着）。
 
 ## 测试
 
