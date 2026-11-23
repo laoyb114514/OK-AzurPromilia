@@ -33,6 +33,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from src.core.redaction import RedactionReport, redact_config_with_report, redact_text
+
 MANIFEST_NAME = "manifest.json"
 SYSTEM_NAME = "system.json"
 MAX_LOG_FILES = 3
@@ -60,6 +62,18 @@ def _tail_bytes(path: Path, limit: int) -> bytes | None:
             return handle.read()
     except OSError:
         return None
+
+
+def _redact_config_bytes(path: Path, raw: bytes, report: RedactionReport) -> bytes:
+    """把一份配置脱敏后重新序列化；JSON 坏了就原样返回（坏文件本身也是线索）。"""
+    try:
+        data = json.loads(raw.decode("utf-8", errors="replace"))
+    except (ValueError, UnicodeError):
+        return raw
+    redacted, file_report = redact_config_with_report(data)
+    for key in file_report.keys:
+        report.add(f"{path.name}:{key}")
+    return json.dumps(redacted, ensure_ascii=False, indent=2).encode("utf-8")
 
 
 @dataclass
@@ -184,22 +198,27 @@ def build_bundle(
         payloads["runs.json"] = json.dumps(_run_stats(root), ensure_ascii=False, indent=2).encode("utf-8")
         payloads["ledger.json"] = json.dumps(_ledger_totals(root), ensure_ascii=False, indent=2).encode("utf-8")
 
-        # 配置（跳过 profiles 大快照）
+        # 配置（跳过 profiles 大快照）；**打包前脱敏**：Notification 配置里有
+        # Discord Webhook / Telegram Bot Token 这类凭据，原样带走等于把权限一起送出去
+        redaction = RedactionReport()
         config_dir = root / "configs"
         if config_dir.is_dir():
             for path in sorted(config_dir.glob("*.json")):
-                data = _tail_bytes(path, MAX_LOG_BYTES)
-                if data is not None:
-                    payloads[f"configs/{path.name}"] = data
+                raw = _tail_bytes(path, MAX_LOG_BYTES)
+                if raw is None:
+                    continue
+                payloads[f"configs/{path.name}"] = _redact_config_bytes(path, raw, redaction)
 
-        # 日志尾部
+        # 日志尾部（同样脱敏：DEBUG 日志会把整份配置打出来）
         logs_dir = root / "logs"
         if logs_dir.is_dir():
             logs = sorted(logs_dir.glob("ok-script*.log"), reverse=True)[: max(1, int(max_logs))]
             for path in logs:
                 data = _tail_bytes(path, MAX_LOG_BYTES)
                 if data is not None:
-                    payloads[f"logs/{path.name}"] = data
+                    text, changed = redact_text(data.decode("utf-8", errors="replace"))
+                    redaction.log_lines += changed
+                    payloads[f"logs/{path.name}"] = text.encode("utf-8")
 
         # 失败帧
         frames_dir = root / "failure_frames"
@@ -224,6 +243,7 @@ def build_bundle(
             "generated_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             "app_root": str(root.resolve()),
             "include_screenshots": bool(include_screenshots),
+            "redacted": redaction.to_dict(),
             "files": {
                 name: {"size": len(data), "sha256": _sha256_bytes(data)}
                 for name, data in sorted(payloads.items())

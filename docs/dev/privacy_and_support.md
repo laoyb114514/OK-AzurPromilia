@@ -60,20 +60,35 @@
 
 `src/core/diagnostics_bundle.py` +「工具与诊断 → 诊断包」。
 
-```text
-ok-ap-diagnostics-<时间戳>.zip
-├── manifest.json         # 每个文件的大小 + SHA-256（判断包有没有坏）
-├── system.json           # 平台、Python、版本、游戏 exe、支持分辨率、时间
-├── configs/*.json        # 运行配置（不含 profiles 大快照）
-├── logs/ok-script*.log   # 日志尾部（默认 3 个文件、每个最多 2MB）
-├── templates.json        # 模板清单（coco categories）
-├── runs.json             # 运行报表统计（含每任务成功率/平均用时）
-├── ledger.json           # 记账汇总（只放合计与前 50 个物品，不放明细）
-└── failure_frames/…      # 索引 + 最新一帧
-```
+| 文件 | 内容 |
+|------|------|
+| `manifest.json` | 每个文件的大小 + SHA-256，以及**脱敏统计** |
+| `system.json` | 平台、Python、版本、游戏 exe、支持分辨率、时间 |
+| `configs/*.json` | 运行配置（不含 profiles 大快照）——**已脱敏** |
+| `logs/ok-script*.log` | 日志尾部（默认 3 个文件、每个最多 2MB）——**已脱敏** |
+| `templates.json` | 模板清单（coco categories） |
+| `runs.json` | 运行报表统计（含每任务成功率/平均用时） |
+| `ledger.json` | 记账汇总（只放合计与前 50 个物品，不放明细） |
+| `failure_frames/…` | 索引 + 最新一帧（帧本身已过 UID 遮挡） |
 
 隐私上的默认取舍：**截图默认不打包**（页面有「包含截图」开关），
 记账只给合计、不给逐条明细；失败帧因为已经过了遮挡处理器，可以带。
+
+### 打包前脱敏（重要）
+
+诊断包是要发出去给别人看的（群、issue）。框架的 `Notification` 配置里有
+**Discord Webhook、Telegram Bot Token、QQ Bot API Token**，而日志在 DEBUG 级别还会把
+整份配置打出来（`Config:init self.config = {...}`）——原样打包等于把「往你的频道发消息」
+的权限一起送出去。
+
+`src/core/redaction.py` 在打包时抹掉这些值：
+
+- 键名命中敏感词（`token`/`webhook`/`password`/`secret`/`chat id`/`nickname`/`账号`/`密码`…）
+  → 值替换成 `***`，**键名保留**（收包的人仍能看出「配没配」）；
+- 列表里的账号逐项替换、**长度保留**（「3 个账号」这个信息对排查有用）；
+- 日志里 `'Discord Webhook': 'https://…'` 与 `webhook = https://…` 两种写法都抹；
+- manifest 里记 `redacted: {count, keys, log_lines}`，收包的人知道哪些值不可信；
+- 配置文件本身不是合法 JSON 时**原样复制**（坏文件本身也是线索）。
 
 ## 5. 崩溃诊断
 
@@ -163,6 +178,7 @@ ok-ap-diagnostics-<时间戳>.zip
 | `tests/test_config.py` | 新增 Tab（隐私遮挡）已注册且可导入 |
 | `tests/test_failure_frame_store.py` | 落盘/索引/读取/修剪/清空/损坏容错/同名毫秒去重；**落盘前遮挡（不改原帧、其余区域不动、masked 标记过索引）、无处理器不变、处理器报错或返回空都退回未遮挡且不丢帧** |
 | `tests/test_repo_index.py` | 索引解析/筛选、四类条目安装、同名不覆盖、覆盖开关、SHA-256 拦截、坏 JSON、模板包走 asset_pack；进度比例（无历史/兜底/封顶/负值） |
+| `tests/test_redaction.py` | 敏感键识别（token/webhook/password/chat id/账号/`-`/`_` 变体）、嵌套与列表脱敏（长度保留、不改原对象）、日志两种写法、无关行不动、**打包端到端：配置与日志里的 token 在 zip 里确实没了、manifest 记下脱敏统计、坏 JSON 原样复制** |
 
 ```bash
 uv run python -m unittest discover -s tests
