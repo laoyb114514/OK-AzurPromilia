@@ -1240,3 +1240,9 @@ msgstr "Checks flows, queues, schemes, routes, configs and i18n in one go"
 
 msgid "自检失败：{error}"
 msgstr "Health check failed: {error}"
+
+msgid "安装示例"
+msgstr "Install examples"
+
+msgid "安装示例失败：{error}"
+msgstr "Failed to install examples: {error}"

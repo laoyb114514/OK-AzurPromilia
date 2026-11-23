@@ -1234,3 +1234,9 @@ msgstr "플로 / 큐 / 스킴 / 루트 / 설정 / i18n을 한 번에 점검합�
 
 msgid "自检失败：{error}"
 msgstr "점검 실패: {error}"
+
+msgid "安装示例"
+msgstr "예제 설치"
+
+msgid "安装示例失败：{error}"
+msgstr "예제 설치 실패: {error}"

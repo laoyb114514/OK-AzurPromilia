@@ -1231,3 +1231,9 @@ msgstr "把流程 / 队列 / 方案 / 路线 / 配置 / i18n 一起体检一遍"
 
 msgid "自检失败：{error}"
 msgstr "自检失败：{error}"
+
+msgid "安装示例"
+msgstr "安装示例"
+
+msgid "安装示例失败：{error}"
+msgstr "安装示例失败：{error}"

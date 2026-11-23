@@ -1242,3 +1242,9 @@ msgstr "Comprueba flujos, colas, esquemas, rutas, configuración e i18n de una v
 
 msgid "自检失败：{error}"
 msgstr "Falló la comprobación: {error}"
+
+msgid "安装示例"
+msgstr "Instalar ejemplos"
+
+msgid "安装示例失败：{error}"
+msgstr "No se pudieron instalar los ejemplos: {error}"

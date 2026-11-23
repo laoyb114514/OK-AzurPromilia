@@ -1236,3 +1236,9 @@ msgstr "フロー / キュー / スキーム / ルート / 設定 / i18n をま�
 
 msgid "自检失败：{error}"
 msgstr "点検に失敗しました：{error}"
+
+msgid "安装示例"
+msgstr "サンプルをインストール"
+
+msgid "安装示例失败：{error}"
+msgstr "サンプルのインストールに失敗しました：{error}"

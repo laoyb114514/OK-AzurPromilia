@@ -44,7 +44,7 @@ from src.core.flow import (
     validate_flow,
 )
 from src.core.flow.recording import MAX_RECORDING_STEPS, convert_recording
-from src.core.flow.templates import install_templates, load_template, missing_templates
+from src.core.flow.templates import install_all_examples, load_template, missing_templates
 from src.core.profile_store import ProfileError, ProfileStore
 from src.core.queue import QUEUE_FOLDER, QueueFormatError, TaskQueue, list_queues, load_queue, save_queue
 
@@ -134,7 +134,7 @@ class FlowTab(CustomTab):
             (self.tr("校验"), FluentIcon.CHECKBOX, self._validate_current_flow),
             (self.tr("导入 JSON"), FluentIcon.ADD, self._import_flow),
             (self.tr("从录制 JSON 生成"), FluentIcon.PHOTO, self._import_recording),
-            (self.tr("安装示例流程"), FluentIcon.DOWNLOAD, self._install_flow_templates),
+            (self.tr("安装示例"), FluentIcon.DOWNLOAD, self._install_flow_templates),
             (self.tr("打开目录"), FluentIcon.FOLDER, lambda: self._open_dir(FLOW_FOLDER)),
             (self.tr("删除"), FluentIcon.DELETE, self._delete_flow),
         ):
@@ -351,17 +351,19 @@ class FlowTab(CustomTab):
         self._notify(summary, error=bool(errors))
 
     def _install_flow_templates(self):
-        """把 assets/flow_templates 里的示例流程装进 configs/flows（不覆盖同名）。"""
+        """把 assets 下的示例流程 / 队列 / 路线装进 configs（不覆盖同名）。"""
         try:
-            report = install_templates()
+            report = install_all_examples()
         except Exception as exc:
-            self._notify(self.tr("安装示例流程失败：{error}").format(error=exc), error=True)
+            self._notify(self.tr("安装示例失败：{error}").format(error=exc), error=True)
             return
-        self.refresh_flows()
+        self.refresh_all()
         self._notify(report.describe(), error=not report.installed)
-        # 顺便告诉用户每份还缺哪些模板（骨架流程就靠这个清单去标）
+        # 顺便告诉用户每份流程还缺哪些模板（骨架流程就靠这个清单去标）
         lines = [report.describe()]
         for item in report.installed:
+            if not (item.path and item.path.parent.name == "flows"):
+                continue
             try:
                 flow = load_template(item.name)
                 missing = missing_templates(flow)

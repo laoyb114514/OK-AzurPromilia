@@ -1,15 +1,21 @@
-"""示例流程模板测试：解析校验、模板依赖收集、缺哪些、安装与不覆盖。"""
+"""示例资源测试：流程/队列/路线的解析校验、模板依赖、安装与不覆盖。"""
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
-from src.core.flow import validate_flow
+from src.core.flow import templates, validate_flow
 from src.core.flow.templates import (
     FlowTemplateError,
+    example_target,
     feature_names,
+    install_all_examples,
+    install_examples,
     install_templates,
+    list_examples,
     list_templates,
     load_template,
     missing_templates,
@@ -158,6 +164,89 @@ class TestInstallTemplates(unittest.TestCase):
     def test_load_missing_template(self):
         with tempfile.TemporaryDirectory() as tmp, self.assertRaises(FlowTemplateError):
             load_template("nope", Path(tmp))
+
+
+class TestOtherExampleKinds(unittest.TestCase):
+    def test_queue_example_parses(self):
+        from src.core.queue import load_queue
+
+        names = list_examples("queue", REPO_ROOT / "assets" / "queue_templates")
+        self.assertEqual(names, ["一条龙"])
+        queue = load_queue("一条龙", REPO_ROOT / "assets" / "queue_templates")
+        self.assertEqual(len(queue.items), 3)
+        self.assertTrue(queue.stop_on_failure)
+        self.assertEqual([item.kind for item in queue.items], ["task", "task", "task"])
+        self.assertTrue(all(item.budget_minutes > 0 for item in queue.items))
+
+    def test_route_example_is_valid(self):
+        from src.core.route import load_route
+
+        names = list_examples("route", REPO_ROOT / "assets" / "route_templates")
+        self.assertEqual(names, ["主界面到背包"])
+        route = load_route("主界面到背包", REPO_ROOT / "assets" / "route_templates")
+        self.assertEqual(route.validate(), [])
+        self.assertGreater(len(route.waypoints), 1)
+
+    def test_install_each_kind(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for kind, count in (("flow", 3), ("queue", 1), ("route", 1)):
+                with self.subTest(kind=kind):
+                    report = install_examples(kind, target_folder=root / kind)
+                    self.assertEqual(len(report.installed), count)
+                    self.assertEqual(len(list((root / kind).glob("*.json"))), count)
+
+    def test_queue_example_skips_existing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.assertEqual(len(install_examples("queue", target_folder=root).installed), 1)
+            second = install_examples("queue", target_folder=root)
+            self.assertEqual(len(second.installed), 0)
+            self.assertIn("不覆盖", second.describe())
+
+    def test_bad_queue_example_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "src"
+            source.mkdir()
+            (source / "坏队列.json").write_text(
+                json.dumps({"items": [{"kind": "nope", "ref": "x"}]}), encoding="utf-8"
+            )
+            report = install_examples("queue", target_folder=root / "out", folder=source)
+            self.assertEqual(len(report.installed), 0)
+            self.assertEqual(len(report.skipped), 1)
+
+    def test_bad_route_example_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "src"
+            source.mkdir()
+            (source / "坏路线.json").write_text(json.dumps({"waypoints": [{"page": ""}]}), encoding="utf-8")
+            report = install_examples("route", target_folder=root / "out", folder=source)
+            self.assertEqual(len(report.installed), 0)
+            self.assertEqual(len(report.skipped), 1)
+
+    def test_install_all_examples_counts_three_kinds(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sources = {
+                "flow": root / "flow_src",
+                "queue": root / "queue_src",
+                "route": root / "route_src",
+            }
+            shutil.copytree(REPO_ROOT / "assets" / "flow_templates", sources["flow"])
+            shutil.copytree(REPO_ROOT / "assets" / "queue_templates", sources["queue"])
+            shutil.copytree(REPO_ROOT / "assets" / "route_templates", sources["route"])
+            targets = {kind: root / f"out_{kind}" for kind in sources}
+            with mock.patch.dict(templates.EXAMPLE_SOURCES, sources):
+                report = install_all_examples(targets=targets)
+            self.assertEqual(len(report.installed), 5)  # 3 流程 + 1 队列 + 1 路线
+            for kind, target in targets.items():
+                self.assertTrue(list(target.glob("*.json")), kind)
+
+    def test_unknown_kind(self):
+        with self.assertRaises(FlowTemplateError):
+            example_target("exe")
 
 
 if __name__ == "__main__":

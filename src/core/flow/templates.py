@@ -135,30 +135,124 @@ def missing_templates(flow: Flow, available: set[str] | None = None) -> list[str
     return [name for name in required_templates(flow) if name not in known]
 
 
-def install_templates(
+# ── 其它类型的示例（队列 / 路线） ────────────────────────
+KIND_FLOW = "flow"
+KIND_QUEUE = "queue"
+KIND_ROUTE = "route"
+EXAMPLE_KINDS = (KIND_FLOW, KIND_QUEUE, KIND_ROUTE)
+
+EXAMPLE_SOURCES = {
+    KIND_FLOW: TEMPLATE_FOLDER,
+    KIND_QUEUE: Path("assets") / "queue_templates",
+    KIND_ROUTE: Path("assets") / "route_templates",
+}
+
+
+def example_target(kind: str, folder: str | Path | None = None) -> Path:
+    if kind == KIND_FLOW:
+        return Path(folder) if folder is not None else FLOW_FOLDER
+    if kind == KIND_QUEUE:
+        return Path(folder) if folder is not None else Path("configs") / "queues"
+    if kind == KIND_ROUTE:
+        return Path(folder) if folder is not None else Path("configs") / "routes"
+    raise FlowTemplateError(f"不认识的示例类型 {kind!r}")
+
+
+def list_examples(kind: str, folder: str | Path | None = None) -> list[str]:
+    base = Path(folder) if folder is not None else EXAMPLE_SOURCES[kind]
+    if not base.is_dir():
+        return []
+    return sorted(path.stem for path in base.glob("*.json"))
+
+
+def _load_example_payload(kind: str, name: str, folder: str | Path | None) -> tuple[dict, str]:
+    """读出示例 JSON 并**用对应的模型校验一遍**，返回 ``(payload, json_text)``。"""
+    if kind == KIND_FLOW:
+        flow = load_template(name, folder)
+        return json.loads(flow.to_json()), flow.to_json()
+
+    from src.core.queue import QueueFormatError, TaskQueue
+    from src.core.route import Route
+
+    base = Path(folder) if folder is not None else EXAMPLE_SOURCES[kind]
+    path = base / f"{name}.json"
+    try:
+        text = path.read_text(encoding="utf-8")
+        data = json.loads(text)
+    except OSError as exc:
+        raise FlowTemplateError(f"读不到示例 {name}: {exc}") from exc
+    except ValueError as exc:
+        raise FlowTemplateError(f"示例 {name} 不是合法 JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise FlowTemplateError(f"示例 {name} 顶层必须是对象")
+
+    if kind == KIND_QUEUE:
+        try:
+            queue = TaskQueue.from_dict(data)
+        except QueueFormatError as exc:
+            raise FlowTemplateError(f"队列示例 {name}：{exc}") from exc
+        return json.loads(queue.to_json()), queue.to_json()
+
+    try:
+        route = Route.from_dict(data)
+    except Exception as exc:
+        raise FlowTemplateError(f"路线示例 {name}：{exc}") from exc
+    issues = route.validate()
+    if issues:
+        raise FlowTemplateError(f"路线示例 {name}：" + "；".join(issues))
+    return json.loads(route.to_json()), route.to_json()
+
+
+def install_examples(
+    kind: str,
     target_folder: str | Path | None = None,
     folder: str | Path | None = None,
     overwrite: bool = False,
 ) -> InstallReport:
-    """把模板逐份装到 ``configs/flows/``；单份失败不影响其它份。"""
-    target = Path(target_folder) if target_folder is not None else FLOW_FOLDER
+    """把某一类示例逐份装到对应目录；单份失败不影响其它份。"""
+    target = example_target(kind, target_folder)
+    source = Path(folder) if folder is not None else EXAMPLE_SOURCES[kind]
     report = InstallReport()
-    for name in list_templates(folder):
+    for name in list_examples(kind, source):
         try:
-            flow = load_template(name, folder)
+            _payload, text = _load_example_payload(kind, name, source)
         except FlowTemplateError as exc:
             report.results.append(TemplateInstall(name=name, message=str(exc)))
             continue
         try:
             path = target / f"{name}.json"
             if path.exists() and not overwrite:
-                report.results.append(TemplateInstall(name=name, message="同名流程已存在，不覆盖"))
+                report.results.append(TemplateInstall(name=name, message="同名文件已存在，不覆盖"))
                 continue
             target.mkdir(parents=True, exist_ok=True)
             tmp = path.with_suffix(".json.tmp")
-            tmp.write_text(flow.to_json(), encoding="utf-8")
+            tmp.write_text(text, encoding="utf-8")
             os.replace(tmp, path)
             report.results.append(TemplateInstall(name=name, ok=True, path=path))
         except (OSError, FlowFormatError) as exc:
             report.results.append(TemplateInstall(name=name, message=str(exc)))
     return report
+
+
+def install_all_examples(
+    overwrite: bool = False,
+    targets: dict[str, str | Path] | None = None,
+) -> InstallReport:
+    """流程 / 队列 / 路线三类示例一次装完。
+
+    ``targets`` 可以按类型覆盖安装目录（测试用；默认各自装进 ``configs/<kind>s``）。
+    """
+    merged = InstallReport()
+    for kind in EXAMPLE_KINDS:
+        target = (targets or {}).get(kind)
+        merged.results.extend(install_examples(kind, target_folder=target, overwrite=overwrite).results)
+    return merged
+
+
+def install_templates(
+    target_folder: str | Path | None = None,
+    folder: str | Path | None = None,
+    overwrite: bool = False,
+) -> InstallReport:
+    """把流程模板逐份装到 ``configs/flows/``（保留旧入口，等价于安装 flow 类示例）。"""
+    return install_examples(KIND_FLOW, target_folder=target_folder, folder=folder, overwrite=overwrite)
