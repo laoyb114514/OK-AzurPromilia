@@ -18,13 +18,36 @@
 
 ### 导入真实数据
 
-「离线工具 → 养成」页的**「导入数据」**按钮，或代码里 `import_dataset(路径)`：
+**推荐：表格导入**（`tools/import_growth.py`）——把 wiki 上的表抄成 CSV/TSV 就行，
+Excel 另存为 CSV 也可以，不用手写 JSON：
+
+```bash
+uv run python tools/import_growth.py --sample > 我的养成表.csv   # 导出示例表照着改
+uv run python tools/import_growth.py 我的养成表.csv --dry-run    # 只校验，先看解析结果
+uv run python tools/import_growth.py 我的养成表.csv              # 备份 + 覆盖
+```
+
+表格一行 = 一个条目的一段等级区间：
+
+```csv
+key,name,kind,max_level,from,to,exp,credits,materials
+char_amber,琥珀,character,80,1,20,4000,2400,风之碎晶=3;星辉粉尘=1
+char_amber,琥珀,character,80,21,40,12000,7200,风之碎晶=6
+```
+
+- 列名大小写/顺序不敏感，多余的列忽略；同一 `key` 的多行自动合并成一个条目；
+- `materials` 用 `名字=数量`，多个用 `;`（或 `|`）分隔，留空表示这段不要材料；
+- 报错会指到**第几行、哪一列**（「第 3 行的 exp 不是数字」），改一行就能过；
+- 表格里出现的材料会自动登记进 `materials`（分类先记 `other`，可事后手改）。
+
+**JSON 直投**：「离线工具 → 养成」页的**「导入数据」**按钮，或代码里 `import_dataset(路径)`：
 
 1. 先 `Dataset.from_file` **完整校验**，校验不过一个字节都不写（不会出现「导入一半」）；
 2. 通过后把原文件备份到 `assets/data/backups/growth_<时间戳>.json`（同秒重名自动加序号）；
 3. 再原子替换 `assets/data/growth.json`，页面自动重新载入条目。
 
 返回的 `ImportResult.describe()` 会写清「导入了什么、备份在哪」。
+`Dataset.to_json()` 可以做反向导出（当前数据 → JSON），导入器就是用它写盘的。
 
 ```json
 {
@@ -216,6 +239,7 @@ log.export_csv("runs.csv")
 | 测试 | 覆盖 |
 |------|------|
 | `tests/test_growth.py` | 数据载入与校验、区间比例切分、份数/潜能/升星、库存缺口、最优体力来源、无来源标注、大单位优先凑货币、经验道具贪心、12 目标上限、CSV/PNG 导出；导入数据（校验失败不写目标文件、成功时备份原文件、无原文件不备份、同秒备份名去重、源文件缺失） |
+| `tests/test_growth_table_import.py` | 表格导入：**CSV/TSV、列名不敏感、多行合并、材料多种分隔符、按等级排序**；错误带行号（kind/数字/区间/材料写法/缺 key/max_level）；**导入写盘与备份、坏表一个字节不写**；`to_dict`/`to_json` 往返（含潜能与升星） |
 | `tests/test_gacha_model.py` | 概率表数值、单调性、硬保底、垫抽、期望区间、预算内概率单调、50% 概率的 82.85% 基准、最坏情况、自定义概率表校验（**越界 / 非单调 / 缺硬保底都拒绝**） |
 | `tests/test_ledger.py` | 四种结算写法、支出识别、去重、纯数字名字拒绝、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算；报表（失败原因持久化与分组排序、按任务分组统计、多任务/单任务/空报表文本、总用时） |
 | `tests/test_flow_task_run_log.py` | 流程/队列跑完写报表（成功、返回 False、抛异常三种结局）、队列用队列名、空名回退到任务类型、写报表失败不影响执行、时钟回退、跑完能估时长 |

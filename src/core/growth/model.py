@@ -163,6 +163,47 @@ class Entry:
                 result[name] = result.get(name, 0.0) + amount
         return result
 
+    def to_dict(self) -> dict:
+        """序列化回 ``from_dict`` 能读的形状（等级段 / 潜能 / 升星都保留）。"""
+        data: dict = {
+            "key": self.key,
+            "name": self.name,
+            "kind": self.kind,
+            "max_level": self.max_level,
+        }
+        if self.rarity:
+            data["rarity"] = self.rarity
+        data["levels"] = [
+            {
+                "from": span.start,
+                "to": span.end,
+                "exp": span.exp,
+                "credits": span.credits,
+                "materials": dict(span.materials),
+            }
+            for span in self.levels
+        ]
+        if self.potentials:
+            data["potentials"] = [
+                {
+                    "name": potential.name,
+                    "levels": [
+                        {"level": item.level, "exp": item.exp} for item in potential.levels
+                    ],
+                }
+                for potential in self.potentials
+            ]
+        if self.star_stages:
+            data["star_stages"] = [
+                {
+                    "star": stage.star,
+                    "copies": stage.copies,
+                    "materials": dict(stage.materials),
+                }
+                for stage in self.star_stages
+            ]
+        return data
+
 
 @dataclass(frozen=True)
 class Dungeon:
@@ -266,6 +307,33 @@ class Dataset:
     @classmethod
     def load_default(cls) -> Dataset:
         return cls.from_file(DEFAULT_DATA_PATH)
+
+    # ── 导出 ─────────────────────────────────────────────
+    def to_dict(self) -> dict:
+        """序列化回 ``from_dict`` 能读的形状（用于导入器与「另存为」）。
+
+        之前只有 ``from_dict`` 没有反向：想写回 JSON 只能靠外部自己拼，
+        表格导入（``table_import``）因此拿不到可写盘的数据。
+        """
+        return {
+            "version": self.version,
+            "note": self.note,
+            "materials": {name: {"category": category} for name, category in self.materials.items()},
+            "exp_items": dict(self.exp_items),
+            "dungeons": [
+                {
+                    "name": dungeon.name,
+                    "stamina": dungeon.stamina,
+                    "drops": dict(dungeon.drops),
+                }
+                for dungeon in self.dungeons
+            ],
+            "aliases": {name: dict(mapping) for name, mapping in self.aliases.items()},
+            "entries": [entry.to_dict() for entry in self.entries.values()],
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
 
     # ── 查询 ─────────────────────────────────────────────
     def entry(self, key: str) -> Entry:
