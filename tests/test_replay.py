@@ -72,6 +72,12 @@ class TestSchemeModel(unittest.TestCase):
         with self.assertRaises(SchemeFormatError):
             Scheme.from_dict(two_segment_scheme(between_wait="慢一点"))
 
+    def test_negative_between_wait_rejected(self):
+        """负间隔会被静默当成 0，不如直接拒绝（用户填错了应该知道）。"""
+        with self.assertRaises(SchemeFormatError) as ctx:
+            Scheme.from_dict(two_segment_scheme(between_wait=-1.5))
+        self.assertIn("不能是负数", str(ctx.exception))
+
     def test_roundtrip(self):
         scheme = Scheme.from_dict(two_segment_scheme())
         again = Scheme.from_dict(json.loads(scheme.to_json()))

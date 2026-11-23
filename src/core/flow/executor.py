@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import os
 import re
@@ -110,12 +111,12 @@ class CheckpointStore:
         safe = _SAFE_KEY.sub("_", str(key or "flow")).strip("_") or "flow"
         return self.root / f"{safe}.json"
 
-    def for_key(self, key: str) -> FlowCheckpoint:
+    def for_key(self, key: str, fingerprint: str = "") -> FlowCheckpoint:
         """按任意标识取断点（路线等非流程对象也复用这套存储）。"""
-        return FlowCheckpoint(self, str(key or "flow"))
+        return FlowCheckpoint(self, str(key or "flow"), fingerprint=fingerprint)
 
     def for_flow(self, flow: Flow) -> FlowCheckpoint:
-        return self.for_key(flow.key)
+        return FlowCheckpoint(self, flow.key, fingerprint=flow_fingerprint(flow))
 
     def load_record(self, key: str) -> dict | None:
         path = self._path(key)
@@ -142,30 +143,47 @@ class CheckpointStore:
 
 @dataclass
 class FlowCheckpoint:
-    """绑定到某个流程的断点。"""
+    """绑定到某个流程的断点。
+
+    ``fingerprint`` 是「步骤结构」的摘要：流程/路线被改过之后，旧的 ``completed``
+    已经不可信（可能跳过刚插进去的新步骤，或者跳过完全不同的一步），
+    这时直接当作没有断点，从头开始跑，并在日志里说明。
+    """
 
     store: CheckpointStore
     key: str
+    fingerprint: str = ""
 
     def load(self) -> int:
         record = self.store.load_record(self.key)
         if not record:
+            return 0
+        if not self._same_content(record):
+            self.clear()
             return 0
         try:
             return max(0, int(record.get("completed", 0)))
         except (TypeError, ValueError):
             return 0
 
+    def _same_content(self, record: dict) -> bool:
+        """结构变了就不认旧断点；老断点没有 fingerprint 字段时按兼容处理。"""
+        if not self.fingerprint:
+            return True
+        stored = str(record.get("fingerprint", "") or "")
+        if not stored:
+            return True
+        return stored == self.fingerprint
     def save(self, completed: int, total: int) -> bool:
-        return self.store.save_record(
-            self.key,
-            {
-                "flow": self.key,
-                "completed": int(completed),
-                "total": int(total),
-                "updated_at": time.time(),
-            },
-        )
+        payload = {
+            "flow": self.key,
+            "completed": int(completed),
+            "total": int(total),
+            "updated_at": time.time(),
+        }
+        if self.fingerprint:
+            payload["fingerprint"] = self.fingerprint
+        return self.store.save_record(self.key, payload)
 
     def clear(self) -> None:
         self.store.clear(self.key)
@@ -539,3 +557,17 @@ def iter_step_paths(steps: Iterable[FlowStep]) -> Iterable[str]:
         yield step.path
         yield from iter_step_paths(step.steps)
         yield from iter_step_paths(step.else_steps)
+
+
+def structure_fingerprint(payload: Any) -> str:
+    """把「结构」压成短摘要：用来判断断点还算不算数。"""
+    try:
+        text = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        text = repr(payload)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def flow_fingerprint(flow: Flow) -> str:
+    """只看步骤结构，不看名字/说明（改个备注不该让断点失效）。"""
+    return structure_fingerprint(flow.to_dict().get("steps", []))

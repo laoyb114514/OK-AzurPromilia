@@ -196,6 +196,24 @@ def _parse_waypoint(data: Any, path: str) -> Waypoint:
 
 
 # ── 存取 ─────────────────────────────────────────────────
+def route_fingerprint(route: Route) -> str:
+    """航点结构的摘要：路线被改过之后，旧断点就不可信了（与流程同一套判断）。"""
+    from src.core.flow.executor import structure_fingerprint
+
+    return structure_fingerprint(
+        [
+            {
+                "page": point.page,
+                "template": point.template,
+                "click": list(point.click) if point.click else None,
+                "wait": point.wait,
+                "timeout": point.timeout,
+            }
+            for point in route.waypoints
+        ]
+    )
+
+
 def route_path(name: str, folder: str | Path | None = None) -> Path:
     folder = Path(folder) if folder is not None else ROUTE_FOLDER
     token = _SAFE_NAME.sub("_", str(name or "")).strip("._")

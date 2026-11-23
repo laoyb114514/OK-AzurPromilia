@@ -13,7 +13,14 @@ from __future__ import annotations
 
 from src.core.base_game_task import BaseGameTask
 from src.core.flow import CheckpointStore
-from src.core.route import RouteContext, RouteFormatError, RouteRunner, list_routes, load_route
+from src.core.route import (
+    RouteContext,
+    RouteFormatError,
+    RouteRunner,
+    list_routes,
+    load_route,
+    route_fingerprint,
+)
 from src.icons import Icons
 
 
@@ -56,7 +63,9 @@ class RouteTask(BaseGameTask):
         runner = RouteRunner(
             route,
             context,
-            checkpoint=CheckpointStore().for_key(f"route_{route.name}"),
+            checkpoint=CheckpointStore().for_key(
+                f"route_{route.name}", fingerprint=route_fingerprint(route)
+            ),
             log=self.log_info,
             default_timeout=self.runtime.step_timeout,
         )

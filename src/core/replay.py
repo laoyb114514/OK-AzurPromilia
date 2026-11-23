@@ -124,6 +124,9 @@ class Scheme:
             between_wait = float(data.get("between_wait", DEFAULT_BETWEEN_WAIT) or 0.0)
         except (TypeError, ValueError) as exc:
             raise SchemeFormatError("between_wait 必须是数字") from exc
+        if between_wait < 0:
+            # 负的间隔会被静默忽略（等于 0），不如直接说清楚
+            raise SchemeFormatError(f"between_wait 不能是负数（收到 {between_wait:g}）")
         return cls(
             name=str(data.get("name", "") or "新方案"),
             description=str(data.get("description", "") or ""),

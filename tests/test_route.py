@@ -12,8 +12,10 @@ from src.core.route import (
     RouteContext,
     RouteFormatError,
     RouteRunner,
+    Waypoint,
     list_routes,
     load_route,
+    route_fingerprint,
     route_path,
     save_route,
 )
@@ -218,6 +220,23 @@ class TestRouteRunner(unittest.TestCase):
             task = FakeRouteTask(reachable={"page_main"}, visible={"commission_icon"})
             self.assertTrue(self._runner(task, route, checkpoint=checkpoint).run().ok)
             self.assertEqual(checkpoint.load(), 0)
+
+    def test_edited_route_ignores_stale_checkpoint(self):
+        """改了路线，旧断点不该再跳过航点（与流程同一套 fingerprint 判断）。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            store = CheckpointStore(Path(tmp))
+            route = Route.from_dict(route_dict())
+            checkpoint = store.for_key(route.name, fingerprint=route_fingerprint(route))
+            first_task = FakeRouteTask(reachable={"page_main"}, visible=set())
+            self._runner(first_task, route, checkpoint=checkpoint).run()
+            self.assertEqual(checkpoint.load(), 1)
+
+            edited = Route(
+                name=route.name,
+                waypoints=(Waypoint(wait=0.1), *route.waypoints),
+            )
+            fresh = store.for_key(route.name, fingerprint=route_fingerprint(edited))
+            self.assertEqual(fresh.load(), 0, "路线改过就应忽略旧断点")
 
     def test_route_file_roundtrip_through_disk(self):
         with tempfile.TemporaryDirectory() as tmp:

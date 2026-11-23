@@ -636,6 +636,37 @@ class TestCheckpoint(unittest.TestCase):
         self.assertTrue(executor.run().ok)
         self.assertEqual(checkpoint.load(), 0)
 
+    def test_edited_flow_ignores_stale_checkpoint(self):
+        """改了流程结构，旧断点就不该再跳过步骤（否则会跳过刚插入的新步骤）。"""
+        checkpoint = self.store.for_flow(self.flow)
+        executor, _ = make_executor(self.flow, checkpoint=checkpoint)
+        executor.run()
+        self.assertEqual(checkpoint.load(), 1)
+
+        edited = make_flow(
+            [
+                {"type": "wait", "seconds": 0.1},  # 新插入的第 1 步
+                {"type": "click", "x": 0.1, "y": 0.1},
+                {"type": "click", "template": "ghost", "timeout": 0.1},
+            ],
+            name="断点流程",
+        )
+        self.assertEqual(self.store.for_flow(edited).load(), 0, "结构变了应忽略旧断点")
+
+    def test_old_checkpoint_without_fingerprint_still_works(self):
+        key = self.flow.key
+        self.store.save_record(key, {"flow": key, "completed": 2, "total": 3})
+        self.assertEqual(self.store.for_flow(self.flow).load(), 2)
+
+    def test_description_change_keeps_checkpoint(self):
+        checkpoint = self.store.for_flow(self.flow)
+        executor, _ = make_executor(self.flow, checkpoint=checkpoint)
+        executor.run()
+        same_steps = parse_flow(
+            {"name": "断点流程", "description": "改了说明", "steps": self.flow.to_dict()["steps"]}
+        )
+        self.assertEqual(self.store.for_flow(same_steps).load(), 1)
+
     def test_store_tolerates_corrupt_file(self):
         checkpoint = self.store.for_flow(self.flow)
         path = self.store._path(self.flow.key)
