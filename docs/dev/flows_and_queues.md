@@ -38,7 +38,7 @@
 | type | 必填 | 可选 | 说明 |
 |------|------|------|------|
 | `move` | `direction` 或 `dx`/`dy` | `duration` | `direction` 是 `w/a/s/d` 组合（`wd` 表示右上）；`dx/dy` 是相对鼠标位移（转视角） |
-| `click` | `x`+`y` 或 `template` | `times`、`duration` | 比例坐标 0..1；给了 `template` 就等它出现并点它的中心；`duration` 是点击后等待 |
+| `click` | `x`+`y` 或 `template` | `times`、`duration`、`hold` | 比例坐标 0..1；给了 `template` 就等它出现并点它的中心；`duration` 是点击后等待，`hold` 是**按住多久再松开**（长按/蓄力） |
 | `action` | `action` | `args` | 调用白名单里的任务方法，`args` 原样作为关键字参数 |
 | `key` | `key` | `duration`、`times` | `duration` 是按住时长 |
 | `wait` | `seconds` | — | 纯等待（暂停感知） |
@@ -89,12 +89,21 @@
 
 `src/core/flow/recording.py` 的 `convert_recording(events)`：
 
-- `mouse_down`/`mouse_up` 配对成 `click`，按住时长写进 `duration`；
+- `mouse_down`/`mouse_up` 配对成 `click`：
+  - 按住 **≥ 0.3 秒** → 写 `hold`（执行时真的 `mouse_down` → 等 → `mouse_up`），
+    长按/蓄力不会被改成「点一下再等」；
+  - 短按 → 时长写进 `duration`（点击后等待）；
 - `key_down`/`key_up` 配对成 `key`，同样保留按住时长；
 - 相邻动作之间超过 `gap_threshold`（默认 0.05s）的空档补一个 `wait` 步骤；
 - **无法表达的输入如实计入 `skipped`**：右键、中键、滚轮、鼠标移动；
+- **坐标异常的点击计入 `bad_coordinates` 并跳过**：录制器拿不到窗口尺寸时
+  `normalize_coords` 会退回原始像素（如 `1200, 700`），那种值当不了比例坐标，
+  硬塞进流程只会在校验时报「比例越界」，所以直接跳过并在 `notes` 里说明；
 - 上限 **400 步**，超了截断并标记 `truncated`；
 - 只按过没抬起的键、按下没抬起的鼠标，按短按/零时长处理并在 `notes` 里说明。
+
+「长按」退化说明：任务没有 `mouse_down`/`mouse_up`（或拿不到画面尺寸）时，
+`hold` 会退化成「点击 + 等待 `hold` 秒」，并往日志里写一行说明——**不静默改变语义**。
 
 「流程与队列」页的「从录制 JSON 生成」接受两种格式：裸事件数组，或 `{"events": [...]}`。
 
@@ -237,7 +246,7 @@ category，标完热更新即生效）。安装完成后状态栏会直接列出
 | 测试 | 覆盖 |
 |------|------|
 | `tests/test_flow.py` | 解析/校验（含 500 步、4 层、1000 次、字段拼错、比例越界）、全部步骤类型、循环/条件、失败策略、预算（含长等待被截断、预算不记为步骤失败、断点停在最后成功步骤）、断点存取与续跑 |
-| `tests/test_flow_recording.py` | down/up 配对、空档补 wait、跳过右键/滚轮、未抬起处理、400 步截断 |
+| `tests/test_flow_recording.py` | down/up 配对、空档补 wait、跳过右键/滚轮、未抬起处理、400 步截断；**长按转 `hold`、短按保留 `duration`、原始像素坐标跳过并计数、超出 1 的小误差被夹取** |
 | `tests/test_flow_templates.py` | 三份示例流程都能解析且零错误、周常流程不需要新模板、骨架流程各报 3 个待标模板、模板依赖收集（嵌套/去重）、`FeatureList` 取 `value`；队列/路线示例同样校验通过；三类安装计数、不覆盖、坏示例被跳过、未知类型报错 |
 | `tests/test_task_queue.py` | 模型校验、文件存取、执行顺序、失败即停/继续、禁用项、未知项、预算标记；**总预算截断剩余项、传给执行器的预算取最小值、任务类预估超时跳过、流程类不因预估跳过、预估拿不到照常执行** |
 | `tests/test_profile_store.py` | 快照、应用前备份、不删档外文件、名字校验、损坏元信息容错 |

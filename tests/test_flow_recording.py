@@ -103,7 +103,8 @@ class TestRecordingConversion(unittest.TestCase):
     def test_click_without_release(self):
         result = convert_recording([mouse_down(0.4, 0.4, 1.0)])
         self.assertEqual(result.steps[0]["type"], "click")
-        self.assertEqual(result.steps[0]["duration"], 0.0)
+        self.assertNotIn("duration", result.steps[0])  # 零时长点击不写冗余字段
+        self.assertNotIn("hold", result.steps[0])
         self.assertTrue(any("没有抬起" in note for note in result.notes))
 
     def test_truncation(self):
@@ -138,6 +139,38 @@ class TestRecordingConversion(unittest.TestCase):
     def test_suggest_flow_name(self):
         self.assertIn("3", suggest_flow_name([{}, {}, {}]))
         self.assertEqual(suggest_flow_name([]), "录制流程")
+
+
+class TestLongPressAndCoordinates(unittest.TestCase):
+    def test_long_press_becomes_hold(self):
+        result = convert_recording([mouse_down(0.2, 0.2, 1.0), mouse_up(0.2, 0.2, 2.5)])
+        step = result.steps[0]
+        self.assertAlmostEqual(step["hold"], 1.5)   # 真的按住
+        self.assertNotIn("duration", step)          # 不是「点一下再等」
+
+    def test_short_press_stays_duration(self):
+        result = convert_recording([mouse_down(0.2, 0.2, 1.0), mouse_up(0.2, 0.2, 1.05)])
+        step = result.steps[0]
+        self.assertNotIn("hold", step)
+        self.assertAlmostEqual(step["duration"], 0.05)
+
+    def test_raw_pixel_coordinates_are_skipped(self):
+        """录制器拿不到窗口尺寸时会退回原始像素，那种事件不能当比例坐标用。"""
+        result = convert_recording([mouse_down(1200, 700, 1.0), mouse_up(1200, 700, 1.05)])
+        self.assertEqual(result.steps, [])
+        self.assertEqual(result.bad_coordinates, 1)
+        self.assertIn("坐标异常", result.summary())
+        self.assertTrue(any("坐标异常" in note for note in result.notes))
+
+    def test_slightly_over_one_is_clamped(self):
+        result = convert_recording([mouse_down(1.001, 0.999, 1.0), mouse_up(1.001, 0.999, 1.02)])
+        self.assertEqual(result.bad_coordinates, 0)
+        self.assertAlmostEqual(result.steps[0]["x"], 1.0)
+
+    def test_unreleased_press_with_bad_coordinates(self):
+        result = convert_recording([mouse_down(800, 600, 1.0)])
+        self.assertEqual(result.steps, [])
+        self.assertEqual(result.bad_coordinates, 1)
 
 
 if __name__ == "__main__":

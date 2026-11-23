@@ -313,7 +313,10 @@ class FlowTab(CustomTab):
         pad = "   " * indent
         detail = {
             "wait": f"{step.seconds}s",
-            "click": f"({step.x}, {step.y})" if step.x is not None else f"模板 {step.template}",
+            "click": (
+                (f"({step.x}, {step.y})" if step.x is not None else f"模板 {step.template}")
+                + (f" 按住 {step.hold}s" if step.hold else "")
+            ),
             "key": f"{step.key} {step.duration}s",
             "move": step.direction or f"Δ({step.dx}, {step.dy})",
             "action": step.action,

@@ -47,7 +47,7 @@ EXPECT_MODES = ("appear", "disappear")
 COMMON_KEYS = {"type", "timeout", "comment"}
 TYPE_KEYS = {
     "move": {"direction", "duration", "dx", "dy"},
-    "click": {"x", "y", "template", "duration", "times"},
+    "click": {"x", "y", "template", "duration", "times", "hold"},
     "action": {"action", "args"},
     "key": {"key", "duration", "times"},
     "wait": {"seconds"},
@@ -140,6 +140,8 @@ class FlowStep:
     settle: float = 0.0
     threshold: float | None = None
     times: int | None = None
+    #: click 的「按住多久再松开」（长按 / 蓄力）；不填就是普通点击
+    hold: float | None = None
 
     # wait
     seconds: float = 0.0
@@ -278,6 +280,7 @@ def _parse_step(data: Mapping[str, Any], path: str, depth: int, issues: list[Flo
         settle=_opt_float(data.get("settle"), f"{path}.settle", issues, default=0.0),
         threshold=_opt_float(data.get("threshold"), f"{path}.threshold", issues),
         times=_opt_int(data.get("times"), f"{path}.times", issues),
+        hold=_opt_float(data.get("hold"), f"{path}.hold", issues),
         seconds=_opt_float(data.get("seconds"), f"{path}.seconds", issues, default=0.0),
         action=_opt_str(data.get("action")),
         args=_opt_mapping(data.get("args"), f"{path}.args", issues),
@@ -378,6 +381,8 @@ def _validate_step(step: FlowStep, issues: list[FlowIssue]) -> None:
             _check_ratio(step.y, f"{path}.y", issues)
         if step.times is not None and step.times < 1:
             issues.append(FlowIssue("error", f"{path}.times", "次数至少为 1"))
+        if step.hold is not None and step.hold < 0:
+            issues.append(FlowIssue("error", f"{path}.hold", "按住时长不能是负数"))
 
     elif step.type == "key":
         if not step.key:
@@ -489,6 +494,8 @@ def _step_to_dict(step: FlowStep) -> dict:
             data["y"] = step.y
         if step.times is not None:
             data["times"] = step.times
+        if step.hold:
+            data["hold"] = step.hold
         if step.duration:
             data["duration"] = step.duration
     elif step.type == "key":

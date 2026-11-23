@@ -6,12 +6,18 @@
 - ``{'type': 'mouse_up', 'x': …, 'time': …}``
 - ``{'type': 'key_down', 'key': 'w', 'time': …}`` / ``{'type': 'key_up', …}``
 
-录制是「原始事件流」，流程是「语义步骤」，转换时做三件事：
+``x`` / ``y`` 是**比例坐标**（录制器 ``normalize_coords`` 会除以窗口宽高）。
+⚠️ 录制器在拿不到窗口尺寸时会**退回原始像素**，那种事件没法当比例坐标用，
+这里会跳过并计数（``bad_coordinates``），而不是塞进流程等校验报错。
 
-1. down/up 配对成「点击」「按键」，按住时长写进 ``duration``；
+转换时做四件事：
+
+1. down/up 配对成「点击」「按键」，**长按写进 ``hold``**（真按住鼠标），
+   短按的时长写进 ``duration``（点击后等待）；
 2. 相邻动作之间的空档补 ``wait`` 步骤（小于阈值不补，避免步骤爆炸）；
 3. 无法表达成流程步骤的输入（右键、中键、滚轮等）**如实计入 skipped**，
-   转换上限 400 步，超了就截断并标记 ``truncated``。
+   转换上限 400 步，超了就截断并标记 ``truncated``；
+4. 坐标异常的点击计入 ``bad_coordinates`` 并跳过。
 """
 
 from __future__ import annotations
@@ -24,6 +30,10 @@ MAX_RECORDING_STEPS = 400
 DEFAULT_GAP_THRESHOLD = 0.05
 DEFAULT_KEY_DURATION = 0.05
 MIN_DURATION = 0.01
+#: 按住超过这个时长就当成「长按」而不是普通点击
+HOLD_THRESHOLD = 0.3
+#: 比例坐标允许的误差（超出这个范围说明录制器没归一化，是原始像素）
+COORD_TOLERANCE = 0.05
 
 #: 不支持的鼠标按键（流程里的 click 只表达左键）
 SUPPORTED_BUTTONS = ("left",)
@@ -36,6 +46,7 @@ class RecordingConversion:
 
     steps: list[dict] = field(default_factory=list)
     skipped: int = 0
+    bad_coordinates: int = 0
     truncated: bool = False
     notes: list[str] = field(default_factory=list)
 
@@ -55,6 +66,8 @@ class RecordingConversion:
         text = f"转换 {self.count} 步"
         if self.skipped:
             text += f"，跳过 {self.skipped} 个无法表达的输入"
+        if self.bad_coordinates:
+            text += f"，{self.bad_coordinates} 个点击坐标异常已跳过"
         if self.truncated:
             text += f"，超过上限已截断（{MAX_RECORDING_STEPS} 步）"
         return text
@@ -69,6 +82,16 @@ def _to_float(value: Any, default: float = 0.0) -> float:
 
 def _event_type(event: Mapping[str, Any]) -> str:
     return str(event.get("type", "") or "").strip().lower()
+
+
+def _ratio(value: Any) -> float | None:
+    """把坐标当比例值用；明显超出 0..1 说明录制器没归一化，返回 None。"""
+    number = _to_float(value, float("nan"))
+    if number != number:  # NaN
+        return None
+    if number < -COORD_TOLERANCE or number > 1 + COORD_TOLERANCE:
+        return None
+    return round(min(1.0, max(0.0, number)), 4)
 
 
 def convert_recording(
@@ -117,20 +140,22 @@ def convert_recording(
             if pending_mouse is None:
                 continue
             end = _to_float(event.get("time"), pending_mouse["time"])
-            x = _to_float(event.get("x"), pending_mouse["x"])
-            y = _to_float(event.get("y"), pending_mouse["y"])
-            timeline.append(
-                (
-                    pending_mouse["time"],
-                    end,
-                    {
-                        "type": "click",
-                        "x": round(x, 4),
-                        "y": round(y, 4),
-                        "duration": round(max(0.0, end - pending_mouse["time"]), 3),
-                    },
-                )
-            )
+            rx = _ratio(event.get("x", pending_mouse["x"]))
+            ry = _ratio(event.get("y", pending_mouse["y"]))
+            held = max(0.0, end - pending_mouse["time"])
+            if rx is None or ry is None:
+                result.bad_coordinates += 1
+                result.notes.append("跳过坐标异常的点击（录制器没拿到窗口尺寸，坐标是原始像素）")
+                pending_mouse = None
+                continue
+            if held >= HOLD_THRESHOLD:
+                # 长按：真的按住鼠标，而不是「点一下再等一会」
+                step: dict = {"type": "click", "x": rx, "y": ry, "hold": round(held, 3)}
+            else:
+                step = {"type": "click", "x": rx, "y": ry}
+                if held > 0:
+                    step["duration"] = round(held, 3)
+            timeline.append((pending_mouse["time"], end, step))
             pending_mouse = None
             continue
 
@@ -173,19 +198,20 @@ def convert_recording(
         )
         result.notes.append(f"按键 {key} 没有抬起事件，按 {default_key_duration}s 短按处理")
     if pending_mouse is not None:
-        timeline.append(
-            (
-                pending_mouse["time"],
-                pending_mouse["time"],
-                {
-                    "type": "click",
-                    "x": round(pending_mouse["x"], 4),
-                    "y": round(pending_mouse["y"], 4),
-                    "duration": 0.0,
-                },
+        rx = _ratio(pending_mouse["x"])
+        ry = _ratio(pending_mouse["y"])
+        if rx is None or ry is None:
+            result.bad_coordinates += 1
+            result.notes.append("跳过一个未抬起的按下事件（坐标异常）")
+        else:
+            timeline.append(
+                (
+                    pending_mouse["time"],
+                    pending_mouse["time"],
+                    {"type": "click", "x": rx, "y": ry},
+                )
             )
-        )
-        result.notes.append("鼠标按下没有抬起事件，按零时长点击处理")
+            result.notes.append("鼠标按下没有抬起事件，按零时长点击处理")
 
     timeline.sort(key=lambda item: item[0])
 

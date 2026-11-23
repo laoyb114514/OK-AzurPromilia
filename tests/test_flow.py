@@ -60,6 +60,12 @@ class FakeTask:
         if self._on_click:
             self._on_click(self, x, y)
 
+    def mouse_down(self, x=-1, y=-1, name=None, key="left"):
+        self.calls.append(("mouse_down", int(x), int(y)))
+
+    def mouse_up(self, name=None, key="left"):
+        self.calls.append(("mouse_up",))
+
     def press_key(self, key, down_time=0.02, **kwargs):
         self.calls.append(("key", key, round(float(down_time), 3)))
 
@@ -91,7 +97,6 @@ class FakeTask:
     def named(self, kind):
         return [call for call in self.calls if call[0] == kind]
 
-
 def make_flow(steps, name="t"):
     return parse_flow({"name": name, "steps": steps})
 
@@ -109,6 +114,25 @@ class TestFlowParsing(unittest.TestCase):
         self.assertEqual(flow.step_count(), 1)
         self.assertEqual(flow.depth(), 1)
         self.assertEqual(validate_flow(flow), [])
+
+    def test_click_hold_is_parsed_and_round_trips(self):
+        flow = make_flow([{"type": "click", "x": 0.5, "y": 0.5, "hold": 1.5}])
+        self.assertEqual(validate_flow(flow), [])
+        self.assertAlmostEqual(flow.steps[0].hold, 1.5)
+        import json
+
+        again = make_flow(json.loads(flow.to_json())["steps"])
+        self.assertAlmostEqual(again.steps[0].hold, 1.5)
+
+    def test_click_hold_negative_is_rejected(self):
+        flow = make_flow([{"type": "click", "x": 0.5, "y": 0.5, "hold": -1}])
+        errors = [issue for issue in validate_flow(flow) if issue.level == "error"]
+        self.assertTrue(any("hold" in str(issue) for issue in errors))
+
+    def test_click_hold_unknown_field_still_flagged(self):
+        flow = make_flow([{"type": "click", "x": 0.5, "y": 0.5, "durationn": 1}])
+        errors = [issue for issue in validate_flow(flow) if issue.level == "error"]
+        self.assertTrue(any("durationn" in str(issue) for issue in errors))
 
     def test_missing_steps_raises(self):
         with self.assertRaises(FlowFormatError):
@@ -251,6 +275,34 @@ class TestStepValidation(unittest.TestCase):
 
 
 class TestExecutorBasics(unittest.TestCase):
+    def test_click_hold_uses_mouse_down_up(self):
+        executor, task = make_executor(
+            make_flow([{"type": "click", "x": 0.5, "y": 0.5, "hold": 1.2}])
+        )
+        result = executor.run()
+        self.assertTrue(result.ok, result.summary())
+        self.assertEqual(task.named("mouse_down"), [("mouse_down", 960, 540)])
+        self.assertEqual(task.named("mouse_up"), [("mouse_up",)])
+        self.assertIn(("sleep", 1.2), task.calls)
+        self.assertEqual(task.named("click"), [], "有 hold 时不该再普通点击")
+
+    def test_click_hold_falls_back_without_mouse_api(self):
+        class NoMouseTask(FakeTask):
+            width = 1920
+            height = 1080
+
+            # 删掉 mouse_down / mouse_up
+            mouse_down = None
+            mouse_up = None
+
+        task = NoMouseTask()
+        executor, _ = make_executor(
+            make_flow([{"type": "click", "x": 0.4, "y": 0.6, "hold": 0.8}]), task
+        )
+        self.assertTrue(executor.run().ok)
+        self.assertEqual(task.named("click"), [("click", 0.4, 0.6)])
+        self.assertIn(("sleep", 0.8), task.calls)
+
     def test_click_point(self):
         executor, task = make_executor(make_flow([{"type": "click", "x": 0.25, "y": 0.75}]))
         result = executor.run()

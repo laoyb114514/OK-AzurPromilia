@@ -199,6 +199,33 @@ class FlowContext:
             return
         self.task.click(float(x), float(y))
 
+    def click_hold(self, x: float, y: float, hold: float) -> None:
+        """按住 ``hold`` 秒再松开（长按 / 蓄力）。
+
+        框架有 ``mouse_down`` / ``mouse_up``，但它们收的是绝对坐标，
+        所以这里用任务的 ``width`` / ``height`` 把比例坐标换算过去；
+        拿不到尺寸就退回「普通点击 + 等待」，并在日志里说明——**不静默改变语义**。
+        """
+        down = getattr(self.task, "mouse_down", None)
+        up = getattr(self.task, "mouse_up", None)
+        width = getattr(self.task, "width", 0) or 0
+        height = getattr(self.task, "height", 0) or 0
+        if not (callable(down) and callable(up)) or width <= 0 or height <= 0:
+            self.click(float(x), float(y))
+            self.sleep(max(0.0, float(hold)))
+            self.log_fallback(f"任务不支持按住鼠标，{hold:g}s 长按退化为「点击 + 等待」")
+            return
+        down(round(float(x) * width), round(float(y) * height))
+        self.sleep(max(0.0, float(hold)))
+        up()
+
+    def log_fallback(self, message: str) -> None:
+        """能力缺失时的说明通道（有 task.log_info 就用它）。"""
+        logger = getattr(self.task, "log_info", None)
+        if callable(logger):
+            with contextlib.suppress(Exception):
+                logger(message)
+
     def key(self, key: str, duration: float = 0.0) -> None:
         press_key = getattr(self.task, "press_key", None)
         if callable(press_key):
@@ -345,9 +372,12 @@ class FlowExecutor:
                 if not reached:
                     raise FlowError(f"点击目标 {step.template} 未出现", path=step.path, step_type="click")
                 x, y = self._click_point_of(box, fallback=(0.5, 0.5))
-                self.context.click(x, y)
             else:
-                self.context.click(step.x or 0.0, step.y or 0.0)
+                x, y = step.x or 0.0, step.y or 0.0
+            if step.hold:
+                self.context.click_hold(x, y, step.hold)
+            else:
+                self.context.click(x, y)
             if step.duration:
                 self.context.sleep(step.duration)
 
