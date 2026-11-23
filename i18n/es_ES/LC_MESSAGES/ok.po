@@ -738,3 +738,66 @@ msgstr "Etiqueta de origen guardada en el registro, para distinguir liquidación
 
 msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
 msgstr "Se descarta el texto OCR por debajo de esta confianza; 0 lo conserva todo"
+
+msgid "一条龙顺序"
+msgstr "Orden de la rutina diaria"
+
+msgid "保存顺序与开关"
+msgstr "Guardar orden e interruptores"
+
+msgid "拖动任务调整顺序；勾选框控制该项是否执行。任务运行中不能保存。"
+msgstr "Arrastra las tareas para reordenarlas; la casilla decide si se ejecuta. No se puede guardar mientras la tarea está en marcha."
+
+msgid "一键日常的执行顺序"
+msgstr "Orden de ejecución de la rutina diaria"
+
+msgid "已载入当前顺序；拖动或勾选后点「保存」"
+msgstr "Orden actual cargado; arrastra o marca y pulsa Guardar"
+
+msgid "已恢复默认顺序（记得点保存）"
+msgstr "Orden predeterminado restaurado (recuerda guardar)"
+
+msgid "顺序已保存"
+msgstr "Orden guardado"
+
+msgid "上移"
+msgstr "Subir"
+
+msgid "下移"
+msgstr "Bajar"
+
+msgid "恢复默认"
+msgstr "Restaurar predeterminado"
+
+msgid "没有找到「一键日常」任务，无法编辑顺序"
+msgstr "No se encontró la tarea «Rutina diaria»; no se puede editar el orden"
+
+msgid "没有找到「一键日常」任务"
+msgstr "No se encontró la tarea «Rutina diaria»"
+
+msgid "任务正在运行，先停止再改顺序"
+msgstr "La tarea está en marcha; deténla antes de cambiar el orden"
+
+msgid "列表是空的"
+msgstr "La lista está vacía"
+
+msgid "已保存：{order}"
+msgstr "Guardado: {order}"
+
+msgid "保存失败：{error}"
+msgstr "Error al guardar: {error}"
+
+msgid "导航路线"
+msgstr "Ruta de navegación"
+
+msgid "按保存好的路线逐个航点导航/等待/点击，跑通一次就能存下来复用。路线文件在 configs/routes 下。"
+msgstr "Recorre una ruta guardada punto por punto (navegar, esperar, hacer clic); cuando funcione puedes guardarla y reutilizarla. Los archivos de ruta están en configs/routes."
+
+msgid "路线文件"
+msgstr "Archivo de ruta"
+
+msgid "configs/routes 下的文件名（不带 .json）"
+msgstr "Nombre de archivo en configs/routes (sin .json)"
+
+msgid "跳过上次已经跑完的航点"
+msgstr "Omite los puntos ya completados la última vez"

@@ -736,3 +736,66 @@ msgstr "Source tag written into the ledger, to tell settlement / manual / shop a
 
 msgid "OCR 置信度低于该值的文本会被丢弃，0 表示全部保留"
 msgstr "OCR text below this confidence is dropped; 0 keeps everything"
+
+msgid "一条龙顺序"
+msgstr "Daily run order"
+
+msgid "保存顺序与开关"
+msgstr "Save order and switches"
+
+msgid "拖动任务调整顺序；勾选框控制该项是否执行。任务运行中不能保存。"
+msgstr "Drag tasks to reorder; the checkbox controls whether the item runs. Saving is blocked while the task is running."
+
+msgid "一键日常的执行顺序"
+msgstr "Execution order of the daily run"
+
+msgid "已载入当前顺序；拖动或勾选后点「保存」"
+msgstr "Current order loaded; drag or tick, then click Save"
+
+msgid "已恢复默认顺序（记得点保存）"
+msgstr "Default order restored (remember to save)"
+
+msgid "顺序已保存"
+msgstr "Order saved"
+
+msgid "上移"
+msgstr "Move up"
+
+msgid "下移"
+msgstr "Move down"
+
+msgid "恢复默认"
+msgstr "Restore default"
+
+msgid "没有找到「一键日常」任务，无法编辑顺序"
+msgstr "The \"Daily run\" task was not found; the order cannot be edited"
+
+msgid "没有找到「一键日常」任务"
+msgstr "The \"Daily run\" task was not found"
+
+msgid "任务正在运行，先停止再改顺序"
+msgstr "The task is running; stop it before changing the order"
+
+msgid "列表是空的"
+msgstr "The list is empty"
+
+msgid "已保存：{order}"
+msgstr "Saved: {order}"
+
+msgid "保存失败：{error}"
+msgstr "Save failed: {error}"
+
+msgid "导航路线"
+msgstr "Navigation route"
+
+msgid "按保存好的路线逐个航点导航/等待/点击，跑通一次就能存下来复用。路线文件在 configs/routes 下。"
+msgstr "Walk through a saved route waypoint by waypoint (navigate / wait / click); once it works you can save and reuse it. Route files live in configs/routes."
+
+msgid "路线文件"
+msgstr "Route file"
+
+msgid "configs/routes 下的文件名（不带 .json）"
+msgstr "File name under configs/routes (without .json)"
+
+msgid "跳过上次已经跑完的航点"
+msgstr "Skip the waypoints already finished last time"

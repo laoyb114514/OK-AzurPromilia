@@ -95,8 +95,12 @@ class CheckpointStore:
         safe = _SAFE_KEY.sub("_", str(key or "flow")).strip("_") or "flow"
         return self.root / f"{safe}.json"
 
+    def for_key(self, key: str) -> FlowCheckpoint:
+        """按任意标识取断点（路线等非流程对象也复用这套存储）。"""
+        return FlowCheckpoint(self, str(key or "flow"))
+
     def for_flow(self, flow: Flow) -> FlowCheckpoint:
-        return FlowCheckpoint(self, flow.key)
+        return self.for_key(flow.key)
 
     def load_record(self, key: str) -> dict | None:
         path = self._path(key)

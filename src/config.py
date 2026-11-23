@@ -107,6 +107,7 @@ config = {
         ["src.tasks.onetime.commission_daily_task", "CommissionDailyTask"],
         ["src.tasks.onetime.claim_daily_task", "ClaimDailyTask"],
         ["src.tasks.onetime.flow_task", "FlowTask"],
+        ["src.tasks.onetime.route_task", "RouteTask"],
         ["src.tasks.onetime.settlement_task", "SettlementTask"],
         ["src.tasks.test.test_screenshot_task", "TestScreenshotTask"],
         ["src.tasks.test.test_interaction_task", "TestInteractionTask"],
@@ -116,6 +117,7 @@ config = {
     "custom_tabs": [
         ["src.gui.global_config_tab", "GlobalConfigTab"],
         ["src.gui.account_config_tab", "AccountConfigTab"],
+        ["src.gui.daily_order_tab", "DailyOrderTab"],
         ["src.gui.flow_tab", "FlowTab"],
         ["src.gui.offline_tools_tab", "OfflineToolsTab"],
         ["src.gui.diagnostics_tab", "DiagnosticsTab"],

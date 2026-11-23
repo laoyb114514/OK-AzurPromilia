@@ -33,6 +33,10 @@
   - **抽卡分析 (`src/core/gacha/`)**：保底层 + 伯努利层模型，算期望抽数、预算内完成概率与最坏情况。
   - **记账与报表 (`src/core/ledger.py`)**：结算文字解析成 `ledger.jsonl`（「结算记账」任务可 OCR 画面），一条龙每项执行写入 `runs.jsonl`，都能导出 CSV。
   - 界面在「离线工具」页（`src/gui/offline_tools_tab.py`）。
+- **复用与固化流程**：
+  - **一条龙顺序 (`src/tasks/daily/order.py` + 「一条龙顺序」页)**：拖动调整「一键日常」各子任务的执行顺序与开关。
+  - **导航路线 (`src/core/route.py` + 「导航路线」任务)**：把「怎么走到某界面」写成航点串，跑通即存、可断点续跑。
+  - **轮椅方案 (`src/core/replay.py`)**：把多段录制拼成一套固定流程，可循环、可导出成流程文件。
 
 ## 快速导航
 
@@ -41,6 +45,7 @@
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
 - [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
+- [一条龙顺序、导航路线与轮椅方案](dev/routes_and_replay.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 
@@ -67,16 +72,18 @@
 │   │   ├── queue/              任务队列：模型、执行器
 │   │   ├── growth/             养成计算：数据模型、计算、CSV/PNG 导出
 │   │   ├── gacha/              抽卡概率模型（保底层 + 伯努利层）
+│   │   ├── route.py            导航路线：航点模型、校验、执行（含断点）
+│   │   ├── replay.py           轮椅方案：多段录制拼成流程
 │   │   ├── ledger.py           结算记账（ledger.jsonl）与运行报表（runs.jsonl）
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
-│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow、Settlement）
+│   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow、Route、Settlement）
 │   │   ├── trigger/            触发式任务（AutoJenga、AutoRhythm、SkipDialog、StarLink、TreasureUnlock）
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
 │   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计、运行报表）
 │   │   └── account/            账号作用域配置存储
-│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 流程与队列 / 离线工具 / 工具与诊断）
+│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 一条龙顺序 / 流程与队列 / 离线工具 / 工具与诊断）
 │   ├── interaction/            游戏交互（GameInteraction 模拟键鼠、ScreenPosition）
 │   ├── image/                  图像算法（旋转模板匹配、连通域、圆弧拟合、音游/叠叠乐检测等）
 │   ├── yolo/                   YOLO 模型注册与 OpenVINO 推理
