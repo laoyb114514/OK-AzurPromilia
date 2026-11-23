@@ -1,0 +1,98 @@
+# 隐私遮挡、坐标拾取与支持工具（批次 E-1）
+
+## 1. UID 遮挡
+
+`src/core/privacy.py` +「隐私遮挡」页。
+
+- 最多 **8 块**，每块可以是**纯色**（`#RRGGBB`，默认黑）或**马赛克**（缩小再放大，真的糊掉）；
+- 坐标一律存 **1920×1080 参考空间**，绘制时按当前画面等比换算 —— 换分辨率不用重调；
+- 配置存 `configs/privacy.json`，默认一块「UID」盖住左下角（与原 `make_bottom_left_black` 同位置）；
+- **作用于落盘截图**：`src/config.py` 的 `screenshot_processor` 现在走
+  `make_privacy_processor()`，日志里的截图、诊断包里的图、失败帧都被遮住；
+  识别用的原始帧不受影响（否则会影响识别精度）。
+
+> 「只在游戏前台显示」这条是**屏幕显示**的要求，遮挡发生在落盘路径上，
+> 因此无条件生效 —— 截图不会因为切窗口而漏遮。配置里的 `only_foreground`
+> 留给覆盖层实现使用。
+
+页面（`src/gui/privacy_tab.py`）：左边块列表、中间 16:9 预览（按比例画出遮挡框、
+选中项高亮）、右边参数编辑（X/Y/宽/高/颜色/模式/标签）、底部增删改/保存/恢复默认。
+
+## 2. 坐标拾取
+
+`src/core/coord_picker.py`：
+
+| 函数 | 作用 |
+|------|------|
+| `client_to_reference(x, y, w, h)` | 客户区像素 → 1920×1080 参考坐标 |
+| `reference_to_client(rx, ry, w, h)` | 反向换算 |
+| `format_snippet(rx, ry)` | 复制片段 `"x": 960, "y": 540` |
+| `color_hex(frame, x, y)` | 该点颜色 `#RRGGBB` |
+| `pick(frame, x, y)` | 一次拾取的完整结果（客户区 + 参考 + 颜色 + 片段） |
+
+「隐私遮挡」页的「坐标拾取」采用**延时取点**：点按钮后 1 秒取当前鼠标位置与屏幕颜色，
+换算成参考坐标填进当前块。
+
+> 需求里写的是「全屏十字线」。做成覆盖层需要窗口句柄、多屏坐标换算与 DPI 处理，
+> 而且只能在真机上验证；先把**换算逻辑和可靠的取点**做扎实（都有测试），
+> 覆盖层留作后续增强，接口已经准备好了。
+
+## 3. 语言包
+
+`src/core/lang_pack.py` +「工具与诊断 → 语言包」。
+
+```text
+语言包EN/
+├── i18n/en_US/LC_MESSAGES/ok.po
+└── assets/lang/home.json
+```
+
+- 扫描程序目录下的 `语言包<代码>/` 文件夹；
+- **只允许写 `i18n/` 与 `assets/lang/`**，出现其它路径直接拒绝（不写任何文件）；
+- 应用前把当前这两个目录备份到 `backups/langpack_<时间戳>/`；
+- 「还原最近备份」会先给当前状态再做一份备份，所以来回切也不会丢东西。
+
+## 4. 诊断包
+
+`src/core/diagnostics_bundle.py` +「工具与诊断 → 诊断包」。
+
+```text
+ok-ap-diagnostics-<时间戳>.zip
+├── manifest.json         # 每个文件的大小 + SHA-256（判断包有没有坏）
+├── system.json           # 平台、Python、版本、游戏 exe、支持分辨率、时间
+├── configs/*.json        # 运行配置（不含 profiles 大快照）
+├── logs/ok-script*.log   # 日志尾部（默认 3 个文件、每个最多 2MB）
+├── templates.json        # 模板清单（coco categories）
+├── runs.json             # 运行报表统计（含每任务成功率/平均用时）
+├── ledger.json           # 记账汇总（只放合计与前 50 个物品，不放明细）
+└── failure_frames/…      # 索引 + 最新一帧
+```
+
+隐私上的默认取舍：**截图默认不打包**（页面有「包含截图」开关），
+记账只给合计、不给逐条明细；失败帧因为已经过了遮挡处理器，可以带。
+
+## 5. 崩溃诊断
+
+`src/core/crash_guard.py`：
+
+- `sys.excepthook`：主线程未捕获异常；
+- `threading.excepthook`：后台线程异常（框架后台线程不少）；
+- `faulthandler`：解释器级崩溃写到 `logs/crash_faulthandler.log`。
+
+每次记录写 `crashes/crash_<时间戳>_<pid>.txt`（时间/线程/pid/Python 版本/cwd + 完整堆栈），
+并自动在同目录打一份诊断包（`make_bundle=True`，里面带崩溃类型与消息）。
+
+- **任何异常都不外抛**（记录失败就返回 `CrashRecord(error=...)`）；
+- UI 线程的异常**只提示不退出**：`notify` 回调负责提示，是否退出仍由框架决定；
+- `close()` 会卸掉钩子并关掉 faulthandler 句柄（测试与退出清理用）。
+
+## 6. 测试覆盖
+
+| 测试 | 覆盖 |
+|------|------|
+| `tests/test_privacy_and_diagnostics.py` | 颜色解析/格式化、块换算与夹取、8 块上限、纯色与马赛克绘制、配置读写与损坏容错、`screenshot_processor` 真的画上去；坐标换算与取色；语言包扫描/白名单拒绝/备份还原；诊断包内容与 manifest、截图开关、空目录也能打包；崩溃守卫安装幂等、堆栈落盘、诊断包、线程钩子、`close()` |
+| `tests/test_config.py` | 新增 Tab（隐私遮挡）已注册且可导入 |
+
+```bash
+uv run python -m unittest discover -s tests
+```

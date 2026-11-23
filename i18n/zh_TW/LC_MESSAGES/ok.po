@@ -790,3 +790,123 @@ msgstr "configs/routes 下的檔案名（不帶 .json）"
 
 msgid "跳过上次已经跑完的航点"
 msgstr "跳過上次已經跑完的航點"
+
+msgid "隐私遮挡"
+msgstr "隱私遮擋"
+
+msgid "宽"
+msgstr "寬"
+
+msgid "高"
+msgstr "高"
+
+msgid "标签，如 UID / 昵称"
+msgstr "標籤，如 UID / 暱稱"
+
+msgid "UID / 昵称 / 聊天遮挡"
+msgstr "UID / 暱稱 / 聊天遮擋"
+
+msgid "已添加 1 块，记得点保存"
+msgstr "已新增 1 塊，記得點儲存"
+
+msgid "已删除 1 块，记得点保存"
+msgstr "已刪除 1 塊，記得點儲存"
+
+msgid "已应用修改，记得点保存"
+msgstr "已套用修改，記得點儲存"
+
+msgid "已恢复默认遮挡，记得点保存"
+msgstr "已恢復預設遮擋，記得點儲存"
+
+msgid "遮挡配置已保存"
+msgstr "遮擋設定已儲存"
+
+msgid "1 秒后取当前鼠标位置与颜色，请把鼠标移到目标位置"
+msgstr "1 秒後取目前滑鼠位置與顏色，請把滑鼠移到目標位置"
+
+msgid "纯色"
+msgstr "純色"
+
+msgid "马赛克"
+msgstr "馬賽克"
+
+msgid "启用遮挡"
+msgstr "啟用遮擋"
+
+msgid "关闭遮挡"
+msgstr "關閉遮擋"
+
+msgid "添加"
+msgstr "新增"
+
+msgid "应用修改"
+msgstr "套用修改"
+
+msgid "坐标拾取"
+msgstr "座標拾取"
+
+msgid "保存"
+msgstr "儲存"
+
+msgid "没有选中遮挡块"
+msgstr "沒有選中遮擋塊"
+
+msgid "坐标用 1920×1080 参考空间；最多 {max_blocks} 块。遮挡只作用于落盘截图与失败帧。"
+msgstr "座標用 1920×1080 參考空間；最多 {max_blocks} 塊。遮擋只作用於落盤截圖與失敗幀。"
+
+msgid "已载入 {count} 块遮挡"
+msgstr "已載入 {count} 塊遮擋"
+
+msgid "已保存到 {path}（下次截图生效）"
+msgstr "已儲存到 {path}（下次截圖生效）"
+
+msgid "取到客户区 ({x}, {y}) → 参考 ({rx:g}, {ry:g})，颜色 {color}"
+msgstr "取到客戶區 ({x}, {y}) → 參考 ({rx:g}, {ry:g})，顏色 {color}"
+
+msgid "最多 {max_blocks} 块遮挡"
+msgstr "最多 {max_blocks} 塊遮擋"
+
+msgid "诊断包"
+msgstr "診斷包"
+
+msgid "语言包"
+msgstr "語言包"
+
+msgid "包含截图"
+msgstr "包含截圖"
+
+msgid "生成诊断包"
+msgstr "產生診斷包"
+
+msgid "默认不含截图；记账只放合计，不放明细"
+msgstr "預設不含截圖；記帳只放合計，不放明細"
+
+msgid "扫描程序目录下的「语言包<代码>」文件夹；应用前自动备份 i18n 与 assets/lang"
+msgstr "掃描程式目錄下的「語言包<代碼>」資料夾；套用前自動備份 i18n 與 assets/lang"
+
+msgid "选择保存目录"
+msgstr "選擇儲存目錄"
+
+msgid "把配置、日志、模板清单、失败帧与系统信息打成一个 zip"
+msgstr "把設定、日誌、模板清單、失敗幀與系統資訊打成一個 zip"
+
+msgid "还原最近备份"
+msgstr "還原最近備份"
+
+msgid "（没有找到语言包）"
+msgstr "（沒有找到語言包）"
+
+msgid "把「语言包<代码>」文件夹放到程序目录下再刷新"
+msgstr "把「語言包<代碼>」資料夾放到程式目錄下再重新整理"
+
+msgid "没有选中语言包"
+msgstr "沒有選中語言包"
+
+msgid "没有可用的语言包备份"
+msgstr "沒有可用的語言包備份"
+
+msgid "找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/lang"
+msgstr "找到 {count} 個語言包；套用前會自動備份 i18n 與 assets/lang"
+
+msgid "已还原 {name}"
+msgstr "已還原 {name}"

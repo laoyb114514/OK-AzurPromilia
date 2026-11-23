@@ -793,3 +793,123 @@ msgstr "configs/routes 아래의 파일 이름(.json 제외)"
 
 msgid "跳过上次已经跑完的航点"
 msgstr "지난번에 끝난 경유지를 건너뜁니다"
+
+msgid "隐私遮挡"
+msgstr "개인정보 가리기"
+
+msgid "宽"
+msgstr "너비"
+
+msgid "高"
+msgstr "높이"
+
+msgid "标签，如 UID / 昵称"
+msgstr "라벨 (예: UID / 닉네임)"
+
+msgid "UID / 昵称 / 聊天遮挡"
+msgstr "UID / 닉네임 / 채팅 가리기"
+
+msgid "已添加 1 块，记得点保存"
+msgstr "1개 추가했습니다(저장을 잊지 마세요)"
+
+msgid "已删除 1 块，记得点保存"
+msgstr "1개 삭제했습니다(저장을 잊지 마세요)"
+
+msgid "已应用修改，记得点保存"
+msgstr "변경 사항을 적용했습니다(저장을 잊지 마세요)"
+
+msgid "已恢复默认遮挡，记得点保存"
+msgstr "기본 가리기로 되돌렸습니다(저장을 잊지 마세요)"
+
+msgid "遮挡配置已保存"
+msgstr "가리기 설정을 저장했습니다"
+
+msgid "1 秒后取当前鼠标位置与颜色，请把鼠标移到目标位置"
+msgstr "1초 뒤 마우스 위치와 색을 가져옵니다. 먼저 마우스를 대상으로 옮기세요"
+
+msgid "纯色"
+msgstr "단색"
+
+msgid "马赛克"
+msgstr "모자이크"
+
+msgid "启用遮挡"
+msgstr "가리기 사용"
+
+msgid "关闭遮挡"
+msgstr "가리기 끄기"
+
+msgid "添加"
+msgstr "추가"
+
+msgid "应用修改"
+msgstr "변경 적용"
+
+msgid "坐标拾取"
+msgstr "좌표 추출"
+
+msgid "保存"
+msgstr "저장"
+
+msgid "没有选中遮挡块"
+msgstr "선택된 가리기 블록이 없습니다"
+
+msgid "坐标用 1920×1080 参考空间；最多 {max_blocks} 块。遮挡只作用于落盘截图与失败帧。"
+msgstr "좌표는 1920×1080 기준 공간을 사용합니다. 최대 {max_blocks}개. 가리기는 저장되는 스크린샷과 실패 프레임에만 적용됩니다."
+
+msgid "已载入 {count} 块遮挡"
+msgstr "가리기 {count}개를 불러왔습니다"
+
+msgid "已保存到 {path}（下次截图生效）"
+msgstr "{path}에 저장했습니다(다음 스크린샷부터 적용)"
+
+msgid "取到客户区 ({x}, {y}) → 参考 ({rx:g}, {ry:g})，颜色 {color}"
+msgstr "클라이언트 ({x}, {y}) → 기준 ({rx:g}, {ry:g}), 색 {color}"
+
+msgid "最多 {max_blocks} 块遮挡"
+msgstr "가리기는 최대 {max_blocks}개"
+
+msgid "诊断包"
+msgstr "진단 패키지"
+
+msgid "语言包"
+msgstr "언어 팩"
+
+msgid "包含截图"
+msgstr "스크린샷 포함"
+
+msgid "生成诊断包"
+msgstr "진단 패키지 생성"
+
+msgid "默认不含截图；记账只放合计，不放明细"
+msgstr "기본적으로 스크린샷은 포함하지 않습니다. 기록은 합계만 넣고 내역은 넣지 않습니다"
+
+msgid "扫描程序目录下的「语言包<代码>」文件夹；应用前自动备份 i18n 与 assets/lang"
+msgstr "앱 폴더의 '語言包<코드>' 폴더를 찾습니다. 적용 전에 i18n과 assets/lang를 자동 백업합니다"
+
+msgid "选择保存目录"
+msgstr "저장 폴더 선택"
+
+msgid "把配置、日志、模板清单、失败帧与系统信息打成一个 zip"
+msgstr "설정, 로그, 템플릿 목록, 실패 프레임, 시스템 정보를 하나의 zip으로 묶습니다"
+
+msgid "还原最近备份"
+msgstr "최근 백업 복원"
+
+msgid "（没有找到语言包）"
+msgstr "(언어 팩을 찾지 못했습니다)"
+
+msgid "把「语言包<代码>」文件夹放到程序目录下再刷新"
+msgstr "'語言包<코드>' 폴더를 앱 폴더에 두고 새로 고침하세요"
+
+msgid "没有选中语言包"
+msgstr "선택된 언어 팩이 없습니다"
+
+msgid "没有可用的语言包备份"
+msgstr "사용 가능한 언어 팩 백업이 없습니다"
+
+msgid "找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/lang"
+msgstr "언어 팩 {count}개를 찾았습니다. 적용 전에 i18n과 assets/lang를 자동 백업합니다"
+
+msgid "已还原 {name}"
+msgstr "{name}을(를) 복원했습니다"

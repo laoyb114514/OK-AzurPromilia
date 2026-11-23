@@ -799,3 +799,123 @@ msgstr "File name under configs/routes (without .json)"
 
 msgid "跳过上次已经跑完的航点"
 msgstr "Skip the waypoints already finished last time"
+
+msgid "隐私遮挡"
+msgstr "Privacy masking"
+
+msgid "宽"
+msgstr "W"
+
+msgid "高"
+msgstr "H"
+
+msgid "标签，如 UID / 昵称"
+msgstr "Label, e.g. UID / nickname"
+
+msgid "UID / 昵称 / 聊天遮挡"
+msgstr "UID / nickname / chat masking"
+
+msgid "已添加 1 块，记得点保存"
+msgstr "Added one block (remember to save)"
+
+msgid "已删除 1 块，记得点保存"
+msgstr "Removed one block (remember to save)"
+
+msgid "已应用修改，记得点保存"
+msgstr "Changes applied (remember to save)"
+
+msgid "已恢复默认遮挡，记得点保存"
+msgstr "Default masking restored (remember to save)"
+
+msgid "遮挡配置已保存"
+msgstr "Masking config saved"
+
+msgid "1 秒后取当前鼠标位置与颜色，请把鼠标移到目标位置"
+msgstr "Capturing the cursor position and colour in 1 second; move the mouse to the target first"
+
+msgid "纯色"
+msgstr "Solid"
+
+msgid "马赛克"
+msgstr "Mosaic"
+
+msgid "启用遮挡"
+msgstr "Masking on"
+
+msgid "关闭遮挡"
+msgstr "Masking off"
+
+msgid "添加"
+msgstr "Add"
+
+msgid "应用修改"
+msgstr "Apply changes"
+
+msgid "坐标拾取"
+msgstr "Pick coordinates"
+
+msgid "保存"
+msgstr "Save"
+
+msgid "没有选中遮挡块"
+msgstr "No mask block selected"
+
+msgid "坐标用 1920×1080 参考空间；最多 {max_blocks} 块。遮挡只作用于落盘截图与失败帧。"
+msgstr "Coordinates use the 1920×1080 reference space; up to {max_blocks} blocks. Masking applies to saved screenshots and failure frames only."
+
+msgid "已载入 {count} 块遮挡"
+msgstr "Loaded {count} mask block(s)"
+
+msgid "已保存到 {path}（下次截图生效）"
+msgstr "Saved to {path} (applies from the next screenshot)"
+
+msgid "取到客户区 ({x}, {y}) → 参考 ({rx:g}, {ry:g})，颜色 {color}"
+msgstr "Client ({x}, {y}) → reference ({rx:g}, {ry:g}), colour {color}"
+
+msgid "最多 {max_blocks} 块遮挡"
+msgstr "At most {max_blocks} mask blocks"
+
+msgid "诊断包"
+msgstr "Diagnostics bundle"
+
+msgid "语言包"
+msgstr "Language pack"
+
+msgid "包含截图"
+msgstr "Include screenshots"
+
+msgid "生成诊断包"
+msgstr "Create diagnostics bundle"
+
+msgid "默认不含截图；记账只放合计，不放明细"
+msgstr "Screenshots excluded by default; the ledger contributes totals only, not details"
+
+msgid "扫描程序目录下的「语言包<代码>」文件夹；应用前自动备份 i18n 与 assets/lang"
+msgstr "Scans \"語言包<code>\" folders next to the app; i18n and assets/lang are backed up before applying"
+
+msgid "选择保存目录"
+msgstr "Choose the output folder"
+
+msgid "把配置、日志、模板清单、失败帧与系统信息打成一个 zip"
+msgstr "Packs configs, logs, template list, failure frames and system info into one zip"
+
+msgid "还原最近备份"
+msgstr "Restore latest backup"
+
+msgid "（没有找到语言包）"
+msgstr "(no language pack found)"
+
+msgid "把「语言包<代码>」文件夹放到程序目录下再刷新"
+msgstr "Put a \"語言包<code>\" folder next to the app, then refresh"
+
+msgid "没有选中语言包"
+msgstr "No language pack selected"
+
+msgid "没有可用的语言包备份"
+msgstr "No language pack backup available"
+
+msgid "找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/lang"
+msgstr "Found {count} language pack(s); i18n and assets/lang are backed up before applying"
+
+msgid "已还原 {name}"
+msgstr "Restored {name}"

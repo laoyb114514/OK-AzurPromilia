@@ -277,6 +277,8 @@ label_class
 # 记账与运行报表
 /ledger.jsonl
 /runs.jsonl
+# 崩溃记录
+/crashes/
 
 
 ############################

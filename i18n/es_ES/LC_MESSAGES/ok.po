@@ -801,3 +801,123 @@ msgstr "Nombre de archivo en configs/routes (sin .json)"
 
 msgid "跳过上次已经跑完的航点"
 msgstr "Omite los puntos ya completados la última vez"
+
+msgid "隐私遮挡"
+msgstr "Ocultación de privacidad"
+
+msgid "宽"
+msgstr "An"
+
+msgid "高"
+msgstr "Al"
+
+msgid "标签，如 UID / 昵称"
+msgstr "Etiqueta, p. ej. UID / apodo"
+
+msgid "UID / 昵称 / 聊天遮挡"
+msgstr "Ocultación de UID / apodo / chat"
+
+msgid "已添加 1 块，记得点保存"
+msgstr "Se añadió un bloque (recuerda guardar)"
+
+msgid "已删除 1 块，记得点保存"
+msgstr "Se eliminó un bloque (recuerda guardar)"
+
+msgid "已应用修改，记得点保存"
+msgstr "Cambios aplicados (recuerda guardar)"
+
+msgid "已恢复默认遮挡，记得点保存"
+msgstr "Máscara predeterminada restaurada (recuerda guardar)"
+
+msgid "遮挡配置已保存"
+msgstr "Configuración de máscaras guardada"
+
+msgid "1 秒后取当前鼠标位置与颜色，请把鼠标移到目标位置"
+msgstr "En 1 segundo se captura la posición y el color del cursor; mueve antes el ratón al objetivo"
+
+msgid "纯色"
+msgstr "Color sólido"
+
+msgid "马赛克"
+msgstr "Mosaico"
+
+msgid "启用遮挡"
+msgstr "Ocultación activada"
+
+msgid "关闭遮挡"
+msgstr "Ocultación desactivada"
+
+msgid "添加"
+msgstr "Añadir"
+
+msgid "应用修改"
+msgstr "Aplicar cambios"
+
+msgid "坐标拾取"
+msgstr "Capturar coordenadas"
+
+msgid "保存"
+msgstr "Guardar"
+
+msgid "没有选中遮挡块"
+msgstr "Ningún bloque seleccionado"
+
+msgid "坐标用 1920×1080 参考空间；最多 {max_blocks} 块。遮挡只作用于落盘截图与失败帧。"
+msgstr "Las coordenadas usan el espacio de referencia 1920×1080; hasta {max_blocks} bloques. La ocultación solo se aplica a las capturas guardadas y a los fotogramas de error."
+
+msgid "已载入 {count} 块遮挡"
+msgstr "Se cargaron {count} bloque(s) de ocultación"
+
+msgid "已保存到 {path}（下次截图生效）"
+msgstr "Guardado en {path} (se aplica desde la próxima captura)"
+
+msgid "取到客户区 ({x}, {y}) → 参考 ({rx:g}, {ry:g})，颜色 {color}"
+msgstr "Cliente ({x}, {y}) → referencia ({rx:g}, {ry:g}), color {color}"
+
+msgid "最多 {max_blocks} 块遮挡"
+msgstr "Como máximo {max_blocks} bloques"
+
+msgid "诊断包"
+msgstr "Paquete de diagnóstico"
+
+msgid "语言包"
+msgstr "Paquete de idioma"
+
+msgid "包含截图"
+msgstr "Incluir capturas"
+
+msgid "生成诊断包"
+msgstr "Crear paquete de diagnóstico"
+
+msgid "默认不含截图；记账只放合计，不放明细"
+msgstr "Las capturas se excluyen por defecto; el registro aporta solo totales, no el detalle"
+
+msgid "扫描程序目录下的「语言包<代码>」文件夹；应用前自动备份 i18n 与 assets/lang"
+msgstr "Busca carpetas «語言包<código>» junto a la app; antes de aplicar se respaldan i18n y assets/lang"
+
+msgid "选择保存目录"
+msgstr "Elegir carpeta de salida"
+
+msgid "把配置、日志、模板清单、失败帧与系统信息打成一个 zip"
+msgstr "Emmpaqueta configuración, registros, lista de plantillas, fotogramas fallidos e información del sistema en un zip"
+
+msgid "还原最近备份"
+msgstr "Restaurar la última copia"
+
+msgid "（没有找到语言包）"
+msgstr "(no se encontró ningún paquete de idioma)"
+
+msgid "把「语言包<代码>」文件夹放到程序目录下再刷新"
+msgstr "Coloca una carpeta «語言包<código>» junto a la app y actualiza"
+
+msgid "没有选中语言包"
+msgstr "Ningún paquete de idioma seleccionado"
+
+msgid "没有可用的语言包备份"
+msgstr "No hay copia de seguridad del paquete de idioma"
+
+msgid "找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/lang"
+msgstr "Se encontraron {count} paquete(s) de idioma; antes de aplicar se respaldan i18n y assets/lang"
+
+msgid "已还原 {name}"
+msgstr "Se restauró {name}"

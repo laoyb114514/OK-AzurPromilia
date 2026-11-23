@@ -17,6 +17,7 @@ from PySide6.QtGui import QColor, QImage, QPixmap
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QTableWidgetItem, QVBoxLayout, QWidget
 from qfluentwidgets import (
     BodyLabel,
+    CheckBox,
     ComboBox,
     FluentIcon,
     InfoBar,
@@ -29,7 +30,9 @@ from qfluentwidgets import (
 )
 
 from src.core.asset_pack import install_pack
+from src.core.diagnostics_bundle import build_bundle
 from src.core.failure_frame_store import FailureFrameStore
+from src.core.lang_pack import apply_pack, list_backups, restore_backup, scan_packs
 from src.core.template_rescorer import TemplateRescorer
 
 PREBUILD_DELAY_MS = 3000
@@ -110,6 +113,11 @@ class DiagnosticsTab(CustomTab):
         self.pack_status: BodyLabel | None = None
         self.install_button: PrimaryPushButton | None = None
         self.browse_button: PushButton | None = None
+        self.include_shots: CheckBox | None = None
+        self.bundle_status: BodyLabel | None = None
+        self.lang_pack_combo: ComboBox | None = None
+        self.lang_pack_status: BodyLabel | None = None
+        self._packs: list = []
 
         QTimer.singleShot(PREBUILD_DELAY_MS, self, self._schedule_build)
 
@@ -135,6 +143,7 @@ class DiagnosticsTab(CustomTab):
         self._schedule_build()
         if self._built:
             self._refresh_frames()
+            self.refresh_lang_packs()
 
     # ── 构建 ─────────────────────────────────────────────
     def _schedule_build(self):
@@ -149,7 +158,62 @@ class DiagnosticsTab(CustomTab):
         self._built = True
         self.add_card(self.tr("失败帧复测"), self._build_failure_frame_card())
         self.add_card(self.tr("素材包安装"), self._build_asset_pack_card())
+        self.add_card(self.tr("诊断包"), self._build_bundle_card())
+        self.add_card(self.tr("语言包"), self._build_lang_pack_card())
         QTimer.singleShot(0, self._refresh_frames)
+        QTimer.singleShot(0, self.refresh_lang_packs)
+
+    def _build_bundle_card(self) -> QWidget:
+        card = QWidget()
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        row = QHBoxLayout()
+        row.setSpacing(6)
+        row.addWidget(BodyLabel(self.tr("把配置、日志、模板清单、失败帧与系统信息打成一个 zip")))
+        self.include_shots = CheckBox(self.tr("包含截图"))
+        row.addWidget(self.include_shots)
+        generate = PrimaryPushButton(FluentIcon.SAVE, self.tr("生成诊断包"))
+        generate.clicked.connect(self._make_bundle)
+        row.addWidget(generate)
+        row.addStretch(1)
+        layout.addLayout(row)
+
+        self.bundle_status = BodyLabel(self.tr("默认不含截图；记账只放合计，不放明细"))
+        self.bundle_status.setWordWrap(True)
+        layout.addWidget(self.bundle_status)
+        return card
+
+    def _build_lang_pack_card(self) -> QWidget:
+        card = QWidget()
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        row = QHBoxLayout()
+        row.setSpacing(6)
+        row.addWidget(BodyLabel(self.tr("语言包")))
+        self.lang_pack_combo = ComboBox()
+        self.lang_pack_combo.setMinimumWidth(320)
+        row.addWidget(self.lang_pack_combo, 1)
+
+        for text, icon, slot in (
+            (self.tr("刷新"), FluentIcon.SYNC, self.refresh_lang_packs),
+            (self.tr("应用"), FluentIcon.CHECKBOX, self._apply_lang_pack),
+            (self.tr("还原最近备份"), FluentIcon.HISTORY, self._restore_lang_pack),
+        ):
+            button = PushButton(icon, text)
+            button.clicked.connect(slot)
+            row.addWidget(button)
+        layout.addLayout(row)
+
+        self.lang_pack_status = BodyLabel(
+            self.tr("扫描程序目录下的「语言包<代码>」文件夹；应用前自动备份 i18n 与 assets/lang")
+        )
+        self.lang_pack_status.setWordWrap(True)
+        layout.addWidget(self.lang_pack_status)
+        return card
 
     def _build_failure_frame_card(self) -> QWidget:
         container = QWidget()
@@ -463,6 +527,71 @@ class DiagnosticsTab(CustomTab):
     def _set_pack_status(self, text: str):
         if self.pack_status is not None:
             self.pack_status.setText(text)
+
+    # ── 诊断包 ───────────────────────────────────────────
+    def _make_bundle(self):
+        folder = QFileDialog.getExistingDirectory(self, self.tr("选择保存目录"), os.getcwd())
+        if not folder:
+            return
+        include_shots = bool(self.include_shots and self.include_shots.isChecked())
+        result = build_bundle(dest_dir=folder, app_root=os.getcwd(), include_screenshots=include_shots)
+        text = result.summary()
+        if self.bundle_status is not None:
+            self.bundle_status.setText(text)
+        self._notify(text, error=not result.ok)
+
+    # ── 语言包 ───────────────────────────────────────────
+    def refresh_lang_packs(self):
+        if self.lang_pack_combo is None:
+            return
+        self._packs = scan_packs(os.getcwd())
+        self.lang_pack_combo.blockSignals(True)
+        self.lang_pack_combo.clear()
+        if self._packs:
+            for pack in self._packs:
+                self.lang_pack_combo.addItem(pack.label())
+        else:
+            self.lang_pack_combo.addItem(self.tr("（没有找到语言包）"))
+        self.lang_pack_combo.blockSignals(False)
+        if self._packs:
+            self._set_lang_status(
+                self.tr("找到 {count} 个语言包；应用前会自动备份 i18n 与 assets/lang").format(
+                    count=len(self._packs)
+                )
+            )
+        else:
+            self._set_lang_status(self.tr("把「语言包<代码>」文件夹放到程序目录下再刷新"))
+
+    def _current_pack(self):
+        if not self._packs or self.lang_pack_combo is None:
+            return None
+        index = self.lang_pack_combo.currentIndex()
+        return self._packs[index] if 0 <= index < len(self._packs) else None
+
+    def _apply_lang_pack(self):
+        pack = self._current_pack()
+        if pack is None:
+            self._notify(self.tr("没有选中语言包"), error=True)
+            return
+        result = apply_pack(pack.path, os.getcwd())
+        self._set_lang_status(result.summary())
+        self._notify(result.summary(), error=not result.ok)
+
+    def _restore_lang_pack(self):
+        backups = list_backups()
+        if not backups:
+            self._notify(self.tr("没有可用的语言包备份"), error=True)
+            return
+        result = restore_backup(backups[0], os.getcwd())
+        self._set_lang_status(result.summary() if result.ok else result.message)
+        self._notify(
+            self.tr("已还原 {name}").format(name=backups[0].name) if result.ok else result.message,
+            error=not result.ok,
+        )
+
+    def _set_lang_status(self, text: str):
+        if self.lang_pack_status is not None:
+            self.lang_pack_status.setText(text)
 
     # ── 通知 ─────────────────────────────────────────────
     def _notify(self, message: str, error: bool = False):

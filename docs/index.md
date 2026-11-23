@@ -37,6 +37,12 @@
   - **一条龙顺序 (`src/tasks/daily/order.py` + 「一条龙顺序」页)**：拖动调整「一键日常」各子任务的执行顺序与开关。
   - **导航路线 (`src/core/route.py` + 「导航路线」任务)**：把「怎么走到某界面」写成航点串，跑通即存、可断点续跑。
   - **轮椅方案 (`src/core/replay.py`)**：把多段录制拼成一套固定流程，可循环、可导出成流程文件。
+- **隐私与支持工具**：
+  - **UID 遮挡 (`src/core/privacy.py` + 「隐私遮挡」页)**：最多 8 块纯色/马赛克，1920×1080 参考坐标，作用于落盘截图与失败帧。
+  - **坐标拾取 (`src/core/coord_picker.py`)**：客户区像素 ↔ 参考坐标，附带取色与复制片段。
+  - **语言包 (`src/core/lang_pack.py`)**：扫描「语言包<代码>」目录，应用/还原带备份。
+  - **诊断包 (`src/core/diagnostics_bundle.py`)**：配置+日志+模板清单+失败帧+系统信息打成 zip（默认不含截图）。
+  - **崩溃诊断 (`src/core/crash_guard.py`)**：三处异常钩子写 `crashes/`，并自动附诊断包。
 
 ## 快速导航
 
@@ -46,6 +52,7 @@
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
 - [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
 - [一条龙顺序、导航路线与轮椅方案](dev/routes_and_replay.md)
+- [隐私遮挡、坐标拾取与支持工具（语言包 / 诊断包 / 崩溃诊断）](dev/privacy_and_support.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 
@@ -75,6 +82,11 @@
 │   │   ├── route.py            导航路线：航点模型、校验、执行（含断点）
 │   │   ├── replay.py           轮椅方案：多段录制拼成流程
 │   │   ├── ledger.py           结算记账（ledger.jsonl）与运行报表（runs.jsonl）
+│   │   ├── privacy.py          UID 遮挡（参考坐标 + 纯色/马赛克）
+│   │   ├── coord_picker.py     坐标换算与取色
+│   │   ├── lang_pack.py        语言包扫描/应用/还原
+│   │   ├── diagnostics_bundle.py 诊断包 zip
+│   │   ├── crash_guard.py      崩溃诊断钩子
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
@@ -83,7 +95,7 @@
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
 │   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计、运行报表）
 │   │   └── account/            账号作用域配置存储
-│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 一条龙顺序 / 流程与队列 / 离线工具 / 工具与诊断）
+│   ├── gui/                    自定义 Tab（全局配置 / 账号配置 / 一条龙顺序 / 流程与队列 / 离线工具 / 隐私遮挡 / 工具与诊断）
 │   ├── interaction/            游戏交互（GameInteraction 模拟键鼠、ScreenPosition）
 │   ├── image/                  图像算法（旋转模板匹配、连通域、圆弧拟合、音游/叠叠乐检测等）
 │   ├── yolo/                   YOLO 模型注册与 OpenVINO 推理
