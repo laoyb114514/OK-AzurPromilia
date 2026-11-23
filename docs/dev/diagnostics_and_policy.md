@@ -186,6 +186,24 @@ ok_templates/...
 > `assets/coco_annotations.json` 生成，`get_feature_by_resolution` 会校验名字；
 > 新增模板必须重新标注并重新生成枚举，改图不改名才走热更新这条路径。
 
+### 刷新缓存为什么必须加锁
+
+`FeatureSet.process_data()` 的实现是**先清空** `feature_dict` / `box_dict`，再从盘上重新读一遍合并。
+所以它不是线程安全的，而每次识别都会走的 `ensure_feature()` 是加锁的。GUI 线程在任务运行时
+直接调它，就会出现「字典已清空、还没填回来」的窗口，这期间的模板查找全部 miss，
+任务会把「素材刚更新」当成「识别失败」。
+
+`src/core/feature_reload.py` 因此把刷新包在 `feature_set.lock` 里（`reload_features()`），
+并在**任务正在运行时明确告警**：
+
+```
+素材已更新，但当前有任务在运行：这一次识别可能因模板缓存重建而漏检，请留意日志
+```
+
+> 仍然做不到「绝对无感」：框架没有提供原子替换 `FeatureSet` 的接口。真要彻底解决，
+> 得把素材安装推迟到任务间隙。这里选「马上生效 + 明确告警」——用户装完素材最自然的
+> 期待就是立刻看到效果；刷新失败时页面会提示「重启程序后生效」，而不是假装成功。
+
 ## 7. 模板自检
 
 `src/core/template_audit.py` +「工具与诊断 → 模板自检」。
@@ -255,6 +273,7 @@ uv run python tools/health_check.py --strict  # 有 warning 也返回 1（CI 可
 | `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |
 | `tests/test_template_audit.py` | 纯色块拒绝、有纹理通过、偏弱/尺寸过小/空区域、灰度图、SHA-256 稳定性与分数排序、COCO 批量自检（重复分组、越界 bbox、缺图报错） |
 | `tests/test_asset_pack.py` | 清单读写、篡改检测、zip slip、前缀白名单、备份、dry-run、回滚 |
+| `tests/test_feature_reload.py` | 刷新必须持有 `feature_set.lock`、返回 load_success、任务运行中告警、异常不外抛、无锁/无 feature_set 也不崩 |
 | `tests/test_health_check.py` | 流程合法/比例越界/无法解析、空队列、方案拼装失败、路线缺动作、配置坏文件、汇总报告与退出码、单项检查不抛异常 |
 | `tests/test_config.py` | 新增 Tab 可导入且已注册 |
 

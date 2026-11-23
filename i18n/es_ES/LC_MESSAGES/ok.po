@@ -1311,3 +1311,6 @@ msgstr "Ronda {idx} | ¡diarias completadas!"
 
 msgid "执行完成，失败统计: {failed}"
 msgstr "Terminado; resumen de fallos: {failed}"
+
+msgid "素材已安装，但模板缓存刷新失败；重启程序后生效"
+msgstr "Los recursos se instalaron pero no se pudo recargar la caché de plantillas; reinicia la app para aplicarlo"

@@ -629,11 +629,22 @@ class DiagnosticsTab(CustomTab):
         return Path(text)
 
     def _after_install(self, report, manifest):
-        """安装成功后刷新框架的模板缓存，否则新素材不会生效。"""
-        feature_set = self._feature_set()
-        if feature_set is not None:
+        """安装成功后刷新框架的模板缓存，否则新素材不会生效。
+
+        见 ``src/core/feature_reload.py``：``process_data()`` 会先清空再重建缓存，
+        所以必须在它自己的锁里调用；任务正在跑时明确告警，而不是假装无事发生。
+        """
+        from src.core.feature_reload import reload_features
+
+        executor = getattr(self, "executor", None)
+        if executor is None:
             with contextlib.suppress(Exception):
-                feature_set.process_data()
+                from ok import og
+
+                executor = getattr(og, "executor", None)
+        reloaded = reload_features(executor, log=self.logger.info)
+        if not reloaded:
+            self._set_pack_status(self.tr("素材已安装，但模板缓存刷新失败；重启程序后生效"))
         with contextlib.suppress(Exception):
             from src.patches.ocr_text_fix_patch import reload_ocr_text_fix
 
