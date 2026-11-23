@@ -115,8 +115,9 @@
 | 需求 | 状态 | 代码 | 测试 | 文档 |
 |------|------|------|------|------|
 | 安装自检（流程/队列/方案/路线/配置/i18n） | ✅ | `src/core/health_check.py` + `tools/health_check.py` | `test_health_check.py` | [诊断](diagnostics_and_policy.md) §9 |
-| 静态引用体检（动作白名单 / FeatureList / 配置项重名） | ✅ | `tests/test_imports.py` | 自身 | [开发指南](development.md) |
-| 离线回归 | ✅ | `tests/`（**1126 项**，不需要游戏） | 自身 | [开发指南](development.md) |
+| GUI 页离屏构建冒烟（9 个自定义页全部 build） | ✅ | `tests/test_gui_tabs.py` | 自身 | [开发指南](development.md) |
+| 静态引用体检（动作白名单 / FeatureList / 配置项重名 / 图标 / i18n / 任务名） | ✅ | `tests/test_imports.py` | 自身 | [开发指南](development.md) |
+| 离线回归 | ✅ | `tests/`（**1133 项**，不需要游戏） | 自身 | [开发指南](development.md) |
 | CI 测试门禁 | ✅ | `.github/workflows/pr-test.yml` | — | [界面行为](ui_behavior.md) §6 |
 | CI 只对改动文件跑 ruff | ✅ | 同上 | — | 同上 §6 |
 | i18n 校验（6 语种、无空 msgstr） | ✅ | `scripts/validate_all.py` + `tools/task_i18n_helper.py` | — | 同上 §6 |

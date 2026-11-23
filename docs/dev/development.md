@@ -578,13 +578,16 @@ python tools/repair_po_locales.py --apply   # 修复 .po 中语言写错的条�
 > ⚠️ 不要用 `python -m ok.test.RunTests` —— 它在跑完测试后会在 `ok.quit()` 处抛
 > `AttributeError`，退出码非 0。
 
-除了功能测试，还有两道**体检**：
+除了功能测试，还有两类**体检**：
 
 ```bash
-uv run python -m unittest tests.test_imports   # 把 src/ 每个模块都 import 一遍
+uv run python -m unittest tests.test_imports tests.test_gui_tabs   # 静态引用 + 离屏构建所有页
 uv run python tools/health_check.py             # 流程/队列/方案/路线/配置/i18n 全查
 ```
 
+- `tests/test_gui_tabs.py` 用 Qt 的 **offscreen** 平台把 9 个自定义页真实构造 + build 一遍
+  （不弹窗、CI 也能跑），并检查每页的 name/icon 能取到——静态检查只能确认名字存在，
+  确认不了这一段构造代码跑不跑得通；
 - 「导入体检」能抓到 GUI 页/补丁里拼错的名字——这类错误否则要等用户点开那一页才炸；
   它顺带还查这几类「只有跑到那一步才会炸」的引用：
   - 流程 `ACTION_ALLOWLIST` 里每个动作在 `BaseGameTask` 上真的存在（`dodge` 就曾经只有名字）；
