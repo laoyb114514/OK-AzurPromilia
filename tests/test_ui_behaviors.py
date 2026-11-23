@@ -567,5 +567,94 @@ class TestTaskbarThreadPlacement(unittest.TestCase):
         self.assertTrue(WindowsTaskbar(0).close())  # 没有 COM 也不能抛
 
 
+class _StubRunLog:
+    """只要 estimate_seconds / progress_ratio 的替身（任务栏 tick 只用这两个）。"""
+
+    def estimate_seconds(self, task: str, fallback: float = 0.0):
+        return 10.0
+
+    def progress_ratio(self, task: str, elapsed: float, fallback_seconds: float | None = None):
+        return min(0.97, max(0.0, elapsed / 10.0))
+
+
+class TestBackgroundTickResilience(unittest.TestCase):
+    """后台线程的一轮绝不能抛异常：崩一次，提醒/进度就再也不工作了。"""
+    def test_reminder_tick_survives_settings_failure(self):
+        from src.core.reminders import ReminderScheduler, ReminderSettings
+        from src.patches.ui_extras_patch import reminder_tick
+
+        logs = []
+
+        def broken_loader():
+            raise OSError("配置读不了")
+
+        settings = ReminderSettings()
+        scheduler = ReminderScheduler(settings)
+        state = {}
+        result = reminder_tick(
+            scheduler, settings, broken_loader, lambda *a: None, state, logs.append
+        )
+        self.assertEqual(result, settings)  # 设置保持不变
+        self.assertEqual(len(logs), 1)
+        self.assertIn("配置读不了", logs[0])
+
+        # 同一个错误连发多次只记一条（不刷日志）
+        for _ in range(5):
+            reminder_tick(scheduler, settings, broken_loader, lambda *a: None, state, logs.append)
+        self.assertEqual(len(logs), 1)
+
+    def test_reminder_tick_switches_settings(self):
+        from src.core.reminders import ReminderScheduler, ReminderSettings
+        from src.patches.ui_extras_patch import reminder_tick
+
+        scheduler = ReminderScheduler(ReminderSettings(daily_reset_enabled=False))
+        updated = ReminderSettings(daily_reset_enabled=True)
+        reminder_tick(
+            scheduler,
+            ReminderSettings(daily_reset_enabled=False),
+            lambda: updated,
+            lambda message, title: None,
+            {},
+        )
+        self.assertTrue(scheduler.settings.daily_reset_enabled)
+
+    def test_taskbar_tick_survives_backend_failure(self):
+        from src.core.taskbar import NullTaskbar, TaskbarProgress
+        from src.patches.ui_extras_patch import taskbar_tick
+
+        class BoomProgress(TaskbarProgress):
+            def update(self, ratio):
+                raise OSError("任务栏没了")
+
+        class FakeExecutor:
+            current_task = type("Task", (), {"name": "日常任务"})()
+
+        run_log = _StubRunLog()
+        logs = []
+        state = {}
+        with mock.patch("ok.og.executor", FakeExecutor(), create=True):
+            taskbar_tick(
+                BoomProgress(NullTaskbar()),
+                run_log,
+                state,
+                enabled_loader=lambda: True,
+                log=logs.append,
+                now=0.0,
+            )
+        self.assertEqual(len(logs), 1)
+        self.assertIn("任务栏没了", logs[0])
+
+    def test_taskbar_tick_respects_disabled(self):
+        from src.core.taskbar import NullTaskbar, TaskbarProgress
+        from src.patches.ui_extras_patch import taskbar_tick
+
+        progress = TaskbarProgress(NullTaskbar())
+        progress.update(0.5)
+        state = {"current": object()}
+        taskbar_tick(progress, None, state, enabled_loader=lambda: False)
+        self.assertIsNone(progress.last)   # 关掉后进度条被撤掉
+        self.assertIsNone(state["current"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -42,6 +42,88 @@ WM_HOTKEY = 0x0312
 _INSTALLED = False
 _threads: dict[str, threading.Thread] = {}
 
+#: 同类错误只在第一次 + 每 N 次记一条，避免线程出问题时把日志刷爆
+ERROR_LOG_EVERY = 60
+
+
+def _log_error(log, state: dict, exc: Exception) -> None:
+    """线程内错误：第一次与每 ``ERROR_LOG_EVERY`` 次记一条（否则「提醒没反应」没法排查）。"""
+    key = f"{type(exc).__name__}: {exc}"
+    count = state.get("errors", 0) + 1
+    state["errors"] = count
+    state["last_error"] = key
+    first = state.get("last_error_logged") != key
+    if log is None:
+        return
+    if first or count % ERROR_LOG_EVERY == 0:
+        with contextlib.suppress(Exception):
+            log(f"后台线程出错（第 {count} 次）：{key}")
+        state["last_error_logged"] = key
+
+
+def reminder_tick(
+    scheduler: ReminderScheduler,
+    last_settings,
+    settings_loader,
+    notify,
+    state: dict | None = None,
+    log=None,
+):
+    """提醒线程的一轮：**不抛异常**（线程里崩一次就再也不会提醒了）。
+
+    返回本轮用的设置（调用方存起来，下次用来判断「设置变了」）。
+    """
+    state = state if state is not None else {}
+    try:
+        current = settings_loader()
+        if current != last_settings:
+            scheduler.settings = current
+            scheduler.reset()
+            last_settings = current
+        for reminder in scheduler.poll():
+            notify(reminder.message, reminder.title)
+        return last_settings
+    except Exception as exc:
+        _log_error(log, state, exc)
+        return last_settings
+
+
+def taskbar_tick(
+    progress: TaskbarProgress,
+    run_log,
+    state: dict,
+    enabled_loader=load_taskbar_enabled,
+    log=None,
+    now: float | None = None,
+) -> None:
+    """任务栏线程的一轮：同样**不抛异常**。"""
+    try:
+        if not enabled_loader():
+            if progress.last is not None:
+                progress.clear()
+            state["current"] = None
+            return
+        from ok import og
+
+        executor = getattr(og, "executor", None)
+        task = getattr(executor, "current_task", None) if executor is not None else None
+        if task is None:
+            if progress.last is not None:
+                progress.clear()
+            state["current"] = None
+            return
+        moment = time.monotonic() if now is None else now
+        if task is not state.get("current"):
+            state["current"] = task
+            state["started"] = moment
+        name = getattr(task, "name", None) or task.__class__.__name__
+        elapsed = moment - state.get("started", moment)
+        ratio = compute_ratio(run_log, str(name), elapsed)
+        if ratio is not None:
+            progress.update(ratio)
+    except Exception as exc:
+        _log_error(log, state, exc)
+
 
 def _notify(message: str, title: str) -> None:
     try:
@@ -52,7 +134,9 @@ def _notify(message: str, title: str) -> None:
         pass
 
 
-def start_reminder_thread(stop_event: threading.Event | None = None) -> threading.Thread | None:
+def start_reminder_thread(
+    stop_event: threading.Event | None = None, log=None
+) -> threading.Thread | None:
     """启动提醒线程（幂等）。"""
     global _threads
     existing = _threads.get("reminders")
@@ -61,19 +145,17 @@ def start_reminder_thread(stop_event: threading.Event | None = None) -> threadin
     stop = stop_event or threading.Event()
 
     def loop():
-        scheduler = ReminderScheduler(load_reminder_settings())
+        state: dict = {}
+        try:
+            scheduler = ReminderScheduler(load_reminder_settings())
+        except Exception as exc:
+            _log_error(log, state, exc)
+            return
         last_settings = scheduler.settings
         while not stop.is_set():
-            try:
-                current = load_reminder_settings()
-                if current != last_settings:
-                    scheduler.settings = current
-                    scheduler.reset()
-                    last_settings = current
-                for reminder in scheduler.poll():
-                    _notify(reminder.message, reminder.title)
-            except Exception:
-                pass
+            last_settings = reminder_tick(
+                scheduler, last_settings, load_reminder_settings, _notify, state, log
+            )
             stop.wait(POLL_INTERVAL)
 
     thread = threading.Thread(target=loop, name="ok-ap-reminders", daemon=True)
@@ -82,7 +164,9 @@ def start_reminder_thread(stop_event: threading.Event | None = None) -> threadin
     return thread
 
 
-def start_taskbar_thread(hwnd: int, stop_event: threading.Event | None = None) -> threading.Thread | None:
+def start_taskbar_thread(
+    hwnd: int, stop_event: threading.Event | None = None, log=None
+) -> threading.Thread | None:
     """启动任务栏进度线程（幂等）；``hwnd`` 为 0 时线程直接退出。
 
     **后端必须在线程内部创建**：``ITaskbarList3`` 是单线程套间（STA）对象，
@@ -97,39 +181,17 @@ def start_taskbar_thread(hwnd: int, stop_event: threading.Event | None = None) -
     stop = stop_event or threading.Event()
 
     def loop():
-        backend = create_backend(hwnd)
+        state: dict = {}
+        try:
+            backend = create_backend(hwnd)
+        except Exception as exc:
+            _log_error(log, state, exc)
+            return
         progress = TaskbarProgress(backend)
         run_log = default_run_log()
-        current = None
-        started = 0.0
         try:
             while not stop.is_set():
-                try:
-                    if not load_taskbar_enabled():
-                        if progress.last is not None:
-                            progress.clear()
-                        current = None
-                        stop.wait(TASKBAR_INTERVAL)
-                        continue
-                    from ok import og
-
-                    executor = getattr(og, "executor", None)
-                    task = getattr(executor, "current_task", None) if executor is not None else None
-                    if task is None:
-                        if progress.last is not None:
-                            progress.clear()
-                        current = None
-                    else:
-                        if task is not current:
-                            current = task
-                            started = time.monotonic()
-                        name = getattr(task, "name", None) or task.__class__.__name__
-                        elapsed = time.monotonic() - started
-                        ratio = compute_ratio(run_log, str(name), elapsed)
-                        if ratio is not None:
-                            progress.update(ratio)
-                except Exception:
-                    pass
+                taskbar_tick(progress, run_log, state, log=log)
                 stop.wait(TASKBAR_INTERVAL)
         finally:
             with contextlib.suppress(Exception):
@@ -259,8 +321,10 @@ def install_ui_extras_patch() -> bool:
         except Exception:
             hwnd = 0
         try:
-            start_reminder_thread()
-            start_taskbar_thread(hwnd)
+            # 线程内错误要能在日志里看到（否则「提醒没反应」完全没法排查）
+            logger = getattr(self, "log_info", None)
+            start_reminder_thread(log=logger)
+            start_taskbar_thread(hwnd, log=logger)
             start_hotkey_thread()
         except Exception:
             pass
