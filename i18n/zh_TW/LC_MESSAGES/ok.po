@@ -1367,3 +1367,39 @@ msgstr "異常資訊:"
 
 msgid "--- 第 {round} 轮 (账号: {account}) ---"
 msgstr "--- 第 {round} 輪 (帳號: {account}) ---"
+
+msgid "开始录制动作"
+msgstr "開始錄製動作"
+
+msgid "停止录制并生成流程"
+msgstr "停止錄製並產生流程"
+
+msgid "录制会按当前游戏窗口换算坐标；录制期间请在游戏里正常操作，停止后自动生成流程"
+msgstr "錄製會依目前遊戲視窗換算座標；錄製期間請在遊戲裡正常操作，停止後自動產生流程"
+
+msgid "正在录制：请在游戏里操作，录完点「停止录制并生成流程」"
+msgstr "正在錄製：請在遊戲裡操作，錄完點「停止錄製並產生流程」"
+
+msgid "没有录到任何操作（检查游戏窗口是否已连接）"
+msgstr "沒有錄到任何操作（檢查遊戲視窗是否已連線）"
+
+msgid "没有录到任何操作"
+msgstr "沒有錄到任何操作"
+
+msgid "录制功能不可用：{error}"
+msgstr "錄製功能不可用：{error}"
+
+msgid "开始录制失败：{error}"
+msgstr "開始錄製失敗：{error}"
+
+msgid "停止录制失败：{error}"
+msgstr "停止錄製失敗：{error}"
+
+msgid "生成流程失败：{error}"
+msgstr "產生流程失敗：{error}"
+
+msgid "录制结束：{summary}"
+msgstr "錄製結束：{summary}"
+
+msgid "有任务正在运行（{name}），先停止任务再录制"
+msgstr "有任務正在執行（{name}），先停止任務再錄製"

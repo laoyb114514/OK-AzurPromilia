@@ -1454,3 +1454,41 @@ msgstr "Exception:"
 
 msgid "--- 第 {round} 轮 (账号: {account}) ---"
 msgstr "--- Round {round} (account: {account}) ---"
+
+msgid "开始录制动作"
+msgstr "Start recording"
+
+msgid "停止录制并生成流程"
+msgstr "Stop and create flow"
+
+msgid "录制会按当前游戏窗口换算坐标；录制期间请在游戏里正常操作，停止后自动生成流程"
+msgstr ""
+"Coordinates are converted against the current game window; just play "
+"normally while recording — a flow is generated when you stop."
+
+msgid "正在录制：请在游戏里操作，录完点「停止录制并生成流程」"
+msgstr "Recording: play in the game, then press “Stop and create flow”"
+
+msgid "没有录到任何操作（检查游戏窗口是否已连接）"
+msgstr "No actions were recorded (check that the game window is connected)"
+
+msgid "没有录到任何操作"
+msgstr "Nothing was recorded"
+
+msgid "录制功能不可用：{error}"
+msgstr "Recording is unavailable: {error}"
+
+msgid "开始录制失败：{error}"
+msgstr "Failed to start recording: {error}"
+
+msgid "停止录制失败：{error}"
+msgstr "Failed to stop recording: {error}"
+
+msgid "生成流程失败：{error}"
+msgstr "Failed to create the flow: {error}"
+
+msgid "录制结束：{summary}"
+msgstr "Recording finished: {summary}"
+
+msgid "有任务正在运行（{name}），先停止任务再录制"
+msgstr "A task is running ({name}) — stop it before recording"

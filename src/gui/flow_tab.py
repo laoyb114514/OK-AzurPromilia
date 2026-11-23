@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 
 from ok.gui.widget.CustomTab import CustomTab
@@ -73,6 +74,9 @@ class FlowTab(CustomTab):
         self.profile_name: LineEdit | None = None
         self.profile_status: BodyLabel | None = None
         self.checkpoint_status: BodyLabel | None = None
+        self.record_button: PushButton | None = None
+        self.record_status: BodyLabel | None = None
+        self._recording = False
 
         QTimer.singleShot(PREBUILD_DELAY_MS, self, self._schedule_build)
 
@@ -142,6 +146,19 @@ class FlowTab(CustomTab):
             button.clicked.connect(slot)
             row.addWidget(button)
         layout.addLayout(row)
+
+        # 录制动作：真正监听键鼠（框架 Recorder），停止后直接变成流程文件
+        record_row = QHBoxLayout()
+        record_row.setSpacing(6)
+        self.record_button = PushButton(FluentIcon.MICROPHONE, self.tr("开始录制动作"))
+        self.record_button.clicked.connect(self._toggle_recording)
+        record_row.addWidget(self.record_button)
+        self.record_status = BodyLabel(
+            self.tr("录制会按当前游戏窗口换算坐标；录制期间请在游戏里正常操作，停止后自动生成流程")
+        )
+        self.record_status.setWordWrap(True)
+        record_row.addWidget(self.record_status, 1)
+        layout.addLayout(record_row)
 
         self.flow_detail = QPlainTextEdit()
         self.flow_detail.setReadOnly(True)
@@ -395,6 +412,92 @@ class FlowTab(CustomTab):
         target = save_flow(flow)
         self.refresh_flows()
         self._notify(self.tr("已导入流程：{name}").format(name=target.stem))
+
+    # ── 录制动作 ─────────────────────────────────────────
+    def _toggle_recording(self):
+        if self._recording:
+            self._stop_recording()
+        else:
+            self._start_recording()
+
+    def _start_recording(self):
+        """开始录制：真的挂键鼠监听（框架 ``Recorder``）。"""
+        if self._recording:
+            return
+        running = ""
+        try:
+            from ok import og
+
+            executor = getattr(og, "executor", None)
+            task = getattr(executor, "current_task", None) if executor is not None else None
+            running = getattr(task, "name", "") or (task.__class__.__name__ if task else "")
+        except Exception:
+            running = ""
+        if running:
+            self._notify(
+                self.tr("有任务正在运行（{name}），先停止任务再录制").format(name=running),
+                error=True,
+            )
+            return
+        try:
+            from ok.ui.qt.tasks.RecordScript import recorder
+        except Exception as exc:
+            self._notify(self.tr("录制功能不可用：{error}").format(error=exc), error=True)
+            return
+
+        target = ""
+        try:
+            from ok import og
+
+            device_manager = getattr(og, "device_manager", None)
+            getter = getattr(device_manager, "get_hwnd_name", None)
+            if callable(getter):
+                target = str(getter() or "")
+        except Exception:
+            target = ""
+        try:
+            recorder.start(target)
+        except Exception as exc:
+            self._notify(self.tr("开始录制失败：{error}").format(error=exc), error=True)
+            return
+        self._recording = True
+        self.record_button.setText(self.tr("停止录制并生成流程"))
+        self._set_status(self.record_status, self.tr("正在录制：请在游戏里操作，录完点「停止录制并生成流程」"))
+
+    def _stop_recording(self):
+        events = []
+        try:
+            from ok.ui.qt.tasks.RecordScript import recorder
+
+            recorder.stop()
+            events = list(getattr(recorder, "events", None) or [])
+        except Exception as exc:
+            self._notify(self.tr("停止录制失败：{error}").format(error=exc), error=True)
+        finally:
+            self._recording = False
+            if getattr(self, "record_button", None) is not None:
+                self.record_button.setText(self.tr("开始录制动作"))
+
+        if not events:
+            self._set_status(self.record_status, self.tr("没有录到任何操作（检查游戏窗口是否已连接）"))
+            self._notify(self.tr("没有录到任何操作"), error=True)
+            return
+
+        conversion = convert_recording(events, max_steps=MAX_RECORDING_STEPS)
+        name = f"录制流程_{time.strftime('%m%d_%H%M%S')}"
+        try:
+            flow = Flow.from_dict(conversion.to_flow(name))
+            target = save_flow(flow)
+        except Exception as exc:
+            self._notify(self.tr("生成流程失败：{error}").format(error=exc), error=True)
+            return
+        self.refresh_flows()
+        self._set_status(self.flow_status, conversion.summary())
+        self._set_status(self.record_status, self.tr("录制结束：{summary}").format(summary=conversion.summary()))
+        self._notify(
+            self.tr("已生成流程 {name}：{summary}").format(name=target.stem, summary=conversion.summary()),
+            error=conversion.truncated,
+        )
 
     def _import_recording(self):
         path, _filter = QFileDialog.getOpenFileName(

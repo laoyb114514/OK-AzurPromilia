@@ -1379,3 +1379,39 @@ msgstr "예외 정보:"
 
 msgid "--- 第 {round} 轮 (账号: {account}) ---"
 msgstr "--- {round}회차 (계정: {account}) ---"
+
+msgid "开始录制动作"
+msgstr "동작 녹화 시작"
+
+msgid "停止录制并生成流程"
+msgstr "중지하고 흐름 생성"
+
+msgid "录制会按当前游戏窗口换算坐标；录制期间请在游戏里正常操作，停止后自动生成流程"
+msgstr "좌표는 현재 게임 창 기준으로 변환됩니다. 녹화 중에는 게임에서 평소처럼 조작하세요. 중지하면 흐름이 자동으로 생성됩니다."
+
+msgid "正在录制：请在游戏里操作，录完点「停止录制并生成流程」"
+msgstr "녹화 중: 게임에서 조작한 뒤 「중지하고 흐름 생성」을 누르세요"
+
+msgid "没有录到任何操作（检查游戏窗口是否已连接）"
+msgstr "기록된 동작이 없습니다 (게임 창이 연결되었는지 확인하세요)"
+
+msgid "没有录到任何操作"
+msgstr "기록된 동작이 없습니다"
+
+msgid "录制功能不可用：{error}"
+msgstr "녹화 기능을 사용할 수 없습니다: {error}"
+
+msgid "开始录制失败：{error}"
+msgstr "녹화 시작 실패: {error}"
+
+msgid "停止录制失败：{error}"
+msgstr "녹화 중지 실패: {error}"
+
+msgid "生成流程失败：{error}"
+msgstr "흐름 생성 실패: {error}"
+
+msgid "录制结束：{summary}"
+msgstr "녹화 종료: {summary}"
+
+msgid "有任务正在运行（{name}），先停止任务再录制"
+msgstr "작업이 실행 중입니다({name}). 먼저 중지한 뒤 녹화하세요"

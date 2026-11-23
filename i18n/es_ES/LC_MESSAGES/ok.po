@@ -1478,3 +1478,43 @@ msgstr "Excepción:"
 
 msgid "--- 第 {round} 轮 (账号: {account}) ---"
 msgstr "--- Ronda {round} (cuenta: {account}) ---"
+
+msgid "开始录制动作"
+msgstr "Empezar a grabar acciones"
+
+msgid "停止录制并生成流程"
+msgstr "Detener y crear flujo"
+
+msgid "录制会按当前游戏窗口换算坐标；录制期间请在游戏里正常操作，停止后自动生成流程"
+msgstr ""
+"Las coordenadas se convierten según la ventana del juego; opera con "
+"normalidad mientras grabas — al detener se genera el flujo."
+
+msgid "正在录制：请在游戏里操作，录完点「停止录制并生成流程」"
+msgstr "Grabando: opera en el juego y pulsa «Detener y crear flujo»"
+
+msgid "没有录到任何操作（检查游戏窗口是否已连接）"
+msgstr ""
+"No se grabó ninguna acción (comprueba que la ventana del juego esté "
+"conectada)"
+
+msgid "没有录到任何操作"
+msgstr "No se grabó nada"
+
+msgid "录制功能不可用：{error}"
+msgstr "La grabación no está disponible: {error}"
+
+msgid "开始录制失败：{error}"
+msgstr "No se pudo empezar a grabar: {error}"
+
+msgid "停止录制失败：{error}"
+msgstr "No se pudo detener la grabación: {error}"
+
+msgid "生成流程失败：{error}"
+msgstr "No se pudo crear el flujo: {error}"
+
+msgid "录制结束：{summary}"
+msgstr "Grabación finalizada: {summary}"
+
+msgid "有任务正在运行（{name}），先停止任务再录制"
+msgstr "Hay una tarea en ejecución ({name}); deténla antes de grabar"
