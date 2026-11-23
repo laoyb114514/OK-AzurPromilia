@@ -1036,3 +1036,45 @@ msgstr "Cancel"
 
 msgid "记住我的选择"
 msgstr "Remember my choice"
+
+msgid "实时辅助"
+msgstr "Live assist"
+
+msgid "按你设置的按键序列与节奏持续操作，适合需要一直盯着的战斗场景。可选用前置模板限定生效场合。"
+msgstr "Keeps pressing the keys you configure at the pace you set — handy for combat scenes that need constant attention. Optionally gate it behind a template."
+
+msgid "按键序列"
+msgstr "Key sequence"
+
+msgid "动作间隔(秒)"
+msgstr "Action interval (s)"
+
+msgid "前置模板"
+msgstr "Gate template"
+
+msgid "最大连续次数"
+msgstr "Max actions per run"
+
+msgid "记录日志"
+msgstr "Log every action"
+
+msgid "_按下时长(秒)"
+msgstr "_Key hold (s)"
+
+msgid "逗号分隔，按顺序轮转，例如 q,e,r"
+msgstr "Comma separated, cycled in order, e.g. q,e,r"
+
+msgid "两次动作之间的最小间隔，避免连点"
+msgstr "Minimum gap between actions, to avoid rapid-fire presses"
+
+msgid "可选：只有该模板出现时才动作（填模板名，如 auto_combat_check）"
+msgstr "Optional: only act when this template is visible (e.g. auto_combat_check)"
+
+msgid "单次 run 最多按几次，避免长时间占住触发轮转"
+msgstr "How many presses per run, so one task does not hog the trigger rotation"
+
+msgid "每次动作写一行日志，方便确认节奏"
+msgstr "Write one log line per action, handy for checking the rhythm"
+
+msgid "按键按住时长"
+msgstr "How long each key is held down"

@@ -150,5 +150,6 @@ config = {
         ["src.tasks.trigger.skip_dialog_task", "SkipDialogTask"],
         ["src.tasks.trigger.star_link_assist_task", "StarLinkAssistTask"],
         ["src.tasks.trigger.treasure_unlock_task", "TreasureUnlockTask"],
+        ["src.tasks.trigger.auto_combat_assist_task", "AutoCombatAssistTask"],
     ],
 }

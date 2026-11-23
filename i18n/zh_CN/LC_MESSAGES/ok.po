@@ -1027,3 +1027,45 @@ msgstr "取消"
 
 msgid "记住我的选择"
 msgstr "记住我的选择"
+
+msgid "实时辅助"
+msgstr "实时辅助"
+
+msgid "按你设置的按键序列与节奏持续操作，适合需要一直盯着的战斗场景。可选用前置模板限定生效场合。"
+msgstr "按你设置的按键序列与节奏持续操作，适合需要一直盯着的战斗场景。可选用前置模板限定生效场合。"
+
+msgid "按键序列"
+msgstr "按键序列"
+
+msgid "动作间隔(秒)"
+msgstr "动作间隔(秒)"
+
+msgid "前置模板"
+msgstr "前置模板"
+
+msgid "最大连续次数"
+msgstr "最大连续次数"
+
+msgid "记录日志"
+msgstr "记录日志"
+
+msgid "_按下时长(秒)"
+msgstr "_按下时长(秒)"
+
+msgid "逗号分隔，按顺序轮转，例如 q,e,r"
+msgstr "逗号分隔，按顺序轮转，例如 q,e,r"
+
+msgid "两次动作之间的最小间隔，避免连点"
+msgstr "两次动作之间的最小间隔，避免连点"
+
+msgid "可选：只有该模板出现时才动作（填模板名，如 auto_combat_check）"
+msgstr "可选：只有该模板出现时才动作（填模板名，如 auto_combat_check）"
+
+msgid "单次 run 最多按几次，避免长时间占住触发轮转"
+msgstr "单次 run 最多按几次，避免长时间占住触发轮转"
+
+msgid "每次动作写一行日志，方便确认节奏"
+msgstr "每次动作写一行日志，方便确认节奏"
+
+msgid "按键按住时长"
+msgstr "按键按住时长"

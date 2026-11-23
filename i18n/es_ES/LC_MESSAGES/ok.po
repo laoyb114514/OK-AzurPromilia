@@ -1038,3 +1038,45 @@ msgstr "Cancelar"
 
 msgid "记住我的选择"
 msgstr "Recordar mi elección"
+
+msgid "实时辅助"
+msgstr "Asistencia en vivo"
+
+msgid "按你设置的按键序列与节奏持续操作，适合需要一直盯着的战斗场景。可选用前置模板限定生效场合。"
+msgstr "Sigue pulsando las teclas y el ritmo que configures; útil en combates que requieren atención constante. Opcionalmente se limita a una plantilla."
+
+msgid "按键序列"
+msgstr "Secuencia de teclas"
+
+msgid "动作间隔(秒)"
+msgstr "Intervalo de acción (s)"
+
+msgid "前置模板"
+msgstr "Plantilla previa"
+
+msgid "最大连续次数"
+msgstr "Acciones máximas por ejecución"
+
+msgid "记录日志"
+msgstr "Registrar cada acción"
+
+msgid "_按下时长(秒)"
+msgstr "_Duración de pulsación (s)"
+
+msgid "逗号分隔，按顺序轮转，例如 q,e,r"
+msgstr "Separadas por comas y en orden cíclico, p. ej. q,e,r"
+
+msgid "两次动作之间的最小间隔，避免连点"
+msgstr "Separación mínima entre acciones para evitar pulsaciones seguidas"
+
+msgid "可选：只有该模板出现时才动作（填模板名，如 auto_combat_check）"
+msgstr "Opcional: actuar solo cuando aparezca esa plantilla (p. ej. auto_combat_check)"
+
+msgid "单次 run 最多按几次，避免长时间占住触发轮转"
+msgstr "Cuántas pulsaciones por ejecución, para no acaparar la rotación de disparadores"
+
+msgid "每次动作写一行日志，方便确认节奏"
+msgstr "Escribe una línea de registro por acción para comprobar el ritmo"
+
+msgid "按键按住时长"
+msgstr "Tiempo que se mantiene pulsada cada tecla"

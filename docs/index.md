@@ -37,6 +37,7 @@
   - **一条龙顺序 (`src/tasks/daily/order.py` + 「一条龙顺序」页)**：拖动调整「一键日常」各子任务的执行顺序与开关。
   - **导航路线 (`src/core/route.py` + 「导航路线」任务)**：把「怎么走到某界面」写成航点串，跑通即存、可断点续跑。
   - **轮椅方案 (`src/core/replay.py`)**：把多段录制拼成一套固定流程，可循环、可导出成流程文件。
+  - **实时辅助 (`src/tasks/trigger/auto_combat_assist_task.py`)**：按配置的按键序列与冷却持续操作，可用前置模板限定生效场合。
 - **隐私与支持工具**：
   - **UID 遮挡 (`src/core/privacy.py` + 「隐私遮挡」页)**：最多 8 块纯色/马赛克，1920×1080 参考坐标，作用于落盘截图与失败帧。
   - **坐标拾取 (`src/core/coord_picker.py`)**：客户区像素 ↔ 参考坐标，附带取色与复制片段。
@@ -103,7 +104,7 @@
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
 │   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow、Route、Settlement）
-│   │   ├── trigger/            触发式任务（AutoJenga、AutoRhythm、SkipDialog、StarLink、TreasureUnlock）
+│   │   ├── trigger/            触发式任务（AutoJenga、AutoRhythm、SkipDialog、StarLink、TreasureUnlock、AutoCombatAssist）
 │   │   ├── test/               调试与测试任务（Screenshot、Interaction、TreasureBand、UINavigate）
 │   │   ├── daily/              多步骤任务编排与汇总（DailyFeature、步骤统计、运行报表）
 │   │   └── account/            账号作用域配置存储
