@@ -175,10 +175,16 @@ ledger.export_csv("ledger.csv")
 用**暂停感知**的 `active_time()` 计时，并把「成功/失败 + 用时」写进报表：
 
 ```python
-log.stats("家园每日")               # count / success / failed / success_rate / avg_seconds
+log.stats("家园每日")               # count / success / failed / success_rate / avg_seconds / total_seconds
+log.by_task()                       # {任务: 上面那些指标}
+log.failure_notes(limit=8)          # [(失败原因, 次数)]，按次数降序，没记原因的归到「未记录原因」
+log.report_lines()                  # 给 UI 直接渲染的多行报表（总览 + 按任务 + 失败原因）
 log.estimate_seconds("家园每日")    # 任务栏「预计剩余」用
 log.export_csv("runs.csv")
 ```
+
+失败时会顺带把**失败原因**写进记录（`DailyTaskRunner` 先 `set_task_failure` 再写报表，
+所以报表里是具体原因而不是只有「返回 False」）；没有 `note` 字段的旧记录照样能读。
 
 写报表失败**不会影响任务**（失败被吞掉），测试里也固化了这一点。
 
@@ -190,7 +196,7 @@ log.export_csv("runs.csv")
 |------|------|
 | `tests/test_growth.py` | 数据载入与校验、区间比例切分、份数/潜能/升星、库存缺口、最优体力来源、无来源标注、大单位优先凑货币、经验道具贪心、12 目标上限、CSV/PNG 导出；导入数据（校验失败不写目标文件、成功时备份原文件、无原文件不备份、同秒备份名去重、源文件缺失） |
 | `tests/test_gacha_model.py` | 概率表数值、单调性、硬保底、垫抽、期望区间、预算内概率单调、50% 概率的 82.85% 基准、最坏情况、自定义概率表校验 |
-| `tests/test_ledger.py` | 四种结算写法、支出识别、去重、纯数字名字拒绝、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算 |
+| `tests/test_ledger.py` | 四种结算写法、支出识别、去重、纯数字名字拒绝、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算；报表（失败原因持久化与分组排序、按任务分组统计、多任务/单任务/空报表文本、总用时） |
 | `tests/test_ocr_lines.py` | OCR 文本框按行聚类、行内 x 排序、置信度过滤、异常吞掉、聚类后能被结算解析器吃下 |
 | `tests/test_settlement_and_reporting.py` | 结算任务写入 ledger、来源取配置、长列表预览截断；一条龙每项写入 runs.jsonl、禁用项不记、报表失败不影响任务 |
 

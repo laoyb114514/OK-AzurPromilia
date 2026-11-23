@@ -184,5 +184,71 @@ class TestRunLog(StoreTestBase):
         self.assertIn("成功", text)
 
 
+class TestRunLogReport(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.log = RunLog(self.root / "runs.jsonl")
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_note_is_persisted(self):
+        self.log.record("A", False, 3.0, note="找不到主界面")
+        self.assertEqual(self.log.rows()[0]["note"], "找不到主界面")
+
+    def test_rows_without_note_are_compatible(self):
+        self.log.record("A", True, 3.0)
+        self.assertEqual(self.log.rows()[0]["note"], "")
+
+    def test_by_task_breakdown(self):
+        for ok, seconds in ((True, 10.0), (True, 20.0), (False, 30.0)):
+            self.log.record("A", ok, seconds)
+        self.log.record("B", True, 5.0)
+        breakdown = self.log.by_task()
+        self.assertEqual(breakdown["A"]["count"], 3)
+        self.assertEqual(breakdown["A"]["success"], 2)
+        self.assertEqual(breakdown["A"]["failed"], 1)
+        self.assertAlmostEqual(breakdown["A"]["avg_seconds"], 20.0)
+        self.assertAlmostEqual(breakdown["A"]["total_seconds"], 60.0)
+        self.assertAlmostEqual(breakdown["B"]["success_rate"], 1.0)
+
+    def test_failure_notes_grouped_and_ordered(self):
+        self.log.record("A", False, 1.0, note="超时")
+        self.log.record("A", False, 1.0, note="超时")
+        self.log.record("A", False, 1.0, note="识别不到")
+        self.log.record("A", False, 1.0)
+        notes = self.log.failure_notes()
+        self.assertEqual(notes[0], ("超时", 2))
+        self.assertIn(("未记录原因", 1), notes)
+        self.assertEqual(len(self.log.failure_notes(limit=1)), 1)
+
+    def test_failure_notes_ignore_success(self):
+        self.log.record("A", True, 1.0)
+        self.assertEqual(self.log.failure_notes(), [])
+
+    def test_report_lines_empty(self):
+        self.assertEqual(self.log.report_lines(), ["还没有运行记录"])
+
+    def test_report_lines_single_task(self):
+        self.log.record("A", True, 60.0)
+        lines = self.log.report_lines()
+        self.assertIn("共 1 次", lines[0])
+        self.assertNotIn("按任务：", lines)
+
+    def test_report_lines_multiple_tasks(self):
+        self.log.record("A", True, 60.0)
+        self.log.record("B", False, 30.0, note="卡住")
+        lines = self.log.report_lines()
+        self.assertIn("按任务：", lines)
+        self.assertIn("失败原因：", lines)
+        self.assertTrue(any("卡住" in line for line in lines))
+
+    def test_stats_total_seconds(self):
+        self.log.record("A", True, 10.0)
+        self.log.record("A", True, 20.0)
+        self.assertAlmostEqual(self.log.stats()["total_seconds"], 30.0)
+
+
 if __name__ == "__main__":
     unittest.main()

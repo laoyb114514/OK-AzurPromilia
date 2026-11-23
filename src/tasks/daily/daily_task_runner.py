@@ -108,10 +108,18 @@ class DailyTaskRunner:
                 pass
         return time.monotonic()
 
-    def _record_run(self, key: str, ok: bool, elapsed: float) -> None:
+    def _record_run(self, key: str, ok: bool, elapsed: float, note: str = "") -> None:
         """把这一项的成败与用时写进运行报表（失败不影响主流程）。"""
         with contextlib.suppress(Exception):
-            self.run_log.record(key, ok, elapsed)
+            self.run_log.record(key, ok, elapsed, note="" if ok else note)
+
+    def _failure_note_for(self, key: str) -> str:
+        """从已记录的失败原因里取这一项的（没有就返回通用文案）。"""
+        account_id = self._current_account_info().get("account_id", "")
+        note = ""
+        with contextlib.suppress(Exception):
+            note = str((self.failure_details.get(account_id) or {}).get(key, "") or "").strip()
+        return note or self._tr("任务返回 False")
 
     def _is_multi_account(self) -> bool:
         return bool(self.task.config.get("多账户模式", False)) and callable(
@@ -243,11 +251,13 @@ class DailyTaskRunner:
         self.task.ensure_main(**self.ensure_main_kwargs)
         started = self._clock()
         result = func()
-        self._record_run(key, result is not False, self._clock() - started)
+        elapsed = self._clock() - started
 
         if result is False:
             self.task_status["failed"].append(key)
             self.set_task_failure(self._tr("任务返回 False"), task_name=key)
+            # 先记失败原因再写报表，这样报表里能看到具体原因而不是只有「返回 False」
+            self._record_run(key, False, elapsed, note=self._failure_note_for(key))
             if key not in self.failure_screenshot_tasks:
                 self.task.screenshot(f"DailyTask_FailTask_{key}")
             self.task.log_info(self._tr("任务 {key} 执行失败").format(key=self._tr(key)), notify=True)
@@ -255,6 +265,7 @@ class DailyTaskRunner:
             self.final_summary["current_task"] = ""
             return False
 
+        self._record_run(key, True, elapsed)
         self.task_status["success"].append(key)
         self.clear_task_failure(key)
         self.current_task_key = None

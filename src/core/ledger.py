@@ -272,15 +272,17 @@ class RunLog:
     def path(self) -> Path:
         return self.store.path
 
-    def record(self, task: str, ok: bool, seconds: float, ts: float | None = None) -> bool:
-        return self.store.append(
-            {
-                "ts": time.time() if ts is None else float(ts),
-                "task": str(task),
-                "ok": bool(ok),
-                "seconds": round(float(seconds), 3),
-            }
-        )
+    def record(self, task: str, ok: bool, seconds: float, ts: float | None = None, note: str = "") -> bool:
+        """记一条运行结果。``note`` 用来存失败原因（成功时留空），旧记录没有这个字段也能读。"""
+        data = {
+            "ts": time.time() if ts is None else float(ts),
+            "task": str(task),
+            "ok": bool(ok),
+            "seconds": round(float(seconds), 3),
+        }
+        if note:
+            data["note"] = str(note)[:200]
+        return self.store.append(data)
 
     def rows(self) -> list[dict]:
         result = []
@@ -292,6 +294,7 @@ class RunLog:
                         "task": str(row.get("task", "")),
                         "ok": bool(row.get("ok", False)),
                         "seconds": float(row.get("seconds", 0) or 0),
+                        "note": str(row.get("note", "") or ""),
                     }
                 )
             except (TypeError, ValueError):
@@ -309,7 +312,65 @@ class RunLog:
             "failed": count - success,
             "success_rate": (success / count) if count else 0.0,
             "avg_seconds": (total_seconds / count) if count else 0.0,
+            "total_seconds": total_seconds,
         }
+
+    def by_task(self) -> dict[str, dict[str, float]]:
+        """按任务分组统计（次数/成功/失败/成功率/平均/总用时）。"""
+        grouped: dict[str, list[dict]] = {}
+        for row in self.rows():
+            grouped.setdefault(row["task"], []).append(row)
+        result: dict[str, dict[str, float]] = {}
+        for task, rows in grouped.items():
+            count = len(rows)
+            success = sum(1 for row in rows if row["ok"])
+            total = sum(row["seconds"] for row in rows)
+            result[task] = {
+                "count": count,
+                "success": success,
+                "failed": count - success,
+                "success_rate": (success / count) if count else 0.0,
+                "avg_seconds": (total / count) if count else 0.0,
+                "total_seconds": total,
+            }
+        return result
+
+    def failure_notes(self, limit: int = 8) -> list[tuple[str, int]]:
+        """失败原因汇总：``[(原因, 次数)]``，按次数降序；没写原因的归到「未记录原因」。"""
+        counts: dict[str, int] = {}
+        for row in self.rows():
+            if row["ok"]:
+                continue
+            reason = str(row.get("note", "") or "").strip() or "未记录原因"
+            counts[reason] = counts.get(reason, 0) + 1
+        ordered = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        return ordered[: max(1, int(limit))]
+
+    def report_lines(self, limit: int = 8) -> list[str]:
+        """给 UI 直接渲染的多行报表文本。"""
+        stats = self.stats()
+        if not stats["count"]:
+            return ["还没有运行记录"]
+        total_minutes = stats["total_seconds"] / 60
+        lines = [
+            f"共 {int(stats['count'])} 次，成功 {int(stats['success'])} 次，"
+            f"成功率 {stats['success_rate'] * 100:.1f}%，平均 {stats['avg_seconds']:.0f} 秒，"
+            f"累计 {total_minutes:.0f} 分钟",
+        ]
+        breakdown = self.by_task()
+        if len(breakdown) > 1:
+            lines.append("按任务：")
+            for task, item in sorted(breakdown.items(), key=lambda kv: (-kv[1]["count"], kv[0]))[:limit]:
+                lines.append(
+                    f"  {task}：{int(item['count'])} 次，成功率 {item['success_rate'] * 100:.0f}%，"
+                    f"平均 {item['avg_seconds']:.0f} 秒"
+                )
+        notes = self.failure_notes(limit=limit)
+        if notes:
+            lines.append("失败原因：")
+            for reason, count in notes:
+                lines.append(f"  {reason} ×{count}")
+        return lines
 
     def estimate_seconds(self, task: str | None = None, default: float = 0.0) -> float:
         """按历史平均用时估算一次任务要多久（任务栏「预计剩余」用）。"""

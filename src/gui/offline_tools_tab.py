@@ -576,6 +576,9 @@ class OfflineToolsTab(CustomTab):
                     avg=stats["avg_seconds"],
                 )
             )
+            # 按任务的明细 + 失败原因汇总（report_lines 第一行是总览，这里已经单独渲染了）
+            for line in run_log.report_lines()[1:]:
+                lines.append(f"  {line}")
         else:
             lines.append(self.tr("  还没有运行记录"))
 
