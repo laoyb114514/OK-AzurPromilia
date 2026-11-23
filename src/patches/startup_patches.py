@@ -14,6 +14,7 @@ def install_startup_patches():
     from src.patches.crash_guard_patch import install_crash_guard_patch
     from src.patches.i18n_collection_patch import install_i18n_collection_patch
     from src.patches.launch_args_patch import install_launch_args_patch
+    from src.patches.nav_layout_patch import install_nav_layout_patch
     from src.patches.no_frame_task_patch import install_no_frame_task_patch
     from src.patches.ocr_text_fix_patch import install_ocr_text_fix_patch
     from src.patches.process_execute_patch import install_process_execute_patch
@@ -34,6 +35,8 @@ def install_startup_patches():
     install_i18n_collection_patch()
     install_launch_args_patch()
     install_mute_promo_patch()
+    # 导航布局：窗口建好后合并滚动区（只影响侧栏外观）
+    install_nav_layout_patch()
     install_no_frame_task_patch()
     install_ocr_text_fix_patch()
     install_process_execute_patch()

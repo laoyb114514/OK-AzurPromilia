@@ -1,7 +1,26 @@
-# 界面行为：关闭询问、提醒、任务栏进度、快捷键（批次 E-2）
+# 界面行为：左侧导航、关闭询问、提醒、任务栏进度、快捷键（批次 E-2）
 
 「界面与提醒」页集中管理这四件事，设置写到 `configs/` 下的 JSON，改完立即生效
 （提示线程每轮都会重新读配置；快捷键例外，见下）。
+
+## 0. 左侧导航布局
+
+侧栏本来是三个区（qfluentwidgets）：`topLayout`（本项目 9 个自定义页，**不滚动**）、
+`scrollArea`（框架的 Capture / Triggers / Tasks / Templates / Schedule，**带滚动条**）、
+`bottomLayout`（Debug / Run Code / Notification / Settings / About，固定）。
+
+于是看着像「上面 9 项不动 + 下面另起一段带滚动条」，滚动条出现在列表中间。现在
+`src/patches/nav_layout_patch.py` 在窗口建好后把 `topLayout` 的项**按原顺序搬到滚动区最前面**：
+
+- 视觉顺序不变：自定义页仍在最上，接着才是 Capture / Triggers / Tasks…
+- **整列只用一个滚动条**（除底部 5 项以外的所有项都在滚动区里）；
+- 底部 5 项（开发工具 / 运行代码 / 通知 / 设置 / 关于）仍在 `bottomLayout`，**固定不滚**。
+
+拿不到导航面板时安静跳过（补丁不影响启动）；`tests/test_nav_layout_patch.py` 用真实的
+`NavigationItemLayout` 验证「搬空顶部区、顺序不变、底部不动」。
+
+> 说明：这个补丁改的是**布局归属**，没有改任何页面的路由键与点击行为。
+> 如果鼠标悬停时的选中指示条位置看起来偏了，告诉我，我再调指示器计算。
 
 ## 1. 关闭询问
 

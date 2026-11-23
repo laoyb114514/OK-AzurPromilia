@@ -23,6 +23,7 @@ PATCHES = [
     ("src.patches.i18n_collection_patch", "install_i18n_collection_patch"),
     ("src.patches.launch_args_patch", "install_launch_args_patch"),
     ("src.patches.qfluent_mute_promo_patch", "install_mute_promo_patch"),
+    ("src.patches.nav_layout_patch", "install_nav_layout_patch"),
     ("src.patches.no_frame_task_patch", "install_no_frame_task_patch"),
     ("src.patches.ocr_text_fix_patch", "install_ocr_text_fix_patch"),
     ("src.patches.process_execute_patch", "install_process_execute_patch"),
