@@ -60,6 +60,7 @@
 
 - [从源码运行 / 快速上手](dev/quickstart.md)
 - [开发指南](dev/development.md)
+- [安装自检：uv run python tools/health_check.py](dev/diagnostics_and_policy.md)
 - [功能对照表（需求逐条 → 代码/测试/文档）](dev/feature_map.md)
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)

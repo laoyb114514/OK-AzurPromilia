@@ -1219,3 +1219,15 @@ msgstr "{name} 还需要标注：{names}"
 
 msgid "{name} 所需模板都已存在，可以直接跑"
 msgstr "{name} 所需模板都已存在，可以直接跑"
+
+msgid "安装自检"
+msgstr "安装自检"
+
+msgid "还没自检；自检只读文件，不改任何东西"
+msgstr "还没自检；自检只读文件，不改任何东西"
+
+msgid "把流程 / 队列 / 方案 / 路线 / 配置 / i18n 一起体检一遍"
+msgstr "把流程 / 队列 / 方案 / 路线 / 配置 / i18n 一起体检一遍"
+
+msgid "自检失败：{error}"
+msgstr "自检失败：{error}"

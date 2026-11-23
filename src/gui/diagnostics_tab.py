@@ -40,6 +40,7 @@ from qfluentwidgets import (
 from src.core.asset_pack import install_pack
 from src.core.diagnostics_bundle import build_bundle
 from src.core.failure_frame_store import FailureFrameStore
+from src.core.health_check import run_all
 from src.core.lang_pack import apply_pack, list_backups, restore_backup, scan_packs
 from src.core.template_audit import TemplateAuditError, audit_directory
 from src.core.template_rescorer import TemplateRescorer
@@ -128,6 +129,8 @@ class DiagnosticsTab(CustomTab):
         self.lang_pack_status: BodyLabel | None = None
         self.audit_detail: QPlainTextEdit | None = None
         self.audit_status: BodyLabel | None = None
+        self.health_detail: QPlainTextEdit | None = None
+        self.health_status: BodyLabel | None = None
         self._packs: list = []
 
         QTimer.singleShot(PREBUILD_DELAY_MS, self, self._schedule_build)
@@ -169,6 +172,7 @@ class DiagnosticsTab(CustomTab):
         self._built = True
         self.add_card(self.tr("失败帧复测"), self._build_failure_frame_card())
         self.add_card(self.tr("模板自检"), self._build_template_audit_card())
+        self.add_card(self.tr("安装自检"), self._build_health_check_card())
         self.add_card(self.tr("素材包安装"), self._build_asset_pack_card())
         self.add_card(self.tr("诊断包"), self._build_bundle_card())
         self.add_card(self.tr("语言包"), self._build_lang_pack_card())
@@ -346,6 +350,47 @@ class DiagnosticsTab(CustomTab):
 
         card_layout.addLayout(body)
         return card
+
+    def _build_health_check_card(self) -> QWidget:
+        card = QWidget()
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        row = QHBoxLayout()
+        row.setSpacing(6)
+        row.addWidget(BodyLabel(self.tr("把流程 / 队列 / 方案 / 路线 / 配置 / i18n 一起体检一遍")))
+        run_button = PrimaryPushButton(FluentIcon.CERTIFICATE, self.tr("开始自检"))
+        run_button.clicked.connect(self._run_health_check)
+        row.addWidget(run_button)
+        row.addStretch(1)
+        layout.addLayout(row)
+
+        self.health_detail = QPlainTextEdit()
+        self.health_detail.setReadOnly(True)
+        self.health_detail.setFixedHeight(150)
+        layout.addWidget(self.health_detail)
+
+        self.health_status = BodyLabel(self.tr("还没自检；自检只读文件，不改任何东西"))
+        self.health_status.setWordWrap(True)
+        layout.addWidget(self.health_status)
+        return card
+
+    def _run_health_check(self):
+        try:
+            report = run_all(os.getcwd())
+        except Exception as exc:
+            self._set_health_status(self.tr("自检失败：{error}").format(error=exc))
+            self._notify(self.tr("自检失败：{error}").format(error=exc), error=True)
+            return
+        if self.health_detail is not None:
+            self.health_detail.setPlainText("\n".join(report.lines()))
+        self._set_health_status(report.summary())
+        self._notify(report.summary(), error=not report.ok)
+
+    def _set_health_status(self, text: str):
+        if self.health_status is not None:
+            self.health_status.setText(text)
 
     def _build_asset_pack_card(self) -> QWidget:
         card = QWidget()

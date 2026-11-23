@@ -211,7 +211,32 @@ ok_templates/...
   安装成功后自动刷新 FeatureSet 与 OCR 纠错表。
 - **诊断包 / 语言包**：见 [隐私遮挡与支持工具](privacy_and_support.md) 第 4、5 节。
 
-## 9. 测试覆盖
+## 9. 安装自检
+
+`src/core/health_check.py` +「工具与诊断 → 安装自检」+ 命令行 `tools/health_check.py`。
+
+流程 / 队列 / 轮椅方案 / 路线 / 配置这些文件都是**用户手改的**，格式错了不会在保存时报错，
+而是跑到一半才炸。自检把它们提前体检一遍：
+
+| 检查 | 发现什么 |
+|------|----------|
+| 模板 | 纯色块、重复模板（复用模板自检） |
+| 流程 | 结构错误、超 500 步 / 4 层 / 1000 次、字段拼错、比例越界 |
+| 队列 | 解析失败、队列为空 |
+| 轮椅方案 | 分段为空、循环非法、拼不成流程 |
+| 导航路线 | 航点缺动作、页面名为空 |
+| 配置 | `configs/*.json` 是否合法 JSON |
+| i18n | 6 个语种目录是否齐全、是否有空 msgstr（装了 polib 才会查空串） |
+
+```bash
+uv run python tools/health_check.py           # 退出码 0 = 没问题
+uv run python tools/health_check.py --strict  # 有 warning 也返回 1（CI 可用）
+```
+
+每一项都**不会抛异常**：坏文件变成一条结果，其它项继续查；单项检查自身出错也只会记成
+「检查本身出错」，不影响其它项。
+
+## 10. 测试覆盖
 
 | 测试 | 覆盖 |
 |------|------|
@@ -221,6 +246,7 @@ ok_templates/...
 | `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |
 | `tests/test_template_audit.py` | 纯色块拒绝、有纹理通过、偏弱/尺寸过小/空区域、灰度图、SHA-256 稳定性与分数排序、COCO 批量自检（重复分组、越界 bbox、缺图报错） |
 | `tests/test_asset_pack.py` | 清单读写、篡改检测、zip slip、前缀白名单、备份、dry-run、回滚 |
+| `tests/test_health_check.py` | 流程合法/比例越界/无法解析、空队列、方案拼装失败、路线缺动作、配置坏文件、汇总报告与退出码、单项检查不抛异常 |
 | `tests/test_config.py` | 新增 Tab 可导入且已注册 |
 
 全部离线可跑，不需要游戏：

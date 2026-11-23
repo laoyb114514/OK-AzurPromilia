@@ -1228,3 +1228,15 @@ msgstr "{name} still needs these templates marked: {names}"
 
 msgid "{name} 所需模板都已存在，可以直接跑"
 msgstr "{name} has all the templates it needs and can run right away"
+
+msgid "安装自检"
+msgstr "Install health check"
+
+msgid "还没自检；自检只读文件，不改任何东西"
+msgstr "Not checked yet; the check only reads files and changes nothing"
+
+msgid "把流程 / 队列 / 方案 / 路线 / 配置 / i18n 一起体检一遍"
+msgstr "Checks flows, queues, schemes, routes, configs and i18n in one go"
+
+msgid "自检失败：{error}"
+msgstr "Health check failed: {error}"
