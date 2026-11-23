@@ -9,18 +9,26 @@
 `scrollArea`（框架的 Capture / Triggers / Tasks / Templates / Schedule，**带滚动条**）、
 `bottomLayout`（Debug / Run Code / Notification / Settings / About，固定）。
 
-于是看着像「上面 9 项不动 + 下面另起一段带滚动条」，滚动条出现在列表中间。现在
-`src/patches/nav_layout_patch.py` 在窗口建好后把 `topLayout` 的项**按原顺序搬到滚动区最前面**：
+于是看着像「上面 9 项不动 + 下面另起一段带滚动条」，滚动条出现在列表中间。
 
-- 视觉顺序不变：自定义页仍在最上，接着才是 Capture / Triggers / Tasks…
-- **整列只用一个滚动条**（除底部 5 项以外的所有项都在滚动区里）；
-- 底部 5 项（开发工具 / 运行代码 / 通知 / 设置 / 关于）仍在 `bottomLayout`，**固定不滚**。
+`src/patches/nav_layout_patch.py` 的做法是**只改注册位置、不动控件父窗口**：
 
-拿不到导航面板时安静跳过（补丁不影响启动）；`tests/test_nav_layout_patch.py` 用真实的
-`NavigationItemLayout` 验证「搬空顶部区、顺序不变、底部不动」。
+1. 包一层 `FluentWindow.addSubInterface`：`src.gui.*` 的页面一律以
+   `NavigationItemPosition.SCROLL` 注册 → 和框架的项进同一个滚动区；
+2. 窗口建好后在**同一个布局内**把本项目的项排到前面（`takeAt` + `insertWidget`），
+   视觉顺序保持「自定义页 → Capture / Triggers / Tasks…」；
+3. 底部 5 项本来就是 `BOTTOM`，一行代码都不碰。
 
-> 说明：这个补丁改的是**布局归属**，没有改任何页面的路由键与点击行为。
-> 如果鼠标悬停时的选中指示条位置看起来偏了，告诉我，我再调指示器计算。
+结果：**整列一个滚动条**；底部 5 项（开发工具 / 运行代码 / 通知 / 设置 / 关于）固定不滚。
+
+> ⚠️ 第一版补丁是「把 `topLayout` 里的控件搬到 `scrollLayout`」，结果滚动区被撑到标题栏
+> 下面、和窗口标题文字重叠（用户截图确认）。控件跨布局搬移后父窗口/几何没有重算，
+> 所以现在改成上面这种「只改注册位置 + 同布局内排序」的做法。
+> `tests/test_nav_layout_patch.py` 锁住三条：本项目页面被改成 SCROLL、框架/底部页面保持原位置、
+> 同布局排序后顺序为「本项目 → 框架项」。
+>
+> 如果鼠标悬停时的选中指示条位置看起来偏了，告诉我——指示器位置是框架算的，
+> 我在这台机器上没有字体、看不到真实窗口，只能靠你确认。
 
 ## 1. 关闭询问
 
