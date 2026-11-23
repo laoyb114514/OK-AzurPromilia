@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
@@ -261,7 +262,14 @@ class PityBernoulliModel:
 
 
 def parse_rate_table(text: str) -> list[float]:
-    """把「2.8%, 28.8%, 100%」这类文本解析成概率表（支持逗号/空格/换行分隔）。"""
+    """把「2.8%, 28.8%, 100%」这类文本解析成概率表（支持逗号/空格/换行分隔）。
+
+    校验比「能转成数字」严格一点，否则用户贴错一个数就会得到一个荒谬的模型：
+
+    - 每项必须在 **0~1**（``150%``、``-5%`` 都拒绝，并指出是哪个值）；
+    - 概率必须**单调不减**（抽得越多命中率不该下降）；
+    - 最后一项必须是 **100%**（硬保底），否则模型会算出「永远抽不到」。
+    """
     import re
 
     tokens = [token for token in re.split(r"[,，\s]+", str(text or "").strip()) if token]
@@ -275,7 +283,15 @@ def parse_rate_table(text: str) -> list[float]:
             value = float(raw)
         except ValueError as exc:
             raise ValueError(f"无法解析概率: {token}") from exc
-        rates.append(value / 100.0 if percent or value > 1 else value)
+        rate = value / 100.0 if percent or value > 1 else value
+        if not 0.0 <= rate <= 1.0:
+            raise ValueError(f"概率必须在 0%~100% 之间: {token}")
+        rates.append(rate)
     if not rates:
         raise ValueError("概率表是空的")
+    for previous, current in itertools.pairwise(rates):
+        if current < previous:
+            raise ValueError(f"概率必须单调不减: {previous * 100:g}% → {current * 100:g}%")
+    if abs(rates[-1] - 1.0) > 1e-9:
+        raise ValueError(f"最后一项必须是 100%（硬保底），当前 {rates[-1] * 100:g}%")
     return rates

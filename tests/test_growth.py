@@ -208,6 +208,22 @@ class TestPlanValidation(unittest.TestCase):
         with self.assertRaises(GrowthDataError):
             compute_plan(small_dataset(), [Target("ghost")])
 
+    def test_bare_string_target_is_accepted(self):
+        """允许直接写条目 key，省掉包一层 Target。"""
+        plan = compute_plan(small_dataset(), ["hero"])
+        self.assertEqual(len(plan.targets), 1)
+
+    def test_bad_target_type_has_clear_error(self):
+        with self.assertRaises(GrowthInputError) as ctx:
+            compute_plan(small_dataset(), [123])
+        self.assertIn("Target", str(ctx.exception))
+
+    def test_copies_below_one_is_rejected(self):
+        """0 份 / 负数份是输入错误——静默当 1 份会让人以为算的是 0 份。"""
+        for copies in (0, -2):
+            with self.subTest(copies=copies), self.assertRaises(GrowthInputError):
+                compute_plan(small_dataset(), [Target("hero", copies=copies)])
+
     def test_no_op_target_is_skipped(self):
         plan = compute_plan(small_dataset(), [Target("hero", from_level=40, to_level=40)])
         self.assertEqual(plan.targets, [])

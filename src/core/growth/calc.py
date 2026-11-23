@@ -40,11 +40,18 @@ class Target:
         start = max(1, int(self.from_level))
         end = entry.max_level if self.to_level is None else int(self.to_level)
         end = max(start, min(end, entry.max_level))
+        try:
+            copies = int(self.copies)
+        except (TypeError, ValueError) as exc:
+            raise GrowthInputError(f"份数必须是整数，收到 {self.copies!r}") from exc
+        if copies < 1:
+            # 0 份 / 负数份都是输入错误：静默当 1 份会让人误以为算的是 0 份
+            raise GrowthInputError(f"份数至少为 1，收到 {self.copies!r}")
         return Target(
             entry_key=self.entry_key,
             from_level=start,
             to_level=end,
-            copies=max(1, int(self.copies)),
+            copies=copies,
             potential_level=max(0, int(self.potential_level)),
             star=max(0, min(int(self.star), max((stage.star for stage in entry.star_stages), default=0))),
         )
@@ -146,8 +153,17 @@ def compute_plan(
     materials: dict[str, float] = {}
 
     for raw_target in target_list:
-        entry = dataset.entry(raw_target.entry_key)
-        target = raw_target.normalized(entry)
+        if isinstance(raw_target, Target):
+            target_in = raw_target
+        elif isinstance(raw_target, str):
+            # 允许直接写条目 key，省掉包一层 Target
+            target_in = Target(raw_target)
+        else:
+            raise GrowthInputError(
+                f"养成目标必须是 Target 或条目 key（字符串），收到 {type(raw_target).__name__}"
+            )
+        entry = dataset.entry(target_in.entry_key)
+        target = target_in.normalized(entry)
         if target.to_level <= target.from_level and not target.potential_level and not target.star:
             plan.notes.append(f"{entry.name} 没有需要养成的部分，已跳过")
             continue

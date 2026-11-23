@@ -273,12 +273,20 @@ class RunLog:
         return self.store.path
 
     def record(self, task: str, ok: bool, seconds: float, ts: float | None = None, note: str = "") -> bool:
-        """记一条运行结果。``note`` 用来存失败原因（成功时留空），旧记录没有这个字段也能读。"""
+        """记一条运行结果。``note`` 用来存失败原因（成功时留空），旧记录没有这个字段也能读。
+
+        用时会被夹到 **≥ 0**：系统时间跳变 / 暂停感知时钟算出负数时，
+        负时长会污染平均用时，进而把任务栏进度和 HUD 的「预计剩余」全带偏。
+        """
+        try:
+            elapsed = max(0.0, float(seconds))
+        except (TypeError, ValueError):
+            elapsed = 0.0
         data = {
             "ts": time.time() if ts is None else float(ts),
             "task": str(task),
             "ok": bool(ok),
-            "seconds": round(float(seconds), 3),
+            "seconds": round(elapsed, 3),
         }
         if note:
             data["note"] = str(note)[:200]

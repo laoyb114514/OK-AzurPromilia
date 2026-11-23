@@ -177,6 +177,25 @@ class TestCustomParams(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_rate_table("   ")
 
+    def test_rate_table_rejects_out_of_range(self):
+        """概率表是用户从 wiki 抄的，抄错一个数就会得到荒谬模型。"""
+        for text in ("150%", "-5%"):
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                parse_rate_table(text)
+
+    def test_rate_table_rejects_non_monotonic(self):
+        with self.assertRaises(ValueError) as ctx:
+            parse_rate_table("50%, 20%, 100%")
+        self.assertIn("单调不减", str(ctx.exception))
+
+    def test_rate_table_requires_hard_pity(self):
+        with self.assertRaises(ValueError) as ctx:
+            parse_rate_table("50%, 60%")
+        self.assertIn("100%", str(ctx.exception))
+
+    def test_rate_table_single_hundred_percent(self):
+        self.assertEqual(parse_rate_table("100%"), [1.0])
+
 
 if __name__ == "__main__":
     unittest.main()

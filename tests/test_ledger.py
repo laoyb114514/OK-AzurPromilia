@@ -249,6 +249,16 @@ class TestRunLogReport(unittest.TestCase):
         self.log.record("A", True, 20.0)
         self.assertAlmostEqual(self.log.stats()["total_seconds"], 30.0)
 
+    def test_negative_or_bad_seconds_are_clamped(self):
+        """系统时间跳变会算出负数时长，不能污染平均用时（任务栏/HUD 都靠它）。"""
+        self.log.record("A", True, -5)
+        self.log.record("A", True, "oops")
+        self.log.record("A", True, 10)
+        stats = self.log.stats()
+        self.assertEqual(stats["count"], 3)
+        self.assertAlmostEqual(stats["total_seconds"], 10.0)
+        self.assertAlmostEqual(stats["avg_seconds"], 10.0 / 3)
+
 
 if __name__ == "__main__":
     unittest.main()
