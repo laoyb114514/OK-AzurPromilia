@@ -59,12 +59,13 @@
 
 - [从源码运行 / 快速上手](dev/quickstart.md)
 - [开发指南](dev/development.md)
+- [功能对照表（需求逐条 → 代码/测试/文档）](dev/feature_map.md)
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
 - [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
 - [一条龙顺序、导航路线与轮椅方案](dev/routes_and_replay.md)
 - [隐私遮挡、坐标拾取与支持工具（语言包 / 诊断包 / 崩溃诊断）](dev/privacy_and_support.md)
-- [界面行为：关闭询问 / 提醒 / 任务栏进度 / 快捷键](dev/ui_behavior.md)
+- [界面行为：关闭询问 / 提醒 / 任务栏进度 / 快捷键 / HUD](dev/ui_behavior.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 

@@ -125,7 +125,19 @@ ok-ap-diagnostics-<时间戳>.zip
 没有历史数据时用 `fallback_seconds`，两者都没有返回 0。
 真正结束由调用方自己置 1.0 或隐藏进度条。
 
-## 8. 测试覆盖
+## 8. 单实例（防多开）
+
+由框架提供：`ok.util.process.check_mutex()`（`ok/__init__.py` 启动时调用，`config['check_mutex']` 可关）。
+
+- 互斥量名 = 当前工作目录的 MD5，所以**同一个安装目录只能开一个**（不同目录各开一个）；
+- 第二个实例会等 5 秒；期间前一个退出就正常接管；
+- 5 秒后仍占着，就按 `%TEMP%/ok-script-<hash>.pid` 里记录的 PID 收尾；
+- 收尾也失败则抛 `RuntimeError('Another application instance is still running and could not be stopped safely.')`
+  拒绝启动，而不是让两个实例同时操作游戏。
+
+本项目**没有**另写一套单实例逻辑（重复实现只会和框架打架），只在这里说明行为。
+
+## 9. 测试覆盖
 
 | 测试 | 覆盖 |
 |------|------|
