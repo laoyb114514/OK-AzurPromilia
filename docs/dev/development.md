@@ -586,6 +586,9 @@ uv run python tools/health_check.py             # 流程/队列/方案/路线/�
 ```
 
 - 「导入体检」能抓到 GUI 页/补丁里拼错的名字——这类错误否则要等用户点开那一页才炸；
+  它顺带还查三类「只有跑到那一步才会炸」的引用：
+  流程 ACTION_ALLOWLIST 里每个动作在 BaseGameTask 上真的存在（dodge 就曾经只有名字）、
+  代码里每个 FeatureList.xxx 都能取到（docstring 里的例子不算）、全局配置项 key 不重名；
 - 「安装自检」见 [识别诊断与运行策略](diagnostics_and_policy.md) §9，也可以在
   「工具与诊断 → 安装自检」里点按钮跑。
 

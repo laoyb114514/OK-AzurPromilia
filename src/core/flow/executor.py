@@ -35,13 +35,16 @@ PROGRESS_FOLDER = "flow_progress"
 #: 流程里 ``{"type": "action", "action": "..."}`` 允许调用的任务方法。
 #: 想加新动作就往这里加白名单 —— 流程文件是用户可编辑的 JSON，
 #: 不能让任意字符串变成任意方法调用。
+#:
+#: ⚠️ 名单里每个名字都必须在 ``BaseGameTask`` 上真的存在，否则等用户跑到那一步
+#: 才炸（``dodge`` 就这么躺了一阵子：白名单里有、方法没有）。这条由
+#: ``tests/test_imports.py`` 守着。
 ACTION_ALLOWLIST = frozenset(
     {
         "back",
         "ensure_main",
         "handle_confirm",
         "handle_login",
-        "dodge",
         "press_combat_key",
         "click_relative",
         "next_frame",
