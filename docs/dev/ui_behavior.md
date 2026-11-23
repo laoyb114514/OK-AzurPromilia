@@ -97,13 +97,22 @@
 
 ## 6. 工程质量
 
-- **CI 新增「只对改动文件跑 ruff」**（`.github/workflows/pr-test.yml`）：
-  基线里还有历史告警，全量检查会挡住所有 PR；改成只检查 `git diff base...HEAD` 的
-  `*.py`，新代码必须干净，确需保留的告警用 `# noqa: 规则名` 显式豁免。
-- `pyproject.toml` 里把 `RUF003`（注释里的 `×`、`—` 等中文标点）加入 ignore：
-  本项目注释大量引用游戏内文案，这类字符是故意的。
-- 顺手把碰过的文件里的历史告警清零（`base_game_task.py` / `daily_task_runner.py` /
-  `daily_task.py` / 若干测试），这样这条门禁对后续改动是可用的。
+CI（`.github/workflows/pr-test.yml`）在 PR 上跑四道门禁：
+
+| 门禁 | 跑什么 | 挡住什么 |
+|------|--------|----------|
+| 依赖可复现 | `gen_release_requirements.py --check` | `requirements.txt` 与 `uv.lock` 不同步导致打包失败 |
+| **只对改动文件跑 ruff** | `git diff base...HEAD -- "*.py"` | 基线里有历史告警，全量检查会挡住所有 PR；新代码必须干净，确需保留用 `# noqa: 规则名` |
+| 全量离线测试 | `unittest discover -s tests` | 逻辑回归（1200+ 项，不需要游戏） |
+| **i18n 校验 + 安装自检** | `scripts/validate_all.py`、`tools/health_check.py --strict` | 加了 UI 文案没翻译（6 语种有空 msgstr）、示例流程/队列装上打不开 |
+
+`pyproject.toml` 里把 `RUF003`（注释里的 `×`、`—` 等中文标点）加入 ignore：
+本项目注释大量引用游戏内文案，这类字符是故意的。顺手把碰过的文件里的历史告警清零
+（`base_game_task.py` / `daily_task_runner.py` / `daily_task.py` / 若干测试）。
+
+**文档也有测试**（`tests/test_docs_links.py`）：相对链接必须指向存在的文件、`#锚点` 必须
+能对上标题（按 GitHub 规则生成 slug，保留中文）、文档里用反引号点名的 `tests/*.py` 必须真的
+存在、`docs/index.md` 不能漏列文档。改名/搬章节忘了同步，CI 会直接红，不用等人点到 404。
 
 ## 7. 明确没做的
 

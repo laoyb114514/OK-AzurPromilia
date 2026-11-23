@@ -107,3 +107,11 @@ jobs:
         timeout-minutes: 5
         run: |
           python -u -m unittest discover -s tests -p "test_*.py" -v
+
+      # i18n 与安装自检以前只在本地手动跑，CI 不拦；这两步都很便宜（几秒），
+      # 却能在 PR 阶段挡住「加了 tab 没翻译」「示例流程装了打不开」这类问题。
+      - name: Validate i18n (6 locales, no empty msgstr)
+        run: python scripts/validate_all.py
+
+      - name: Install health check (flows / queues / routes / schemes / configs / i18n)
+        run: python tools/health_check.py --strict
