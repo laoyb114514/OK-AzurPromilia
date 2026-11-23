@@ -1180,3 +1180,33 @@ msgstr "육성 데이터 JSON 선택"
 
 msgid "导入数据"
 msgstr "데이터 가져오기"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "왼쪽에서 항목을 선택하면 해당 항목의 자체 설정(기본값과 다른 부분)을 표시합니다"
+
+msgid "打开配置文件"
+msgstr "설정 파일 열기"
+
+msgid "刷新参数"
+msgstr "설정 새로 고침"
+
+msgid "每项自己的参数"
+msgstr "항목별 설정"
+
+msgid "有独立配置文件"
+msgstr "전용 설정 파일 있음"
+
+msgid "还没有独立配置文件"
+msgstr "전용 설정 파일 없음"
+
+msgid "先在左边选中一项"
+msgstr "먼저 왼쪽에서 항목을 선택하세요"
+
+msgid "读不到参数：{error}"
+msgstr "설정을 읽을 수 없습니다: {error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "설정 파일을 열 수 없습니다: {error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name} ({prefix}): {line}"

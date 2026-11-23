@@ -1177,3 +1177,33 @@ msgstr "选择养成数据 JSON"
 
 msgid "导入数据"
 msgstr "导入数据"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+
+msgid "打开配置文件"
+msgstr "打开配置文件"
+
+msgid "刷新参数"
+msgstr "刷新参数"
+
+msgid "每项自己的参数"
+msgstr "每项自己的参数"
+
+msgid "有独立配置文件"
+msgstr "有独立配置文件"
+
+msgid "还没有独立配置文件"
+msgstr "还没有独立配置文件"
+
+msgid "先在左边选中一项"
+msgstr "先在左边选中一项"
+
+msgid "读不到参数：{error}"
+msgstr "读不到参数：{error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "打不开配置文件：{error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name}（{prefix}）：{line}"

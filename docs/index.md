@@ -36,6 +36,7 @@
   - 界面在「离线工具」页（`src/gui/offline_tools_tab.py`）。
 - **复用与固化流程**：
   - **一条龙顺序 (`src/tasks/daily/order.py` + 「一条龙顺序」页)**：拖动调整「一键日常」各子任务的执行顺序与开关。
+  - **每项自己的参数 (`src/core/task_config_summary.py`)**：选中一项就显示它与默认值不同的参数，可直接打开该任务的配置文件。
   - **导航路线 (`src/core/route.py` + 「导航路线」任务)**：把「怎么走到某界面」写成航点串，跑通即存、可断点续跑。
   - **轮椅方案 (`src/core/replay.py`)**：把多段录制拼成一套固定流程，可循环、可导出成流程文件。
   - **实时辅助 (`src/tasks/trigger/auto_combat_assist_task.py`)**：按配置的按键序列与冷却持续操作，可用前置模板限定生效场合。
@@ -106,6 +107,7 @@
 │   │   ├── taskbar.py          任务栏进度（ITaskbarList3，可降级）
 │   │   ├── hud.py              HUD 状态文案与定位（纯逻辑）
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
+│   │   ├── task_config_summary.py 子任务参数摘要（「一条龙顺序」页用）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
 │   │   ├── onetime/            一次性业务任务（Daily、HomeDaily、CommissionDaily、ClaimDaily、Flow、Route、Settlement）

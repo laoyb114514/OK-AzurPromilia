@@ -1182,3 +1182,33 @@ msgstr "育成データの JSON を選択"
 
 msgid "导入数据"
 msgstr "データをインポート"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "左で項目を選ぶと、その項目自身の設定（既定値と異なる部分）を表示します"
+
+msgid "打开配置文件"
+msgstr "設定ファイルを開く"
+
+msgid "刷新参数"
+msgstr "設定を更新"
+
+msgid "每项自己的参数"
+msgstr "項目ごとの設定"
+
+msgid "有独立配置文件"
+msgstr "専用の設定ファイルあり"
+
+msgid "还没有独立配置文件"
+msgstr "専用の設定ファイルなし"
+
+msgid "先在左边选中一项"
+msgstr "先に左で項目を選んでください"
+
+msgid "读不到参数：{error}"
+msgstr "設定を読み込めません：{error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "設定ファイルを開けません：{error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name}（{prefix}）：{line}"

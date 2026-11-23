@@ -7,6 +7,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from ok.gui.widget.CustomTab import CustomTab
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QHBoxLayout, QListWidget, QListWidgetItem, QVBoxLayout, QWidget
@@ -20,6 +23,7 @@ from qfluentwidgets import (
     PushButton,
 )
 
+from src.core.task_config_summary import config_path, has_own_config, summary_line
 from src.tasks.daily.order import split_order
 from src.tasks.onetime.daily_task import DEFAULT_ORDER, DailyTask
 
@@ -37,6 +41,8 @@ class DailyOrderTab(CustomTab):
         self._task = None
         self.list_widget: QListWidget | None = None
         self.status_label: BodyLabel | None = None
+        self.detail_label: BodyLabel | None = None
+        self.open_config_button: PushButton | None = None
         QTimer.singleShot(PREBUILD_DELAY_MS, self, self._schedule_build)
 
     # ── CustomTab 元信息 ─────────────────────────────────
@@ -109,6 +115,32 @@ class DailyOrderTab(CustomTab):
 
         self.add_card(self.tr("一键日常的执行顺序"), card)
 
+        # 每一项自己的参数（存在 configs/<任务名>.json 里，归属权在那个任务自己）
+        detail_card = QWidget()
+        detail_layout = QVBoxLayout(detail_card)
+        detail_layout.setContentsMargins(0, 0, 0, 0)
+        detail_layout.setSpacing(8)
+
+        self.detail_label = BodyLabel(self.tr("在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"))
+        self.detail_label.setWordWrap(True)
+        detail_layout.addWidget(self.detail_label)
+
+        detail_row = QHBoxLayout()
+        detail_row.setSpacing(6)
+        self.open_config_button = PushButton(FluentIcon.EDIT, self.tr("打开配置文件"))
+        self.open_config_button.clicked.connect(self._open_selected_config)
+        detail_row.addWidget(self.open_config_button)
+        refresh_detail = PushButton(FluentIcon.SYNC, self.tr("刷新参数"))
+        refresh_detail.clicked.connect(self._refresh_detail)
+        detail_row.addWidget(refresh_detail)
+        detail_row.addStretch(1)
+        detail_layout.addLayout(detail_row)
+
+        self.add_card(self.tr("每项自己的参数"), detail_card)
+
+        if self.list_widget is not None:
+            self.list_widget.currentItemChanged.connect(lambda *_: self._refresh_detail())
+
     # ── 数据 ─────────────────────────────────────────────
     def _resolve_task(self):
         executor = getattr(self, "executor", None)
@@ -143,7 +175,10 @@ class DailyOrderTab(CustomTab):
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsDragEnabled)
             item.setCheckState(Qt.Checked if config.get(name, True) else Qt.Unchecked)
             self.list_widget.addItem(item)
+        if self.list_widget.count():
+            self.list_widget.setCurrentRow(0)
         self._set_status(self.tr("已载入当前顺序；拖动或勾选后点「保存」"))
+        self._refresh_detail()
 
     def _known_names(self) -> list[str]:
         """从默认顺序里取全部已知任务名（顺序串里可能有历史遗留项）。"""
@@ -200,6 +235,62 @@ class DailyOrderTab(CustomTab):
             return
         self._set_status(self.tr("已保存：{order}").format(order=" → ".join(names)))
         self._notify(self.tr("顺序已保存"))
+
+    # ── 每项参数 ─────────────────────────────────────────
+    def selected_name(self) -> str:
+        item = self.list_widget.currentItem() if self.list_widget is not None else None
+        return item.text() if item is not None else ""
+
+    def _refresh_detail(self):
+        """显示选中项自己的参数（与默认值不同的部分）。"""
+        name = self.selected_name()
+        if not name:
+            self._set_detail(self.tr("在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"))
+            return
+        try:
+            line = summary_line(name, **self._summary_kwargs())
+        except Exception as exc:  # 摘要失败不该妨碍排序
+            self._set_detail(self.tr("读不到参数：{error}").format(error=exc))
+            return
+        has_config = has_own_config(name, **self._path_kwargs())
+        prefix = self.tr("有独立配置文件") if has_config else self.tr("还没有独立配置文件")
+        self._set_detail(self.tr("{name}（{prefix}）：{line}").format(name=name, prefix=prefix, line=line))
+
+    def _summary_kwargs(self) -> dict:
+        """给 ``summary_line`` 用的默认值来源（取子任务注册类里的 default_config）。"""
+        name = self.selected_name()
+        defaults = {}
+        for task in getattr(getattr(self, "executor", None), "onetime_tasks", []) or []:
+            if str(getattr(task, "name", "")) == name:
+                defaults = dict(getattr(task, "default_config", {}) or {})
+                break
+        return {"defaults": defaults}
+
+    def _path_kwargs(self) -> dict:
+        return {}
+
+    def open_config(self, name: str) -> Path:
+        """打开某项的配置文件（不存在就先建一个空对象，方便用户填）。"""
+        path = config_path(name)
+        try:
+            if not path.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{}\n", encoding="utf-8")
+            os.startfile(str(path))  # type: ignore[attr-defined]
+        except Exception as exc:
+            self._notify(self.tr("打不开配置文件：{error}").format(error=exc), error=True)
+        return path
+
+    def _open_selected_config(self):
+        name = self.selected_name()
+        if not name:
+            self._notify(self.tr("先在左边选中一项"), error=True)
+            return
+        self.open_config(name)
+
+    def _set_detail(self, text: str):
+        if self.detail_label is not None:
+            self.detail_label.setText(text)
 
     # ── 工具 ─────────────────────────────────────────────
     def _set_status(self, text: str):

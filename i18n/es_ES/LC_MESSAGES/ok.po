@@ -1188,3 +1188,33 @@ msgstr "Elegir el JSON de datos de progresión"
 
 msgid "导入数据"
 msgstr "Importar datos"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "Selecciona un elemento a la izquierda para ver sus propios ajustes (solo los que difieren de los valores por defecto)"
+
+msgid "打开配置文件"
+msgstr "Abrir archivo de configuración"
+
+msgid "刷新参数"
+msgstr "Actualizar ajustes"
+
+msgid "每项自己的参数"
+msgstr "Ajustes por elemento"
+
+msgid "有独立配置文件"
+msgstr "tiene su propio archivo de configuración"
+
+msgid "还没有独立配置文件"
+msgstr "sin archivo de configuración todavía"
+
+msgid "先在左边选中一项"
+msgstr "Selecciona primero un elemento a la izquierda"
+
+msgid "读不到参数：{error}"
+msgstr "No se pueden leer los ajustes: {error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "No se puede abrir el archivo de configuración: {error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name} ({prefix}): {line}"

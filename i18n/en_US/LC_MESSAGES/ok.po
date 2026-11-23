@@ -1186,3 +1186,33 @@ msgstr "Choose the growth data JSON"
 
 msgid "导入数据"
 msgstr "Import data"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "Select an item on the left to see its own settings (only the ones differing from defaults)"
+
+msgid "打开配置文件"
+msgstr "Open config file"
+
+msgid "刷新参数"
+msgstr "Refresh settings"
+
+msgid "每项自己的参数"
+msgstr "Per-item settings"
+
+msgid "有独立配置文件"
+msgstr "has its own config file"
+
+msgid "还没有独立配置文件"
+msgstr "no config file yet"
+
+msgid "先在左边选中一项"
+msgstr "Select an item on the left first"
+
+msgid "读不到参数：{error}"
+msgstr "Cannot read the settings: {error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "Cannot open the config file: {error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name} ({prefix}): {line}"

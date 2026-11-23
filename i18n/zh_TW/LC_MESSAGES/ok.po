@@ -1177,3 +1177,33 @@ msgstr "選擇養成資料 JSON"
 
 msgid "导入数据"
 msgstr "匯入資料"
+
+msgid "在左边选中一项，这里显示它自己的参数（与默认值不同的部分）"
+msgstr "在左邊選取一項，這裡顯示它自己的參數（與預設值不同的部分）"
+
+msgid "打开配置文件"
+msgstr "開啟設定檔"
+
+msgid "刷新参数"
+msgstr "重新整理參數"
+
+msgid "每项自己的参数"
+msgstr "每項自己的參數"
+
+msgid "有独立配置文件"
+msgstr "有獨立設定檔"
+
+msgid "还没有独立配置文件"
+msgstr "還沒有獨立設定檔"
+
+msgid "先在左边选中一项"
+msgstr "先在左邊選取一項"
+
+msgid "读不到参数：{error}"
+msgstr "讀不到參數：{error}"
+
+msgid "打不开配置文件：{error}"
+msgstr "打不開設定檔：{error}"
+
+msgid "{name}（{prefix}）：{line}"
+msgstr "{name}（{prefix}）：{line}"
