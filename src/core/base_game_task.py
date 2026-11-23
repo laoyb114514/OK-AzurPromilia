@@ -679,15 +679,32 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
         保留数量变化时重建存储，但**沿用原来的目录**：调用方（含测试）可以先把
         ``_failure_store`` 指到一个自定义目录，后续配置变化不会把帧写到别处。
+        落盘前会过 ``screenshot_processor``（UID 遮挡），与框架落盘截图同一套。
         """
         limit = self.runtime.failure_frame_limit
         store = self._failure_store
         if store is None:
-            store = FailureFrameStore(limit=limit, log=self._log_failure_store)
+            store = FailureFrameStore(
+                limit=limit,
+                log=self._log_failure_store,
+                processor=self._privacy_processor_for_frames,
+            )
         elif store.limit != limit:
-            store = FailureFrameStore(root=store.root, limit=limit, log=self._log_failure_store)
+            store = FailureFrameStore(
+                root=store.root,
+                limit=limit,
+                log=self._log_failure_store,
+                processor=self._privacy_processor_for_frames,
+            )
         self._failure_store = store
         return store
+
+    def _privacy_processor_for_frames(self, frame):
+        """失败帧的遮挡处理器：每次从当前配置取，改了遮挡设置立即生效。"""
+        processor = app_config.get("screenshot_processor")
+        if not callable(processor):
+            return None
+        return processor(frame)
 
     def _log_failure_store(self, message: str):
         with contextlib.suppress(Exception):
@@ -696,8 +713,8 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
     def capture_failure_frame(self, message: str = "", task_name: str | None = None) -> bool:
         """把当前识别帧存进失败帧库，供「工具与诊断 → 失败帧复测」使用。
 
-        用的是 ``self.frame``（识别用的原始帧），**不经过** ``screenshot_processor``，
-        所以复测时拿到的画面与实际识别画面完全一致。
+        用的是 ``self.frame``（识别用的原始帧），入库存盘前过一遍 ``screenshot_processor``：
+        失败帧会长期留在磁盘上，隐私遮挡必须和框架截图一致。
         """
         try:
             frame = self.frame

@@ -1,14 +1,15 @@
-"""失败帧库：把任务失败那一刻的**原始识别帧**存盘，供事后复测。
+"""失败帧库：把任务失败那一刻的识别帧存盘，供事后复测。
 
 为什么单独存、不用框架的 ``screenshots/``：
 
-1. 框架落盘前会过 ``config['screenshot_processor']``（本项目会把左下角 UID 涂黑）
-   和 ``blur_area``，落盘图与识别帧**不是同一张图**，拿它复测等于换了输入；
-2. 框架的 ``screenshots/`` 有体积/天数清理策略，失败现场会被顺手删掉；
-3. 复测要把这一帧喂给**全部模板**并按得分排序，需要一个稳定的索引（时间/任务/消息）。
+1. 框架的 ``screenshots/`` 有体积/天数清理策略，失败现场会被顺手删掉；
+2. 复测要把这一帧喂给**全部模板**并按得分排序，需要一个稳定的索引（时间/任务/消息）；
+3. 框架落盘图会被压缩/加框，与识别帧不是同一份输入。
 
-所以这里自建 ``failure_frames/`` 目录 + ``index.json`` 索引，只留最近 N 帧
-（N 来自全局配置 ``失败帧保留数量``，默认 20）。
+**隐私遮挡**：帧来自识别用的原始画面，落盘前过一遍 ``screenshot_processor``
+（与框架落盘截图用同一个处理器），所以失败帧里同样看不到被遮挡的区域。
+处理器抛异常时会退回未遮挡并记一条警告 —— 失败路径上不允许因为遮罩把帧丢掉。
+被遮挡的帧在索引里标 ``masked: true``，复测页会提示「遮挡区内的模板必然不命中」。
 
 设计约束：
 
@@ -58,6 +59,7 @@ class FailureFrameRecord:
     width: int
     height: int
     channels: int = 3
+    masked: bool = False
 
     @property
     def created_text(self) -> str:
@@ -73,6 +75,7 @@ class FailureFrameRecord:
             "width": self.width,
             "height": self.height,
             "channels": self.channels,
+            "masked": self.masked,
         }
 
     @classmethod
@@ -86,11 +89,14 @@ class FailureFrameRecord:
             width=int(data.get("width", 0) or 0),
             height=int(data.get("height", 0) or 0),
             channels=int(data.get("channels", 3) or 3),
+            masked=bool(data.get("masked", False)),
         )
 
     def label(self) -> str:
         """UI 里展示用的单行标题。"""
         head = f"{self.created_text}  {self.task or '未知任务'}  {self.width}×{self.height}"
+        if self.masked:
+            head += "  已遮挡"
         if self.message:
             head += f"  {self.message}"
         return head
@@ -104,10 +110,12 @@ class FailureFrameStore:
         root: str | Path | None = None,
         limit: int = DEFAULT_LIMIT,
         log: Callable[[str], None] | None = None,
+        processor: Callable[[np.ndarray], np.ndarray | None] | None = None,
     ):
         self.root = Path(root) if root is not None else Path(get_relative_path(DEFAULT_FOLDER))
         self.limit = max(1, int(limit or DEFAULT_LIMIT))
         self._log = log
+        self._processor = processor
         self._index_path = self.root / INDEX_NAME
 
     # ── 路径 ──────────────────────────────────────────────
@@ -167,6 +175,7 @@ class FailureFrameStore:
         """保存一帧。失败时返回 ``None``，绝不抛异常。"""
         if frame is None or not isinstance(frame, np.ndarray) or frame.size == 0:
             return None
+        frame, masked = self._apply_processor(frame)
         try:
             self._ensure_root()
             created = float(created_at if created_at is not None else time.time())
@@ -189,6 +198,7 @@ class FailureFrameStore:
                 width=int(width),
                 height=int(height),
                 channels=int(channels),
+                masked=masked,
             )
 
             records = [record, *self.list()]
@@ -200,6 +210,24 @@ class FailureFrameStore:
         except Exception as exc:  # 失败路径上不允许再抛
             self._warn(f"保存失败帧异常: {exc}")
             return None
+
+    def _apply_processor(self, frame: np.ndarray) -> tuple[np.ndarray, bool]:
+        """落盘前过一遍隐私处理器（返回 ``(帧, 是否遮挡成功)``）。
+
+        处理器抛异常就退回未遮挡的帧再记一条警告：失败路径上宁可有隐私风险，
+        也不能因为遮罩把失败现场弄丢（用户装了遮罩多半也知道自己在录什么）。
+        """
+        if self._processor is None:
+            return frame, False
+        try:
+            processed = self._processor(frame)
+        except Exception as exc:
+            self._warn(f"失败帧遮挡失败，按未遮挡保存: {exc}")
+            return frame, False
+        if not isinstance(processed, np.ndarray) or processed.size == 0:
+            self._warn("失败帧遮挡返回了空结果，按未遮挡保存")
+            return frame, False
+        return processed, True
 
     def _prune_records(self, records: list[FailureFrameRecord]):
         kept = records[: self.limit]

@@ -141,5 +141,63 @@ class TestPruning(FailureFrameStoreTestBase):
         self.assertEqual(len(store.list()), 2)
 
 
+class TestMasking(unittest.TestCase):
+    """失败帧落盘前必须过隐私遮挡（失败帧会长期留在磁盘上）。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    @staticmethod
+    def _processor(frame):
+        out = frame.copy()
+        out[0:8, 0:8] = 0
+        return out
+
+    def test_frame_is_masked_before_saving(self):
+        store = FailureFrameStore(root=self.root, processor=self._processor)
+        original = _frame(200)
+        record = store.save(original, task="t")
+        self.assertTrue(record.masked)
+        self.assertIn("已遮挡", record.label())
+
+        saved = store.load_image(record)
+        self.assertEqual(int(saved[2, 2, 0]), 0)          # 遮挡区被涂掉
+        self.assertEqual(int(saved[20, 40, 0]), 200)      # 其余区域不动
+        self.assertEqual(int(original[2, 2, 0]), 200)     # 传进来的帧不被改
+
+    def test_masked_flag_survives_index_roundtrip(self):
+        FailureFrameStore(root=self.root, processor=self._processor).save(_frame(), task="t")
+        self.assertTrue(FailureFrameStore(root=self.root).list()[0].masked)
+
+    def test_without_processor_nothing_changes(self):
+        store = FailureFrameStore(root=self.root)
+        record = store.save(_frame(), task="t")
+        self.assertFalse(record.masked)
+        self.assertEqual(int(store.load_image(record)[2, 2, 0]), 128)
+
+    def test_processor_failure_falls_back_to_unmasked(self):
+        def boom(_frame):
+            raise RuntimeError("遮罩坏了")
+
+        logs = []
+        store = FailureFrameStore(root=self.root, processor=boom, log=logs.append)
+        record = store.save(_frame(), task="t")
+        self.assertIsNotNone(record, "遮罩失败不该把失败帧丢掉")
+        self.assertFalse(record.masked)
+        self.assertTrue(any("遮挡失败" in log for log in logs))
+
+    def test_processor_returning_none_falls_back(self):
+        logs = []
+        store = FailureFrameStore(root=self.root, processor=lambda _f: None, log=logs.append)
+        record = store.save(_frame(), task="t")
+        self.assertIsNotNone(record)
+        self.assertFalse(record.masked)
+        self.assertTrue(any("空结果" in log for log in logs))
+
+
 if __name__ == "__main__":
     unittest.main()
