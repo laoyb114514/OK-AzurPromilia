@@ -43,6 +43,7 @@
   - **语言包 (`src/core/lang_pack.py`)**：扫描「语言包<代码>」目录，应用/还原带备份。
   - **诊断包 (`src/core/diagnostics_bundle.py`)**：配置+日志+模板清单+失败帧+系统信息打成 zip（默认不含截图）。
   - **崩溃诊断 (`src/core/crash_guard.py`)**：三处异常钩子写 `crashes/`，并自动附诊断包。
+  - **在线仓库 (`src/core/repo_index.py`)**：填一个索引地址就能浏览并一键安装别人分享的流程/队列/轮椅方案/模板包（同名不覆盖、可选 SHA-256）。
 
 ## 快速导航
 
@@ -87,6 +88,7 @@
 │   │   ├── lang_pack.py        语言包扫描/应用/还原
 │   │   ├── diagnostics_bundle.py 诊断包 zip
 │   │   ├── crash_guard.py      崩溃诊断钩子
+│   │   ├── repo_index.py      在线仓库（加载索引 + 一键安装）
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/

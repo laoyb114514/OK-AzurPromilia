@@ -86,12 +86,49 @@ ok-ap-diagnostics-<时间戳>.zip
 - UI 线程的异常**只提示不退出**：`notify` 回调负责提示，是否退出仍由框架决定；
 - `close()` 会卸掉钩子并关掉 faulthandler 句柄（测试与退出清理用）。
 
-## 6. 测试覆盖
+## 6. 在线仓库（分享与一键安装）
+
+`src/core/repo_index.py`。给一个返回 JSON 的 http(s) 索引地址（也可以是本地文件，
+方便离线），就能浏览并安装别人分享的流程 / 队列 / 轮椅方案 / 模板包：
+
+```json
+{
+  "name": "社区分享站",
+  "entries": [
+    {"kind": "flow", "name": "深渊速刷", "url": "https://…/abyss.json",
+     "sha256": "…（可选，给了就校验）", "tags": ["刷图"]},
+    {"kind": "template", "name": "2K 素材包", "url": "https://…/2k.zip"}
+  ]
+}
+```
+
+| kind | 装到 |
+|------|------|
+| `flow` | `configs/flows/<名字>.json` |
+| `queue` | `configs/queues/<名字>.json` |
+| `scheme` | `configs/schemes/<名字>.json` |
+| `template` | 交给 `asset_pack.install_pack()`（逐文件 SHA-256 + 原子安装 + 回滚） |
+
+规则：
+
+- **同名不覆盖**（`allow_overwrite=False` 时直接拒绝），避免别人的流程盖掉你的；
+- 给了 `sha256` 就校验，不匹配不落盘；
+- 下载失败、内容不是合法 JSON、本地文件不存在，都返回 `InstallOutcome(ok=False)` 而不是抛异常。
+
+## 7. 任务栏进度估算
+
+`RunLog.progress_ratio(task, elapsed, cap=0.97, fallback_seconds=None)`：
+按历史平均用时算比例，**封顶 0.97**（估到 100% 还在跑会误导人）。
+没有历史数据时用 `fallback_seconds`，两者都没有返回 0。
+真正结束由调用方自己置 1.0 或隐藏进度条。
+
+## 8. 测试覆盖
 
 | 测试 | 覆盖 |
 |------|------|
 | `tests/test_privacy_and_diagnostics.py` | 颜色解析/格式化、块换算与夹取、8 块上限、纯色与马赛克绘制、配置读写与损坏容错、`screenshot_processor` 真的画上去；坐标换算与取色；语言包扫描/白名单拒绝/备份还原；诊断包内容与 manifest、截图开关、空目录也能打包；崩溃守卫安装幂等、堆栈落盘、诊断包、线程钩子、`close()` |
 | `tests/test_config.py` | 新增 Tab（隐私遮挡）已注册且可导入 |
+| `tests/test_repo_index.py` | 索引解析/筛选、四类条目安装、同名不覆盖、覆盖开关、SHA-256 拦截、坏 JSON、模板包走 asset_pack；进度比例（无历史/兜底/封顶/负值） |
 
 ```bash
 uv run python -m unittest discover -s tests

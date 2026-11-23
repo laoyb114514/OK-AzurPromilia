@@ -316,6 +316,26 @@ class RunLog:
         stats = self.stats(task)
         return stats["avg_seconds"] or default
 
+    def progress_ratio(
+        self,
+        task: str | None,
+        elapsed_seconds: float,
+        cap: float = 0.97,
+        fallback_seconds: float | None = None,
+    ) -> float:
+        """任务栏进度条比例：``已用时间 / 历史平均``，**永远到不了 100%**。
+
+        进度条的意义是「大概还剩多少」，估到 100% 还在跑反而误导人，
+        所以按 ``cap`` 封顶；真结束时由调用方自己置 1.0 或隐藏。
+        没有历史数据时用 ``fallback_seconds``，两者都没有就返回 0。
+        """
+        cap = max(0.0, min(float(cap), 0.99))
+        estimate = self.estimate_seconds(task, fallback_seconds or 0.0)
+        if estimate <= 0:
+            return 0.0
+        ratio = max(0.0, float(elapsed_seconds)) / float(estimate)
+        return min(cap, ratio)
+
     def export_csv(self, path: str | Path) -> Path:
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
