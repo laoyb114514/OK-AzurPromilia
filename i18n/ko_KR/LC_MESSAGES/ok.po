@@ -1072,3 +1072,24 @@ msgstr "동작마다 로그를 한 줄 남겨 리듬을 확인하기 쉽게 합�
 
 msgid "按键按住时长"
 msgstr "키를 누르고 있는 시간"
+
+msgid "暂停"
+msgstr "일시정지"
+
+msgid "继续"
+msgstr "계속"
+
+msgid "停止"
+msgstr "중지"
+
+msgid "显示 HUD 悬浮条"
+msgstr "HUD 표시줄 표시"
+
+msgid "任务栏进度已{state}，HUD 已{hud}"
+msgstr "작업 표시줄 진행률 {state}, HUD {hud}"
+
+msgid "运行中"
+msgstr "실행 중"
+
+msgid "已暂停"
+msgstr "일시정지됨"

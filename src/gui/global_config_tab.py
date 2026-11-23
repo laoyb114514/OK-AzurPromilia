@@ -1,8 +1,7 @@
-from PySide6.QtCore import QTimer
-from qfluentwidgets import FluentIcon, NavigationItemPosition
-
 from ok.gui.tasks.ConfigCard import ConfigCard
 from ok.gui.widget.CustomTab import CustomTab
+from PySide6.QtCore import QTimer
+from qfluentwidgets import FluentIcon, NavigationItemPosition
 
 from src.core.global_config_store import get_all_visible_configs
 

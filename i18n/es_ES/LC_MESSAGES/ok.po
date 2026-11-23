@@ -1080,3 +1080,24 @@ msgstr "Escribe una línea de registro por acción para comprobar el ritmo"
 
 msgid "按键按住时长"
 msgstr "Tiempo que se mantiene pulsada cada tecla"
+
+msgid "暂停"
+msgstr "Pausar"
+
+msgid "继续"
+msgstr "Continuar"
+
+msgid "停止"
+msgstr "Detener"
+
+msgid "显示 HUD 悬浮条"
+msgstr "Mostrar la barra HUD"
+
+msgid "任务栏进度已{state}，HUD 已{hud}"
+msgstr "Progreso de la barra de tareas {state}, HUD {hud}"
+
+msgid "运行中"
+msgstr "En marcha"
+
+msgid "已暂停"
+msgstr "En pausa"

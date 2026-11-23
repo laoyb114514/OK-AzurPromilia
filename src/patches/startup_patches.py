@@ -8,8 +8,8 @@ def install_startup_patches():
     if _PATCH_INSTALLED:
         return
 
-    from src.patches.cascade_dropdown_patch import install_cascade_dropdown_patch
     from src.patches.capture_timestamp_patch import install_capture_timestamp_patch
+    from src.patches.cascade_dropdown_patch import install_cascade_dropdown_patch
     from src.patches.close_behavior_patch import install_close_behavior_patch
     from src.patches.i18n_collection_patch import install_i18n_collection_patch
     from src.patches.launch_args_patch import install_launch_args_patch

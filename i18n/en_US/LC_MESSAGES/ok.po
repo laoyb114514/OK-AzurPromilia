@@ -1078,3 +1078,24 @@ msgstr "Write one log line per action, handy for checking the rhythm"
 
 msgid "按键按住时长"
 msgstr "How long each key is held down"
+
+msgid "暂停"
+msgstr "Pause"
+
+msgid "继续"
+msgstr "Resume"
+
+msgid "停止"
+msgstr "Stop"
+
+msgid "显示 HUD 悬浮条"
+msgstr "Show the HUD bar"
+
+msgid "任务栏进度已{state}，HUD 已{hud}"
+msgstr "Taskbar progress {state}, HUD {hud}"
+
+msgid "运行中"
+msgstr "Running"
+
+msgid "已暂停"
+msgstr "Paused"

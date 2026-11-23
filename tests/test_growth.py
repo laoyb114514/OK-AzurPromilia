@@ -182,7 +182,6 @@ class TestInventoryAndSources(unittest.TestCase):
         self.assertEqual(plan.crystals.get("大星脉结晶"), 2)
 
     def test_crystals_use_gap(self):
-        plan = compute_plan(small_dataset(), [Target("hero")], inventory={"尤尼": 99999})
         plan_gear = compute_plan(
             small_dataset(), [Target("gear", star=2)], inventory={"星脉结晶": 10}
         )

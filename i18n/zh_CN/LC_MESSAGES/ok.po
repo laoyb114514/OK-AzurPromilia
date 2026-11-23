@@ -1069,3 +1069,24 @@ msgstr "每次动作写一行日志，方便确认节奏"
 
 msgid "按键按住时长"
 msgstr "按键按住时长"
+
+msgid "暂停"
+msgstr "暂停"
+
+msgid "继续"
+msgstr "继续"
+
+msgid "停止"
+msgstr "停止"
+
+msgid "显示 HUD 悬浮条"
+msgstr "显示 HUD 悬浮条"
+
+msgid "任务栏进度已{state}，HUD 已{hud}"
+msgstr "任务栏进度已{state}，HUD 已{hud}"
+
+msgid "运行中"
+msgstr "运行中"
+
+msgid "已暂停"
+msgstr "已暂停"

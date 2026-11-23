@@ -65,20 +65,42 @@
 
 配置：`configs/hotkeys.json`。
 
-## 5. 明确没做的
+## 5. HUD 悬浮条
 
-- **HUD 悬浮条**（置顶小条显示状态与预计剩余）：框架有覆盖层 API
-  （`og.app.get_overlay_view()`），但它与 DPI/多屏/点击穿透强相关，且只能在真机验证；
-  这一轮没有实现，需要的状态数据（任务名、进度比例、预计剩余）已经由
-  `RunLog.progress_ratio` 与 `estimate_seconds` 提供，接线是独立的一小块工作。
+`src/core/hud.py`（纯逻辑）+ `src/gui/hud_window.py`（窗口）+ `ui_extras_patch` 里挂载。
+
+- **只在有任务运行时显示**，任务结束自动隐藏；
+- 内容：`运行中 · 任务名  42%  预计还剩 12 分 30 秒`；
+- 位置按**屏幕可用区域底部居中**（`hud_position`），用 Qt 的逻辑像素，150% 缩放也不歪；
+- 窗口标志 `WindowStaysOnTopHint | Tool | FramelessWindowHint | WindowDoesNotAcceptFocus` +
+  `WA_ShowWithoutActivating` —— **不抢游戏焦点、不打断输入**；
+- 自带「暂停/继续」「停止」两个按钮（走 `executor.pause()/start()/stop_current_task()`）；
+- 退出时通过 `app.aboutToQuit` 一起关掉，不留残影；
+- 开关在「界面与提醒」页，写到 `configs/ui_extras.json` 的 `hud_enabled`。
+
+剩余时间格式化（`format_remaining`）：`58 秒` / `12 分 30 秒` / `1 小时 1 分`，
+数据缺失或异常时显示「未知」而不是编一个数。
+
+## 6. 工程质量
+
+- **CI 新增「只对改动文件跑 ruff」**（`.github/workflows/pr-test.yml`）：
+  基线里还有历史告警，全量检查会挡住所有 PR；改成只检查 `git diff base...HEAD` 的
+  `*.py`，新代码必须干净，确需保留的告警用 `# noqa: 规则名` 显式豁免。
+- `pyproject.toml` 里把 `RUF003`（注释里的 `×`、`—` 等中文标点）加入 ignore：
+  本项目注释大量引用游戏内文案，这类字符是故意的。
+- 顺手把碰过的文件里的历史告警清零（`base_game_task.py` / `daily_task_runner.py` /
+  `daily_task.py` / 若干测试），这样这条门禁对后续改动是可用的。
+
+## 7. 明确没做的
+
 - **界面透明度 / 背景图**：ok-script 2.0.6 **没有任何透明度 API**
   （`cfg.blurRadius` 是死配置），要做只能重写窗口合成，风险高、收益低，暂不做。
 
-## 6. 测试覆盖
+## 8. 测试覆盖
 
 | 测试 | 覆盖 |
 |------|------|
-| `tests/test_ui_behaviors.py` | 关闭行为决策与记忆、配置读写容错；提醒设置校验、调度（每日一次/跨天/体力间隔/重置/剩余时间）；快捷键解析（修饰键、F 键、别名、纯字母拒绝、重复/占用检测、注册计划、持久化）；任务栏进度（节流、封顶、清除、无历史不显示、无句柄降级）；快捷键动作（暂停切换、停止当前任务、开关遮挡、未知动作、无执行器） |
+| `tests/test_ui_behaviors.py` | 关闭行为决策与记忆、配置读写容错；提醒设置校验、调度（每日一次/跨天/体力间隔/重置/剩余时间）；快捷键解析（修饰键、F 键、别名、纯字母拒绝、重复/占用检测、注册计划、持久化）；任务栏进度（节流、封顶、清除、无历史不显示、无句柄降级）；快捷键动作（暂停切换、停止当前任务、开关遮挡、未知动作、无执行器）；HUD 文案与位置（剩余时间格式化、进度封顶、隐藏剩余、底部居中、多屏偏移、超大窗口夹取、设置读写保留其它键） |
 
 ```bash
 uv run python -m unittest discover -s tests

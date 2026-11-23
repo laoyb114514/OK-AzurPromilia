@@ -4,7 +4,6 @@ import threading
 
 from ok import ConfigOption
 from ok.util.config import Config
-from ok.util.file import get_relative_path, read_json_file, write_json_file
 from qfluentwidgets import FluentIcon
 
 from src.core.runtime_config import RUNTIME_CONFIG_NAME, load_runtime_settings, runtime_config_option

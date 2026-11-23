@@ -12,6 +12,7 @@
 
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 
 from src.core.base_game_task import BaseGameTask
 from src.icons import Icons
@@ -39,7 +40,7 @@ class DailyTask(AccountMixin, BaseGameTask):
     support_multi_account = True
 
     # 这些是全账号共用的开关，按账号覆盖没有意义
-    account_config_blacklist = {
+    account_config_blacklist: ClassVar[set[str]] = {
         "生成汇总文件",
         "自动打开汇总文件",
         "Exit After Task",

@@ -1,5 +1,6 @@
-"""界面行为测试：关闭询问、提醒调度、快捷键解析与动作、任务栏进度。"""
+"""界面行为测试：关闭询问、提醒调度、快捷键解析与动作、任务栏进度、HUD。"""
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,6 +33,20 @@ from src.core.hotkeys import (
     parse_hotkey,
     save_hotkeys,
     validate,
+)
+from src.core.hud import (
+    UNKNOWN_REMAINING,
+    HudSettings,
+    build_hud_text,
+    format_remaining,
+    hud_position,
+    remaining_seconds,
+)
+from src.core.hud import (
+    load_settings as load_hud_settings,
+)
+from src.core.hud import (
+    save_settings as save_hud_settings,
 )
 from src.core.ledger import RunLog
 from src.core.privacy import default_config
@@ -364,6 +379,77 @@ class TestHotkeyActions(unittest.TestCase):
 
         with mock.patch.object(og, "executor", None, create=True):
             self.assertFalse(perform_action("pause"))
+
+
+class TestHudLogic(unittest.TestCase):
+    def test_format_remaining(self):
+        self.assertEqual(format_remaining(None), UNKNOWN_REMAINING)
+        self.assertEqual(format_remaining(float("nan")), UNKNOWN_REMAINING)
+        self.assertEqual(format_remaining(-5), UNKNOWN_REMAINING)
+        self.assertEqual(format_remaining(0), "0 秒")
+        self.assertEqual(format_remaining(58), "58 秒")
+        self.assertEqual(format_remaining(60), "1 分钟")
+        self.assertEqual(format_remaining(750), "12 分 30 秒")
+        self.assertEqual(format_remaining(3600), "1 小时")
+        self.assertEqual(format_remaining(3660), "1 小时 1 分")
+
+    def test_build_text_without_task_is_empty(self):
+        self.assertEqual(build_hud_text(""), "")
+        self.assertEqual(build_hud_text("   "), "")
+
+    def test_build_text_running(self):
+        text = build_hud_text("一键日常", False, 0.42, 750)
+        self.assertIn("运行中", text)
+        self.assertIn("一键日常", text)
+        self.assertIn("42%", text)
+        self.assertIn("12 分 30 秒", text)
+
+    def test_build_text_paused(self):
+        self.assertIn("已暂停", build_hud_text("A", True, None, None))
+
+    def test_build_text_caps_progress(self):
+        self.assertIn("97%", build_hud_text("A", False, 5.0, None))
+
+    def test_build_text_hides_remaining(self):
+        self.assertNotIn("预计", build_hud_text("A", False, 0.1, 100, show_remaining=False))
+
+    def test_remaining_seconds(self):
+        self.assertEqual(remaining_seconds(1000, 300), 700.0)
+        self.assertEqual(remaining_seconds(100, 500), 0.0)
+        self.assertIsNone(remaining_seconds(None, 10))
+        self.assertIsNone(remaining_seconds(10, None))
+
+    def test_hud_position_bottom_center(self):
+        x, y = hud_position(0, 0, 1920, 1080, 300, 36, 24)
+        self.assertEqual(x, 810)
+        self.assertEqual(y, 1020)
+
+    def test_hud_position_respects_screen_offset(self):
+        x, _y = hud_position(1920, 0, 1920, 1080, 300, 36, 24)
+        self.assertEqual(x, 1920 + 810)
+
+    def test_hud_position_clamps_oversize_window(self):
+        x, y = hud_position(0, 0, 800, 600, 1200, 700, 24)
+        self.assertEqual((x, y), (0, 0))
+
+    def test_settings_roundtrip_and_preserves_other_keys(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ui_extras.json"
+            path.write_text('{"taskbar_progress": false, "hud_enabled": true}', encoding="utf-8")
+            settings = load_hud_settings(path)
+            self.assertTrue(settings.enabled)
+            save_hud_settings(HudSettings(enabled=False, margin=40, show_remaining=False), path)
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            self.assertFalse(saved["hud_enabled"])
+            self.assertFalse(saved["taskbar_progress"])  # 别的键不能被吃掉
+            self.assertEqual(saved["hud_margin"], 40)
+
+    def test_settings_missing_and_corrupt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "x.json"
+            self.assertTrue(load_hud_settings(path).enabled)
+            path.write_text("{ oops", encoding="utf-8")
+            self.assertTrue(load_hud_settings(path).enabled)
 
 
 class TestTaskbarProgress(unittest.TestCase):

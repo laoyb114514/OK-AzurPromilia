@@ -228,7 +228,7 @@ def start_hotkey_thread(stop_event: threading.Event | None = None) -> threading.
 
 
 def install_ui_extras_patch() -> bool:
-    """挂在 MainWindow.__init__ 上，窗口创建后启动两个线程。"""
+    """挂在 MainWindow.__init__ 上：窗口创建后启动线程与 HUD。"""
     global _INSTALLED
     if _INSTALLED:
         return True
@@ -251,7 +251,28 @@ def install_ui_extras_patch() -> bool:
             start_hotkey_thread()
         except Exception:
             pass
+        _attach_hud(self)
 
     MainWindow.__init__ = __init__
     _INSTALLED = True
     return True
+
+
+def _attach_hud(main_window) -> object | None:
+    """按设置创建 HUD，并在退出时一并关掉（不抢焦点、失败不影响启动）。"""
+    try:
+        from src.core.hud import load_settings
+
+        if not load_settings().enabled:
+            return None
+        from src.gui.hud_window import HudWindow
+
+        hud = HudWindow()
+        main_window._ok_ap_hud = hud  # 防止被 GC
+        app = getattr(main_window, "app", None)
+        if app is not None:
+            with contextlib.suppress(Exception):
+                app.aboutToQuit.connect(hud.close)
+        return hud
+    except Exception:
+        return None

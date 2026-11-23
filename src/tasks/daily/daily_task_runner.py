@@ -127,7 +127,7 @@ class DailyTaskRunner:
     def get_current_task_name(self) -> str:
         return str(self.current_task_key or self.final_summary.get("current_task", "") or "")
 
-    def set_task_failure(self, message: str, task_name: str = None, screenshot_taken: bool = False):
+    def set_task_failure(self, message: str, task_name: str | None = None, screenshot_taken: bool = False):
         """手动标记当前任务失败消息。
 
         Args:
@@ -146,14 +146,12 @@ class DailyTaskRunner:
         if account_id not in self.failure_details:
             self.failure_details[account_id] = {}
         self.failure_details[account_id].setdefault(resolved_task_name, resolved_message)
-        try:
+        with contextlib.suppress(Exception):
             self.task.log_info(
                 self._tr("任务失败标记 | {name}: {message}").format(
                     name=self._tr(resolved_task_name), message=resolved_message
                 )
             )
-        except Exception:
-            pass
 
     def clear_task_failure(self, task_name: str):
         """任务成功后移除当前账号下对应的失败记录。"""
@@ -348,14 +346,10 @@ class DailyTaskRunner:
             self._append_round_summary(self._current_round_index, self._current_repeat_total)
         self._sync_task_status_info()
 
-        try:
+        with contextlib.suppress(Exception):
             self.task.info_set("当前失败的任务", self.get_current_task_name())
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(Exception):
             self.task.screenshot("DailyTask_Exception")
-        except Exception:
-            pass
 
         # 与旧逻辑一致：异常不吞，记录现场后继续向外传播，由上层决定后续动作。
         raise e

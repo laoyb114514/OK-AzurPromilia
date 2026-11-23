@@ -1074,3 +1074,24 @@ msgstr "動作ごとにログを 1 行書き、テンポを確認しやすくし
 
 msgid "按键按住时长"
 msgstr "キーを押している時間"
+
+msgid "暂停"
+msgstr "一時停止"
+
+msgid "继续"
+msgstr "再開"
+
+msgid "停止"
+msgstr "停止"
+
+msgid "显示 HUD 悬浮条"
+msgstr "HUD バーを表示"
+
+msgid "任务栏进度已{state}，HUD 已{hud}"
+msgstr "タスクバーの進捗は{state}、HUD は{hud}"
+
+msgid "运行中"
+msgstr "実行中"
+
+msgid "已暂停"
+msgstr "一時停止中"

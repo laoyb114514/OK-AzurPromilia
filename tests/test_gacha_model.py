@@ -4,6 +4,7 @@
 目标概率 50% 时 180 抽内完成 82.85%（与社区公开值一致，作为回归基准）。
 """
 
+import itertools
 import unittest
 
 from src.core.gacha import GachaParams, PityBernoulliModel, parse_rate_table
@@ -28,7 +29,7 @@ class TestRateTable(unittest.TestCase):
 
     def test_rates_are_monotonic(self):
         rates = self.model.rates
-        for previous, current in zip(rates, rates[1:]):
+        for previous, current in itertools.pairwise(rates):
             self.assertLessEqual(previous, current)
 
     def test_hard_pity_is_certain(self):
@@ -73,7 +74,7 @@ class TestProbabilityAndExpectation(unittest.TestCase):
     def test_probability_is_monotonic_in_budget(self):
         model = PityBernoulliModel(target_rate=0.5)
         values = [model.probability_within(budget, copies=1) for budget in (10, 50, 90, 180, 360)]
-        for previous, current in zip(values, values[1:]):
+        for previous, current in itertools.pairwise(values):
             self.assertLessEqual(previous, current)
 
     def test_half_rate_matches_community_figure(self):
@@ -166,10 +167,10 @@ class TestCustomParams(unittest.TestCase):
     def test_parse_rate_table(self):
         parsed = parse_rate_table("2.8%, 28.8%, 100%")
         self.assertEqual(len(parsed), 3)
-        for actual, expected in zip(parsed, (0.028, 0.288, 1.0)):
+        for actual, expected in zip(parsed, (0.028, 0.288, 1.0), strict=True):
             self.assertAlmostEqual(actual, expected, places=9)
         parsed = parse_rate_table("0.008\n0.2\n1")
-        for actual, expected in zip(parsed, (0.008, 0.2, 1.0)):
+        for actual, expected in zip(parsed, (0.008, 0.2, 1.0), strict=True):
             self.assertAlmostEqual(actual, expected, places=9)
         with self.assertRaises(ValueError):
             parse_rate_table("abc")

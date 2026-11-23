@@ -87,6 +87,22 @@ jobs:
           pip install -r requirements.txt
           pip install polib
 
+      - name: Lint changed Python files
+        # 只检查这次 PR 改动的 .py：存量文件里还有历史告警，全量检查会挡住所有 PR。
+        # 新代码要求干净；确实需要保留的告警用 `# noqa: 规则名` 显式豁免。
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $base = "${{ github.event.pull_request.base.sha }}"
+          $files = @(git diff --name-only --diff-filter=ACMR "$base...HEAD" -- "*.py")
+          if ($files.Count -eq 0) {
+            Write-Host "没有改动的 .py 文件，跳过 lint"
+            exit 0
+          }
+          Write-Host "将检查 $($files.Count) 个文件："
+          $files | ForEach-Object { Write-Host "  $_" }
+          pip install "ruff>=0.16,<1"
+          ruff check @files
+
       - name: Run tests
         timeout-minutes: 5
         run: |
