@@ -174,9 +174,17 @@ class TestStaticReferences(unittest.TestCase):
             except (OSError, SyntaxError):
                 continue
             for node in ast.walk(tree):
-                if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+                if not isinstance(node, ast.Call):
                     continue
-                if node.func.attr not in ("tr", "_tr"):
+                # obj.tr("…") / obj._tr("…") 与 直接 _tr("…") 都要查：
+                # daily_summary.py 里 _tr 是局部变量，只认属性调用会漏掉整个模块。
+                if isinstance(node.func, ast.Attribute):
+                    name = node.func.attr
+                elif isinstance(node.func, ast.Name):
+                    name = node.func.id
+                else:
+                    continue
+                if name not in ("tr", "_tr"):
                     continue
                 for arg in node.args:
                     if not (isinstance(arg, ast.Constant) and isinstance(arg.value, str)):
@@ -187,6 +195,45 @@ class TestStaticReferences(unittest.TestCase):
                         if arg.value not in msgids:
                             missing.append(f"{path.relative_to(SRC_ROOT)}:{node.lineno} [{lang}] {arg.value[:40]}")
         self.assertEqual(missing, [], "\n".join(missing[:20]))
+
+    def test_daily_runner_status_words_are_translated(self):
+        """``final_summary["status"]`` 的值是「先写中文、再 _tr 动态翻」的，扫不到字面量调用。
+
+        这些词会出现在「执行情况汇总」里（日志 + txt 报告），漏翻同样是英文用户看到中文。
+        """
+        import ast
+
+        try:
+            import polib
+        except ImportError:  # pragma: no cover
+            self.skipTest("没有 polib")
+
+        repo_root = SRC_ROOT.parent
+        source = (SRC_ROOT / "tasks" / "daily" / "daily_task_runner.py").read_text(encoding="utf-8")
+        statuses = set()
+        for node in ast.walk(ast.parse(source)):
+            if not isinstance(node, ast.Assign):
+                continue
+            targets = [t for t in node.targets if isinstance(t, ast.Subscript)]
+            if not targets:
+                continue
+            key = targets[0].slice
+            if not (isinstance(key, ast.Constant) and key.value == "status"):
+                continue
+            if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                statuses.add(node.value.value)
+        self.assertTrue(statuses, "没找到任何 status 赋值（脚本结构变了？）")
+
+        missing = []
+        for lang in ("zh_TW", "en_US", "ja_JP", "ko_KR", "es_ES"):
+            msgids = {
+                entry.msgid
+                for entry in polib.pofile(str(repo_root / "i18n" / lang / "LC_MESSAGES" / "ok.po"))
+            }
+            for status in sorted(statuses):
+                if status not in msgids:
+                    missing.append(f"[{lang}] {status}")
+        self.assertEqual(missing, [], "\n".join(missing))
 
     def test_translated_placeholders_match(self):
         """msgstr 里的 ``{占位符}`` 必须和 msgid 一致，否则 ``.format()`` 会 KeyError。"""
