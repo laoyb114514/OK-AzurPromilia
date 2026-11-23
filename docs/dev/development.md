@@ -592,8 +592,14 @@ python tools/repair_po_locales.py --apply   # 修复 .po 中语言写错的条�
 
 ```bash
 uv run python -m unittest tests.test_imports tests.test_gui_tabs   # 静态引用 + 离屏构建所有页
+uv run python -m unittest tests.test_patch_install                 # 16 个启动补丁装得上、装两次也安全
 uv run python tools/health_check.py             # 流程/队列/方案/路线/配置/i18n 全查
 ```
+
+- `tests/test_patch_install.py` 在**子进程**里把 16 个 `install_*` 各调两次（离屏 Qt）：
+  补丁会改框架类行为，同进程里装会影响其它测试，所以隔离跑。它能抓到「补丁函数名改了
+  但启动顺序没改（静默跳过）」「新框架版本里属性没了导致安装抛异常」「不幂等（套两层包装）」；
+  另有一条静态检查确认 `install_startup_patches()` 真的调用了每一个；
 
 - `tests/test_gui_tabs.py` 用 Qt 的 **offscreen** 平台把 9 个自定义页真实构造 + build 一遍
   （不弹窗、CI 也能跑），并检查每页的 name/icon 能取到——静态检查只能确认名字存在，
