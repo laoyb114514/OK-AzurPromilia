@@ -274,6 +274,8 @@ label_class
 /failure_frames/
 /backups/
 /downloads/
+# 养成数据导入时自动备份的原文件（本地数据，不入库）
+/assets/data/backups/
 # 记账与运行报表
 /ledger.jsonl
 /runs.jsonl

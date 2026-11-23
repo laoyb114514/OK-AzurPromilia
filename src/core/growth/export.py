@@ -11,6 +11,7 @@ import time
 from collections.abc import Sequence
 from pathlib import Path
 
+from src.core.file_naming import ensure_suffix
 from src.core.growth.calc import GrowthPlan, material_rows, target_rows
 
 CARD_WIDTH = 1280
@@ -29,8 +30,11 @@ TARGET_COLUMNS = ("类型", "目标", "等级", "份数", "阶段", "经验", "�
 
 
 def export_csv(plan: GrowthPlan, path: str | Path) -> Path:
-    """把材料单与目标表一起写成 CSV（两段，中间空一行）。"""
-    target = Path(path)
+    """把材料单与目标表一起写成 CSV（两段，中间空一行）。
+
+    扩展名由这里补（用户手输 `养成材料单` 也会得到 `.csv`），返回补全后的路径。
+    """
+    target = ensure_suffix(path, ".csv")
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.writer(handle)
@@ -123,7 +127,7 @@ def export_png(plan: GrowthPlan, path: str | Path, title: str = "养成材料单
         )
         y += ROW_HEIGHT
 
-    target = Path(path)
+    target = ensure_suffix(path, ".png")
     target.parent.mkdir(parents=True, exist_ok=True)
     image.save(target)
     return target

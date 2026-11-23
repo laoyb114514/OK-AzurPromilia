@@ -45,7 +45,9 @@ char_amber,琥珀,character,80,21,40,12000,7200,风之碎晶=6
 所以命令行和界面是同一套解析与校验。代码里直接调 `import_dataset(路径)`：
 
 1. 先 `Dataset.from_file` **完整校验**，校验不过一个字节都不写（不会出现「导入一半」）；
-2. 通过后把原文件备份到 `assets/data/backups/growth_<时间戳>.json`（同秒重名自动加序号）；
+2. 通过后把原文件备份到**目标文件同级的 `backups/`** 下（默认目标 = `assets/data/growth.json`，
+   所以就是 `assets/data/backups/growth_<时间戳>.json`；导入到别的路径不会往仓库里写备份），
+   同秒重名自动加序号；
 3. 再原子替换 `assets/data/growth.json`，页面自动重新载入条目。
 
 返回的 `ImportResult.describe()` 会写清「导入了什么、备份在哪」。

@@ -123,6 +123,8 @@ class TestImportWrites(unittest.TestCase):
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(result.path, self.target)
         self.assertIsNotNone(result.backup)
+        # 备份跟目标放一起：导入到别的路径时不该往仓库的 assets/data/backups 里写
+        self.assertEqual(result.backup.parent, self.root / "backups")
         loaded = Dataset.from_file(self.target)
         self.assertIn("char_amber", loaded.entries)
 

@@ -471,7 +471,9 @@ def import_dataset(
     backup: Path | None = None
     try:
         if target_path.is_file():
-            folder = Path(backup_dir) if backup_dir is not None else BACKUP_FOLDER
+            # 备份跟目标文件放一起（默认目标就是 assets/data/growth.json → assets/data/backups），
+            # 这样把数据导到别的路径时不会把备份写进仓库目录。
+            folder = Path(backup_dir) if backup_dir is not None else target_path.parent / "backups"
             folder.mkdir(parents=True, exist_ok=True)
             stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
             backup = folder / f"growth_{stamp}.json"

@@ -490,14 +490,14 @@ class OfflineToolsTab(CustomTab):
         if not path:
             return
         try:
-            if suffix == "csv":
-                export_csv(self._plan, path)
-            else:
-                export_png(self._plan, path)
+            written = (
+                export_csv(self._plan, path) if suffix == "csv" else export_png(self._plan, path)
+            )
         except Exception as exc:
             self._notify(self.tr("导出失败：{error}").format(error=exc), error=True)
             return
-        self._notify(self.tr("已导出：{path}").format(path=path))
+        # 用导出函数返回的路径：它会补上 .csv/.png（用户可能手输没扩展名的名字）
+        self._notify(self.tr("已导出：{path}").format(path=written))
 
     # ── 抽卡 ─────────────────────────────────────────────
     def _compute_gacha(self):
@@ -605,14 +605,15 @@ class OfflineToolsTab(CustomTab):
         if not path:
             return
         try:
-            if kind == "ledger":
+            written = (
                 self._ledger().export_csv(path)
-            else:
-                self._run_log().export_csv(path)
+                if kind == "ledger"
+                else self._run_log().export_csv(path)
+            )
         except Exception as exc:
             self._notify(self.tr("导出失败：{error}").format(error=exc), error=True)
             return
-        self._notify(self.tr("已导出：{path}").format(path=path))
+        self._notify(self.tr("已导出：{path}").format(path=written))
 
     # ── 工具 ─────────────────────────────────────────────
     def _set_detail(self, widget: QPlainTextEdit | None, text: str):

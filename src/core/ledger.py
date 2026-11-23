@@ -28,6 +28,8 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.core.file_naming import ensure_suffix
+
 DEFAULT_LEDGER_NAME = "ledger.jsonl"
 DEFAULT_RUNS_NAME = "runs.jsonl"
 
@@ -245,7 +247,7 @@ class Ledger:
         return {"income": income, "expense": expense, "net": income - expense}
 
     def export_csv(self, path: str | Path) -> Path:
-        target = Path(path)
+        target = ensure_suffix(path, '.csv')
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.writer(handle)
@@ -406,7 +408,7 @@ class RunLog:
         return min(cap, ratio)
 
     def export_csv(self, path: str | Path) -> Path:
-        target = Path(path)
+        target = ensure_suffix(path, '.csv')
         target.parent.mkdir(parents=True, exist_ok=True)
         with target.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.writer(handle)
