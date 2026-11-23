@@ -153,5 +153,61 @@ class TestRetryGap(unittest.TestCase):
         self.assertEqual(settings.resolve_retry_gap("oops"), 0.0)
 
 
+class TestWaitUntilUsesRetryGap(unittest.TestCase):
+    """接线测试：``wait_until`` 真的把重试间隔用上了（不是只有个 resolver）。"""
+
+    class Harness:
+        def __init__(self, settings):
+            import threading
+            import types
+
+            self.runtime = settings
+            self.slept: list[float] = []
+            self.now = 0.0
+            self.executor = types.SimpleNamespace(
+                reset_scene=lambda: None,
+                exit_event=threading.Event(),
+                wait_scene_timeout=1.0,
+                wait_until_settle_time=0,
+            )
+
+        def next_frame(self):
+            return None
+
+        def active_time(self):
+            self.now += 0.05
+            return self.now
+
+        def sleep(self, seconds):
+            self.slept.append(round(float(seconds), 3))
+            self.now += float(seconds)
+
+        def log_info(self, *args, **kwargs):
+            return None
+
+    def _run(self, settings, check_delay=None):
+        from unittest import mock
+
+        from src.core.base_game_task import BaseGameTask
+
+        harness = self.Harness(settings)
+        patch = {"wait_until_check_delay": check_delay} if check_delay is not None else {}
+        with mock.patch.dict("src.core.base_game_task.app_config", patch, clear=False):
+            BaseGameTask.wait_until(harness, lambda: False, time_out=0.3)
+        return harness.slept
+
+    def test_retry_interval_is_slept(self):
+        slept = self._run(with_override(RuntimeSettings(), retry_interval=0.1))
+        self.assertTrue(slept, "配置了重试间隔却完全没 sleep")
+        self.assertAlmostEqual(slept[0], 0.1)
+
+    def test_default_does_not_sleep_between_checks(self):
+        self.assertEqual(self._run(RuntimeSettings()), [])
+
+    def test_explicit_check_delay_still_wins(self):
+        slept = self._run(with_override(RuntimeSettings(), retry_interval=0.1), check_delay=0.25)
+        self.assertAlmostEqual(slept[0], 0.25)
+
+
 if __name__ == "__main__":
     unittest.main()
