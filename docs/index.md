@@ -62,6 +62,7 @@
 - [开发指南](dev/development.md)
 - [安装自检：uv run python tools/health_check.py](dev/diagnostics_and_policy.md)
 - [功能对照表（需求逐条 → 代码/测试/文档）](dev/feature_map.md)
+- [验收手册（每条功能怎么点、该看到什么）](dev/acceptance.md)
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
 - [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
