@@ -44,6 +44,7 @@ from src.core.flow import (
     validate_flow,
 )
 from src.core.flow.recording import MAX_RECORDING_STEPS, convert_recording
+from src.core.flow.templates import install_templates, load_template, missing_templates
 from src.core.profile_store import ProfileError, ProfileStore
 from src.core.queue import QUEUE_FOLDER, QueueFormatError, TaskQueue, list_queues, load_queue, save_queue
 
@@ -133,6 +134,7 @@ class FlowTab(CustomTab):
             (self.tr("校验"), FluentIcon.CHECKBOX, self._validate_current_flow),
             (self.tr("导入 JSON"), FluentIcon.ADD, self._import_flow),
             (self.tr("从录制 JSON 生成"), FluentIcon.PHOTO, self._import_recording),
+            (self.tr("安装示例流程"), FluentIcon.DOWNLOAD, self._install_flow_templates),
             (self.tr("打开目录"), FluentIcon.FOLDER, lambda: self._open_dir(FLOW_FOLDER)),
             (self.tr("删除"), FluentIcon.DELETE, self._delete_flow),
         ):
@@ -347,6 +349,31 @@ class FlowTab(CustomTab):
         summary = self.tr("校验完成：{errors} 个错误").format(errors=len(errors))
         self._set_status(self.flow_status, summary)
         self._notify(summary, error=bool(errors))
+
+    def _install_flow_templates(self):
+        """把 assets/flow_templates 里的示例流程装进 configs/flows（不覆盖同名）。"""
+        try:
+            report = install_templates()
+        except Exception as exc:
+            self._notify(self.tr("安装示例流程失败：{error}").format(error=exc), error=True)
+            return
+        self.refresh_flows()
+        self._notify(report.describe(), error=not report.installed)
+        # 顺便告诉用户每份还缺哪些模板（骨架流程就靠这个清单去标）
+        lines = [report.describe()]
+        for item in report.installed:
+            try:
+                flow = load_template(item.name)
+                missing = missing_templates(flow)
+            except Exception:
+                continue
+            if missing:
+                lines.append(
+                    self.tr("{name} 还需要标注：{names}").format(name=item.name, names="、".join(missing))
+                )
+            else:
+                lines.append(self.tr("{name} 所需模板都已存在，可以直接跑").format(name=item.name))
+        self._set_status(self.flow_status, "\n".join(lines))
 
     def _import_flow(self):
         path, _filter = QFileDialog.getOpenFileName(

@@ -33,10 +33,11 @@
 |------|------|------|------|------|
 | 一条龙：顺序可配、可拖动排序 | ✅ | `src/tasks/daily/order.py` + 「一条龙顺序」页 | `test_daily_order.py` | [路线](routes_and_replay.md) §1 |
 | 一条龙每项自己的参数可见 / 可打开配置 | ✅ | `src/core/task_config_summary.py` | `test_task_config_summary.py` | 同上 §1 |
-| 周常 / 危机讨伐 / 剧情委托 | 🚧 | 需游戏内截图才能标模板、写流程 | — | — |
+| 周常活跃奖励 | ✅ | `assets/flow_templates/周常活跃奖励.json`（只用已有模板，开箱可跑） | `test_flow_templates.py` | [流程](flows_and_queues.md) §7 |
+| 危机讨伐 / 剧情委托 | 🚧 | `assets/flow_templates/`（骨架流程，各差 3 个模板；模板名已写死，标好照抄即可） | 同上 | 同上 §7 |
 | 实时辅助（按设置持续操作） | ✅ | `src/tasks/trigger/auto_combat_assist_task.py` | `test_auto_combat_assist_task.py` | 同上 §4 |
 | 导航测试 / 路线管理（航点串、断点续跑） | ✅ | `src/core/route.py` + 「导航路线」任务 | `test_route.py` | 同上 §2 |
-| 动作录制 → 流程（框架录制器 + 转换） | ✅ | `src/core/flow/recording.py` | `test_recording*.py` | [流程](flows_and_queues.md) §3 |
+| 动作录制 → 流程（框架录制器 + 转换） | ✅ | `src/core/flow/recording.py` | `test_flow_recording.py` | [流程](flows_and_queues.md) §2 |
 | 轮椅方案（多段录制拼成固定流程） | ✅ | `src/core/replay.py`（可循环、可导出成流程、可进队列） | `test_replay.py` | [路线](routes_and_replay.md) §3 |
 
 ## 三、流程编排
@@ -124,7 +125,7 @@
 
 | 缺口 | 原因 | 需要你做什么 |
 |------|------|--------------|
-| 周常 / 危机讨伐 / 剧情委托 | 仓库里这三个界面**没有任何模板名**，硬写等于瞎猜坐标 | 给游戏内截图（每个界面 2～3 张） |
+| 危机讨伐 / 剧情委托 | 已给骨架流程，但入口/开始/结算三个按钮的**模板还没标** | 标这三个模板（名字照抄流程里的 `crisis_hunt_*` / `story_commission_*`），或给截图我来标 |
 | 界面透明度 / 背景图 | ok-script 2.0.6 没有任何透明度 API | —（只能重写窗口合成，不建议） |
 | 全屏十字线拾取 | 需要在真机上验证多屏/DPI/点击穿透 | 有需要时我再做，逻辑已就绪 |
 | 养成真实数值 | 内置是示例数据 | 从 promilia.wiki 导出后用「导入数据」导入 |

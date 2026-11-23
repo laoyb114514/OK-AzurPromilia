@@ -1210,3 +1210,15 @@ msgstr "설정 파일을 열 수 없습니다: {error}"
 
 msgid "{name}（{prefix}）：{line}"
 msgstr "{name} ({prefix}): {line}"
+
+msgid "安装示例流程"
+msgstr "예제 플로 설치"
+
+msgid "安装示例流程失败：{error}"
+msgstr "예제 플로 설치 실패: {error}"
+
+msgid "{name} 还需要标注：{names}"
+msgstr "{name}에는 다음 템플릿을 아직 표시해야 합니다: {names}"
+
+msgid "{name} 所需模板都已存在，可以直接跑"
+msgstr "{name}은(는) 필요한 템플릿이 모두 있어 바로 실행할 수 있습니다"

@@ -1216,3 +1216,15 @@ msgstr "Cannot open the config file: {error}"
 
 msgid "{name}（{prefix}）：{line}"
 msgstr "{name} ({prefix}): {line}"
+
+msgid "安装示例流程"
+msgstr "Install sample flows"
+
+msgid "安装示例流程失败：{error}"
+msgstr "Failed to install sample flows: {error}"
+
+msgid "{name} 还需要标注：{names}"
+msgstr "{name} still needs these templates marked: {names}"
+
+msgid "{name} 所需模板都已存在，可以直接跑"
+msgstr "{name} has all the templates it needs and can run right away"

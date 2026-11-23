@@ -1212,3 +1212,15 @@ msgstr "設定ファイルを開けません：{error}"
 
 msgid "{name}（{prefix}）：{line}"
 msgstr "{name}（{prefix}）：{line}"
+
+msgid "安装示例流程"
+msgstr "サンプルフローをインストール"
+
+msgid "安装示例流程失败：{error}"
+msgstr "サンプルフローのインストールに失敗しました：{error}"
+
+msgid "{name} 还需要标注：{names}"
+msgstr "{name} は次のテンプレートの登録が必要です：{names}"
+
+msgid "{name} 所需模板都已存在，可以直接跑"
+msgstr "{name} は必要なテンプレートが揃っているので、そのまま実行できます"

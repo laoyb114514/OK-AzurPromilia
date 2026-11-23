@@ -1207,3 +1207,15 @@ msgstr "打不開設定檔：{error}"
 
 msgid "{name}（{prefix}）：{line}"
 msgstr "{name}（{prefix}）：{line}"
+
+msgid "安装示例流程"
+msgstr "安裝範例流程"
+
+msgid "安装示例流程失败：{error}"
+msgstr "安裝範例流程失敗：{error}"
+
+msgid "{name} 还需要标注：{names}"
+msgstr "{name} 還需要標註：{names}"
+
+msgid "{name} 所需模板都已存在，可以直接跑"
+msgstr "{name} 所需模板都已存在，可以直接執行"

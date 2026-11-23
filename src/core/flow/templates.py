@@ -1,0 +1,164 @@
+"""示例流程模板：把 ``assets/flow_templates/`` 里的流程装进 ``configs/flows/``。
+
+模板的价值在于**告诉你要标哪些模板**：:func:`required_templates` 把一份流程里用到的
+所有模板名收集出来，你可以直接拿这个名字去标注工具里命名，对上就能跑。
+
+- 「周常活跃奖励」只用到仓库里已有的模板，**装好就能跑**；
+- 「危机讨伐（骨架）」「剧情委托（骨架）」各差 3 个模板，名字已经写死在流程里，
+  标注时照抄即可。
+
+安装默认**不覆盖同名文件**（你可能已经改过一份了）。
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from src.core.flow.model import FLOW_FOLDER, Flow, FlowFormatError, parse_flow
+
+TEMPLATE_FOLDER = Path("assets") / "flow_templates"
+
+
+class FlowTemplateError(ValueError):
+    """模板目录或模板文件不合法。"""
+
+
+@dataclass
+class TemplateInstall:
+    name: str
+    ok: bool = False
+    path: Path | None = None
+    message: str = ""
+
+    def summary(self) -> str:
+        if self.ok:
+            return f"{self.name} → {self.path}"
+        return f"{self.name}：{self.message}"
+
+
+@dataclass
+class InstallReport:
+    results: list[TemplateInstall] = field(default_factory=list)
+
+    @property
+    def installed(self) -> list[TemplateInstall]:
+        return [item for item in self.results if item.ok]
+
+    @property
+    def skipped(self) -> list[TemplateInstall]:
+        return [item for item in self.results if not item.ok]
+
+    def describe(self) -> str:
+        parts = []
+        if self.installed:
+            parts.append(f"装好 {len(self.installed)} 份：" + "、".join(item.name for item in self.installed))
+        if self.skipped:
+            parts.append(f"跳过 {len(self.skipped)} 份：" + "、".join(f"{item.name}（{item.message}）" for item in self.skipped))
+        return "；".join(parts) or "没有可安装的模板"
+
+
+def template_folder(folder: str | Path | None = None) -> Path:
+    return Path(folder) if folder is not None else TEMPLATE_FOLDER
+
+
+def list_templates(folder: str | Path | None = None) -> list[str]:
+    base = template_folder(folder)
+    if not base.is_dir():
+        return []
+    return sorted(path.stem for path in base.glob("*.json"))
+
+
+def load_template(name: str, folder: str | Path | None = None) -> Flow:
+    base = template_folder(folder)
+    path = base / f"{name}.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise FlowTemplateError(f"读不到模板 {name}: {exc}") from exc
+    except ValueError as exc:
+        raise FlowTemplateError(f"模板 {name} 不是合法 JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise FlowTemplateError(f"模板 {name} 顶层必须是对象")
+    return parse_flow(data, source=str(path))
+
+
+def required_templates(flow: Flow) -> list[str]:
+    """流程里用到的全部模板名（去重、保序），用来告诉用户「还要标哪些」。"""
+    names: list[str] = []
+
+    def _add(value: str | None) -> None:
+        text = str(value or "").strip()
+        if text and text not in names:
+            names.append(text)
+
+    def _walk(steps) -> None:
+        for step in steps:
+            _add(step.template)
+            _add(step.until_template)
+            _add(step.until_not_template)
+            _walk(step.steps)
+            _walk(step.else_steps)
+
+    _walk(flow.steps)
+    return names
+
+
+def feature_names() -> set[str]:
+    """当前可识别的模板名（来自 COCO 标注，标注后热更新即可生效）。
+
+    ``FeatureList`` 是 Enum，成员名是属性名、``.value`` 才是模板名（小写带下划线），
+    流程里写的也是 ``.value``，所以这里取 value 而不是 ``str(member)``。
+    """
+    try:
+        from src.data.feature_list import FeatureList
+    except Exception:
+        return set()
+
+    names: set[str] = set()
+    try:
+        members = list(FeatureList)
+    except TypeError:
+        members = []
+    for member in members:
+        value = getattr(member, "value", member)
+        if isinstance(value, str) and value:
+            names.add(value)
+    return names
+
+
+def missing_templates(flow: Flow, available: set[str] | None = None) -> list[str]:
+    """流程需要、但当前还**认不出**的模板名 —— 这些就是你还要去标的。"""
+    known = feature_names() if available is None else set(available)
+    return [name for name in required_templates(flow) if name not in known]
+
+
+def install_templates(
+    target_folder: str | Path | None = None,
+    folder: str | Path | None = None,
+    overwrite: bool = False,
+) -> InstallReport:
+    """把模板逐份装到 ``configs/flows/``；单份失败不影响其它份。"""
+    target = Path(target_folder) if target_folder is not None else FLOW_FOLDER
+    report = InstallReport()
+    for name in list_templates(folder):
+        try:
+            flow = load_template(name, folder)
+        except FlowTemplateError as exc:
+            report.results.append(TemplateInstall(name=name, message=str(exc)))
+            continue
+        try:
+            path = target / f"{name}.json"
+            if path.exists() and not overwrite:
+                report.results.append(TemplateInstall(name=name, message="同名流程已存在，不覆盖"))
+                continue
+            target.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".json.tmp")
+            tmp.write_text(flow.to_json(), encoding="utf-8")
+            os.replace(tmp, path)
+            report.results.append(TemplateInstall(name=name, ok=True, path=path))
+        except (OSError, FlowFormatError) as exc:
+            report.results.append(TemplateInstall(name=name, message=str(exc)))
+    return report

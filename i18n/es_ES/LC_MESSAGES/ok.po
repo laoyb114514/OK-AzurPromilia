@@ -1218,3 +1218,15 @@ msgstr "No se puede abrir el archivo de configuración: {error}"
 
 msgid "{name}（{prefix}）：{line}"
 msgstr "{name} ({prefix}): {line}"
+
+msgid "安装示例流程"
+msgstr "Instalar flujos de ejemplo"
+
+msgid "安装示例流程失败：{error}"
+msgstr "No se pudieron instalar los flujos de ejemplo: {error}"
+
+msgid "{name} 还需要标注：{names}"
+msgstr "{name} todavía necesita marcar estas plantillas: {names}"
+
+msgid "{name} 所需模板都已存在，可以直接跑"
+msgstr "{name} ya tiene todas las plantillas necesarias y puede ejecutarse directamente"
