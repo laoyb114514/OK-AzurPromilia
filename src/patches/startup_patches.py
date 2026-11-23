@@ -11,6 +11,7 @@ def install_startup_patches():
     from src.patches.capture_timestamp_patch import install_capture_timestamp_patch
     from src.patches.cascade_dropdown_patch import install_cascade_dropdown_patch
     from src.patches.close_behavior_patch import install_close_behavior_patch
+    from src.patches.crash_guard_patch import install_crash_guard_patch
     from src.patches.i18n_collection_patch import install_i18n_collection_patch
     from src.patches.launch_args_patch import install_launch_args_patch
     from src.patches.no_frame_task_patch import install_no_frame_task_patch
@@ -24,6 +25,8 @@ def install_startup_patches():
     from src.patches.ui_extras_patch import install_ui_extras_patch
     from src.patches.win32_gdi_point_patch import install_win32_gdi_point_patch
 
+    # 崩溃诊断必须第一个挂：后面任何一个补丁初始化时炸了也要留下记录
+    install_crash_guard_patch()
     install_cascade_dropdown_patch()
     install_capture_timestamp_patch()
     # 关闭询问要早于其它 UI 补丁：它是用户最先碰到的交互

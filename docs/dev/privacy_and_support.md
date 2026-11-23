@@ -86,6 +86,16 @@ ok-ap-diagnostics-<时间戳>.zip
 - UI 线程的异常**只提示不退出**：`notify` 回调负责提示，是否退出仍由框架决定；
 - `close()` 会卸掉钩子并关掉 faulthandler 句柄（测试与退出清理用）。
 
+### 什么时候装上
+
+`src/patches/crash_guard_patch.py`，在 `install_startup_patches()` **第一个**执行：
+
+- 早挂早生效 —— 后面任何一个补丁初始化时炸了也会留下记录（否则「崩溃诊断」只是实现和测试，
+  真崩了什么都不会写）；
+- 安装失败只记日志，不影响启动；
+- `OK_AP_DISABLE_CRASH_GUARD=1` 可以关掉（跑测试或排查钩子冲突时用）；
+- `installed_guard()` 能拿到已装上的实例，调试用。
+
 ## 6. 在线仓库（分享与一键安装）
 
 `src/core/repo_index.py`。给一个返回 JSON 的 http(s) 索引地址（也可以是本地文件，

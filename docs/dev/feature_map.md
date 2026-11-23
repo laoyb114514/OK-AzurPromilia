@@ -75,7 +75,7 @@
 | 需求 | 状态 | 代码 | 测试 | 文档 |
 |------|------|------|------|------|
 | 结算界面 OCR 记账（多种写法） | ✅ | `src/core/ledger.py` + `settlement_task` | `test_ledger.py` | 同上 §3 |
-| 运行报表（时长 / 成功率 / 按任务 / 失败原因） | ✅ | `RunLog.by_task` / `failure_notes` / `report_lines` | 同上 | 同上 §3 |
+| 运行报表（时长 / 成功率 / 按任务 / 失败原因；日常 + 流程/队列都记） | ✅ | `RunLog.by_task` / `failure_notes` / `report_lines`，写入点在 `DailyTaskRunner` 与 `FlowTask.run` | `test_ledger.py`、`test_flow_task_run_log.py` | 同上 §3 |
 
 ## 七、界面
 
@@ -106,7 +106,7 @@
 |------|------|------|------|------|
 | 语言包（应用/还原，带备份，路径白名单） | ✅ | `src/core/lang_pack.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
 | 诊断包（配置/日志/模板/失败帧/系统信息） | ✅ | `src/core/diagnostics_bundle.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
-| 崩溃诊断（钩子 + 自动附诊断包） | ✅ | `src/core/crash_guard.py` | `test_privacy_and_diagnostics.py` | 同上 §5 |
+| 崩溃诊断（钩子 + 自动附诊断包，启动时安装） | ✅ | `src/core/crash_guard.py` + `src/patches/crash_guard_patch.py` | `test_privacy_and_diagnostics.py` | 同上 §5 |
 | 在线仓库（索引 + 一键安装，同名不覆盖） | ✅ | `src/core/repo_index.py` + 「分享仓库」页 | `test_repo_index.py` | 同上 §6 |
 | 单实例（防多开） | 🔧 | 框架 `ok.util.process.check_mutex`（cwd 命名互斥量，等待 5 秒后按记录的 PID 收尾，失败则拒绝启动） | — | 同上 §8 |
 

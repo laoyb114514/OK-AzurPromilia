@@ -15,6 +15,9 @@
 
 from __future__ import annotations
 
+import contextlib
+import time
+
 from src.core.base_game_task import BaseGameTask
 from src.core.flow import (
     CheckpointStore,
@@ -25,6 +28,7 @@ from src.core.flow import (
     list_flows,
     load_flow_by_name,
 )
+from src.core.ledger import RunLog
 from src.core.queue import QueueFormatError, QueueRunner, list_queues, load_queue
 from src.core.replay import SchemeFormatError, list_schemes, load_scheme
 from src.icons import Icons
@@ -71,11 +75,54 @@ class FlowTask(BaseGameTask):
 
     # ── 入口 ─────────────────────────────────────────────
     def run(self):
+        """顶层入口：跑流程或队列，并把这一次的成败与用时写进运行报表。
+
+        报表数据同时喂给任务栏进度与 HUD 的「预计剩余」——之前只有日常任务会写，
+        流程/队列跑完在报表里查不到，进度条也永远估不出来。
+        """
+        started = self._clock()
+        name = self._job_name()
+        try:
+            result = self._execute_job()
+        except Exception as exc:
+            self._record_run(name, False, started, note=f"{type(exc).__name__}: {exc}")
+            raise
+        ok = bool(result)
+        self._record_run(name, ok, started, note="" if ok else "任务返回 False")
+        return result
+
+    def _execute_job(self) -> bool:
         job = str(self.config.get("任务类型", JOB_FLOW) or JOB_FLOW)
         budget = self._budget_seconds()
         if job == JOB_QUEUE:
             return self.run_queue(budget)
         return self.run_flow(budget)
+
+    def _job_name(self) -> str:
+        job = str(self.config.get("任务类型", JOB_FLOW) or JOB_FLOW)
+        key = "队列文件" if job == JOB_QUEUE else "流程文件"
+        name = str(self.config.get(key, "") or "").strip()
+        return name or job
+
+    def _clock(self) -> float:
+        """暂停感知的计时（拿不到 active_time 就退回单调时钟）。"""
+        try:
+            return float(self.active_time())
+        except Exception:
+            return time.monotonic()
+
+    def _run_log(self) -> RunLog:
+        log = getattr(self, "_run_log_instance", None)
+        if log is None:
+            log = RunLog()
+            self._run_log_instance = log
+        return log
+
+    def _record_run(self, name: str, ok: bool, started: float, note: str = "") -> None:
+        """写报表；失败不影响主流程。"""
+        with contextlib.suppress(Exception):
+            elapsed = max(0.0, self._clock() - started)
+            self._run_log().record(name or "流程/队列", ok, elapsed, note="" if ok else note)
 
     # ── 流程 ─────────────────────────────────────────────
     def run_flow(self, budget_seconds: float | None = None, name: str | None = None,

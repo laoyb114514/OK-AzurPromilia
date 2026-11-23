@@ -169,10 +169,13 @@ ledger.today_summary()   # 按物品的今日收支
 ledger.export_csv("ledger.csv")
 ```
 
-### 运行报表（已接进一条龙）
+### 运行报表（已接进一条龙、流程与队列）
 
-`RunLog` 写 `runs.jsonl`。`DailyTaskRunner.execute_task()` 现在会在每个任务项前后
-用**暂停感知**的 `active_time()` 计时，并把「成功/失败 + 用时」写进报表：
+`RunLog` 写 `runs.jsonl`。两个来源：
+
+- `DailyTaskRunner.execute_task()`：每个任务项前后用**暂停感知**的 `active_time()` 计时；
+- `FlowTask.run()`：跑完一次流程 / 队列（含轮椅方案）记一条，名字用流程/队列文件名。
+  之前只有日常会写，流程跑完在报表里查不到、任务栏进度也永远估不出来。
 
 ```python
 log.stats("家园每日")               # count / success / failed / success_rate / avg_seconds / total_seconds
@@ -184,9 +187,10 @@ log.export_csv("runs.csv")
 ```
 
 失败时会顺带把**失败原因**写进记录（`DailyTaskRunner` 先 `set_task_failure` 再写报表，
-所以报表里是具体原因而不是只有「返回 False」）；没有 `note` 字段的旧记录照样能读。
+所以报表里是具体原因而不是只有「返回 False」；`FlowTask` 抛异常时记
+`异常类型: 消息`）；没有 `note` 字段的旧记录照样能读。
 
-写报表失败**不会影响任务**（失败被吞掉），测试里也固化了这一点。
+写报表失败**不会影响任务**（失败被吞掉，连磁盘满也一样返回执行结果），测试里固化了这一点。
 
 两个文件都是**追加写 + 读取时容错**，所以手工编辑、断电截断都不会让统计整个崩掉。
 
@@ -197,6 +201,7 @@ log.export_csv("runs.csv")
 | `tests/test_growth.py` | 数据载入与校验、区间比例切分、份数/潜能/升星、库存缺口、最优体力来源、无来源标注、大单位优先凑货币、经验道具贪心、12 目标上限、CSV/PNG 导出；导入数据（校验失败不写目标文件、成功时备份原文件、无原文件不备份、同秒备份名去重、源文件缺失） |
 | `tests/test_gacha_model.py` | 概率表数值、单调性、硬保底、垫抽、期望区间、预算内概率单调、50% 概率的 82.85% 基准、最坏情况、自定义概率表校验 |
 | `tests/test_ledger.py` | 四种结算写法、支出识别、去重、纯数字名字拒绝、无匹配报错、JSONL 坏行容错、按天/按物品汇总、CSV 导出、运行统计与用时估算；报表（失败原因持久化与分组排序、按任务分组统计、多任务/单任务/空报表文本、总用时） |
+| `tests/test_flow_task_run_log.py` | 流程/队列跑完写报表（成功、返回 False、抛异常三种结局）、队列用队列名、空名回退到任务类型、写报表失败不影响执行、时钟回退、跑完能估时长 |
 | `tests/test_ocr_lines.py` | OCR 文本框按行聚类、行内 x 排序、置信度过滤、异常吞掉、聚类后能被结算解析器吃下 |
 | `tests/test_settlement_and_reporting.py` | 结算任务写入 ledger、来源取配置、长列表预览截断；一条龙每项写入 runs.jsonl、禁用项不记、报表失败不影响任务 |
 
