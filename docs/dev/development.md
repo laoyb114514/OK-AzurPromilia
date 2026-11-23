@@ -578,6 +578,17 @@ python tools/repair_po_locales.py --apply   # 修复 .po 中语言写错的条�
 > ⚠️ 不要用 `python -m ok.test.RunTests` —— 它在跑完测试后会在 `ok.quit()` 处抛
 > `AttributeError`，退出码非 0。
 
+除了功能测试，还有两道**体检**：
+
+```bash
+uv run python -m unittest tests.test_imports   # 把 src/ 每个模块都 import 一遍
+uv run python tools/health_check.py             # 流程/队列/方案/路线/配置/i18n 全查
+```
+
+- 「导入体检」能抓到 GUI 页/补丁里拼错的名字——这类错误否则要等用户点开那一页才炸；
+- 「安装自检」见 [识别诊断与运行策略](diagnostics_and_policy.md) §9，也可以在
+  「工具与诊断 → 安装自检」里点按钮跑。
+
 写视觉/任务逻辑的测试时用框架的 `TaskTestCase` + `set_image()`（静态图驱动），
 它可以断言"识别结果"与"决策方向"，但不能断言真实输入效果。
 
