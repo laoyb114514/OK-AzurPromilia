@@ -209,5 +209,66 @@ class TestWaitUntilUsesRetryGap(unittest.TestCase):
         self.assertAlmostEqual(slept[0], 0.25)
 
 
+class TestWaitUntilTimeoutWiring(unittest.TestCase):
+    """``wait_until`` 的超时也要吃全局策略（之前只认框架写死的 wait_scene_timeout）。"""
+
+    class Harness:
+        def __init__(self, settings, scene_timeout=10.0):
+            import threading
+            import types
+
+            self.runtime = settings
+            self.now = 0.0
+            self.frames = 0
+            self.executor = types.SimpleNamespace(
+                reset_scene=lambda: None,
+                exit_event=threading.Event(),
+                wait_scene_timeout=scene_timeout,
+                wait_until_settle_time=0,
+            )
+
+        def next_frame(self):
+            self.frames += 1
+            self.now += 0.5
+            return None
+
+        def active_time(self):
+            return self.now
+
+        def sleep(self, seconds):
+            self.now += float(seconds)
+
+        def log_info(self, *args, **kwargs):
+            return None
+
+    def _frames(self, settings, time_out=0, scene_timeout=10.0):
+        from unittest import mock
+
+        from src.core.base_game_task import BaseGameTask
+
+        harness = self.Harness(settings, scene_timeout)
+        with mock.patch.dict("src.core.base_game_task.app_config", {}, clear=False):
+            BaseGameTask.wait_until(harness, lambda: False, time_out=time_out)
+        return harness.frames
+
+    def test_default_uses_framework_timeout(self):
+        """没改配置时保持框架默认行为（10 秒）。"""
+        self.assertGreater(self._frames(RuntimeSettings()), 10)
+
+    def test_custom_step_timeout_overrides_framework(self):
+        short = self._frames(with_override(RuntimeSettings(), step_timeout=1.0))
+        self.assertLessEqual(short, 6)
+
+    def test_low_spec_doubles_the_effective_timeout(self):
+        normal = self._frames(RuntimeSettings(), scene_timeout=2.0)
+        slow = self._frames(with_override(RuntimeSettings(), low_spec=True), scene_timeout=2.0)
+        self.assertGreater(slow, normal)
+
+    def test_explicit_timeout_is_scaled_by_low_spec(self):
+        normal = self._frames(RuntimeSettings(), time_out=2.0)
+        slow = self._frames(with_override(RuntimeSettings(), low_spec=True), time_out=2.0)
+        self.assertGreater(slow, normal)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -11,7 +11,7 @@
 
 | 键 | 默认 | 作用 |
 |------|------|------|
-| `单步超时(秒)` | 10.0 | `self.loop(time_out=None)` 的默认超时 |
+| `单步超时(秒)` | 10.0 | `self.loop(time_out=None)` 与 `wait_until(time_out=0)` 的默认超时 |
 | `重试间隔(秒)` | 0.0 | 条件没满足时两次重试之间的间隔（与 `wait_until_check_delay` 取较大值） |
 | `动作后等待(秒)` | 0.0 | 失败自恢复时每次按返回键后的等待 |
 | `卡死检测阈值(秒)` | 30.0 | 画面长时间不变的告警阈值 |
@@ -29,7 +29,10 @@
 实现细节：
 
 - `BaseGameTask.runtime` 是**每次读取**的属性（底层是内存里的 dict），改完配置下个任务即生效，不用重启；
-- `self.loop(time_out=None)` 才走全局策略；**显式传值的位置不受影响**，想精确控制就照旧传数字；
+- `self.loop(time_out=None)` 与 `wait_until(time_out=0)` 走全局策略；**显式传具体秒数的位置不受
+  「单步超时」影响**，想精确控制就照旧传数字（但「低配模式」会放大所有超时，包括显式值）；
+- `wait_until(time_out=0)` 的默认值优先用框架的 `wait_scene_timeout`，只有**用户改过**
+  「单步超时」才用配置值——这样存量行为不变，改了配置又真的生效；
 - 非 `BaseGameTask` 的对象（测试里的 MockTask）走 `_runtime_of()` 退回默认快照。
 
 ### 顺手修掉的两个死键
@@ -246,7 +249,7 @@ uv run python tools/health_check.py --strict  # 有 warning 也返回 1（CI 可
 
 | 测试 | 覆盖 |
 |------|------|
-| `tests/test_runtime_config.py` | 默认值不变、类型兜底、低配缩放、ConfigOption 注册 |
+| `tests/test_runtime_config.py` | 默认值不变、类型兜底、低配缩放、ConfigOption 注册；重试间隔解析与真正被 `wait_until` 使用、`wait_until` 超时吃全局策略（默认用框架值 / 自定义覆盖 / 低配放大 / 显式值也放大） |
 | `tests/test_stuck_and_recovery.py` | 卡死阈值/去重告警/低配放大、返回次数上限、异常不外抛、失败帧落盘 |
 | `tests/test_failure_frame_store.py` | 落盘/索引/读取/修剪/清空/损坏容错/同名毫秒去重 |
 | `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |

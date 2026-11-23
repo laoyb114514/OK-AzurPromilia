@@ -14,7 +14,7 @@ from src.core.config_migration import migrate_config_file_keys, migrate_config_v
 from src.core.failure_frame_store import FailureFrameStore
 from src.core.game_window import find_game_hwnd
 from src.core.global_config_store import get_global_config, get_runtime_settings
-from src.core.runtime_config import STUCK_CHECK_INTERVAL, RuntimeSettings
+from src.core.runtime_config import DEFAULT_STEP_TIMEOUT, STUCK_CHECK_INTERVAL, RuntimeSettings
 from src.data.feature_list import FeatureList
 from src.data.lang import get_lang_accessor
 from src.data.page import PageNotFoundError, page_main
@@ -154,16 +154,27 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         这两个键在 ok-script 2.0.6 里没有任何代码引用（是死键），这里由项目自己实现，
         默认 0 与旧行为一致。条件没满足时的重试间隔还会叠加全局配置的
         ``重试间隔(秒)``（取两者较大值），这样那个配置项才真的有用。
+
+        超时也接上了全局策略（之前这里只认框架写死的 ``wait_scene_timeout``）：
+        ``time_out=0`` 时用「单步超时」，用户没改过就用框架值，两种都按低配模式缩放；
+        显式传值的同样按低配模式缩放，与 ``loop()`` 保持一致。
         """
         self.executor.reset_scene()
+        settings = _runtime_of(self)
         before_delay = _as_delay(app_config.get("wait_until_before_delay", 0))
         check_delay = _as_delay(app_config.get("wait_until_check_delay", 0))
-        retry_gap = _runtime_of(self).resolve_retry_gap(check_delay)
+        retry_gap = settings.resolve_retry_gap(check_delay)
         if before_delay > 0:
             self.sleep(before_delay)
         start = self.active_time()
         if time_out == 0:
-            time_out = self.executor.wait_scene_timeout
+            default_timeout = self.executor.wait_scene_timeout
+            # 用户改过「单步超时」才覆盖框架默认值，否则保持框架行为不变
+            if abs(settings.step_timeout - DEFAULT_STEP_TIMEOUT) > 1e-9:
+                default_timeout = settings.step_timeout
+            time_out = settings.scaled_timeout(default_timeout)
+        else:
+            time_out = settings.scaled_timeout(time_out)
         settled = None
 
         while not self.executor.exit_event.is_set():
