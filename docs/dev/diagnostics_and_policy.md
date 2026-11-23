@@ -1,0 +1,206 @@
+# 识别诊断与运行策略（批次 A）
+
+这一层解决三件事：**任务失败后怎么定位问题**、**慢机器怎么放宽节奏**、
+**游戏更新换素材怎么不换程序**。对应界面是「工具与诊断」页与「全局配置 → 自动化策略」。
+
+## 1. 自动化策略（全局配置）
+
+配置项定义在 `src/core/runtime_config.py`，注册进 `src/core/global_config_store.py` 的
+`GLOBAL_CONFIG_OPTIONS`，界面分组在 `src/gui/global_config_tab.py` 的 `GLOBAL_CONFIG_GROUPS`。
+存储位置：`configs/Automation Runtime Config.json`。
+
+| 键 | 默认 | 作用 |
+|------|------|------|
+| `单步超时(秒)` | 10.0 | `self.loop(time_out=None)` 的默认超时 |
+| `重试间隔(秒)` | 0.0 | 动作验证失败后重试之间的间隔 |
+| `动作后等待(秒)` | 0.0 | 动作成功后追加的稳定等待 |
+| `卡死检测阈值(秒)` | 30.0 | 画面长时间不变的告警阈值 |
+| `低配模式` | False | 所有超时放宽 1.5 倍（含卡死阈值） |
+| `失败后自动返回主菜单` | True | 失败后按返回键退回主菜单 |
+| `最大返回次数` | 3 | 最多按几次返回键 |
+| `失败帧保留数量` | 20 | 失败帧库保留帧数 |
+
+约定：
+
+- **默认值与改造前完全一致**（单步超时 10 秒、其余 0 秒），存量用户升级后时序不变；
+- 取值做了类型兜底，用户手改 JSON 成字符串也不会让任务崩；
+- `低配模式` **只放宽时间**，不改变任何判定阈值 —— 慢机器不该因为慢而换一套判据。
+
+实现细节：
+
+- `BaseGameTask.runtime` 是**每次读取**的属性（底层是内存里的 dict），改完配置下个任务即生效，不用重启；
+- `self.loop(time_out=None)` 才走全局策略；**显式传值的位置不受影响**，想精确控制就照旧传数字；
+- 非 `BaseGameTask` 的对象（测试里的 MockTask）走 `_runtime_of()` 退回默认快照。
+
+### 顺手修掉的两个死键
+
+`src/config.py` 里的 `wait_until_before_delay` / `wait_until_check_delay` 在 ok-script 2.0.6
+**没有任何代码引用**（死键）。`BaseGameTask.wait_until` 现在自己实现它们：
+首次检测前等待、每轮检测之间等待，默认 0 与旧行为一致。
+
+> `wait_until_timeout` 仍未接进 `TaskExecutor`：`executor.wait_scene_timeout` 依旧是写死的 10 秒。
+> 需要改单个等待的超时，请继续用 `self.loop(time_out=...)` / `wait_until(time_out=...)` 显式传值。
+
+## 2. 卡死检测
+
+`BaseGameTask` 把 `sleep_check_interval` 设为 `STUCK_CHECK_INTERVAL`（2 秒），
+框架会在 `executor.sleep` 期间周期调用 `sleep_check()`，项目侧复用这个插槽做画面指纹对比：
+
+```text
+sleep_check → _check_stuck → perceptual_hash(self.frame)
+  指纹变化 = 场景在动，重置基线
+  指纹不变且持续 ≥ 卡死检测阈值 → 记一次警告（每个连续不变段只报一次）
+```
+
+- **只警告，不中止任务**：卡住的原因可能是加载、断线重连或挂机，
+  该中止任务的是任务自己的超时，不是这个探针。
+- 时间基准用 `self.active_time()`，**暂停期间不计入**「画面没变」的时长。
+- `low_spec=True` 时阈值同样放大 1.5 倍，避免慢机器误报。
+- 切换场景后想立刻重新基线：调 `reset_stuck_detection()`。
+
+## 3. 失败自恢复
+
+`handle_task_exception` 在记录日志后：
+
+1. `capture_failure_frame()` —— 存下这一帧（见第 4 节）；
+2. `recover_after_failure(reason)` —— 若 `失败后自动返回主菜单` 开启且异常不是
+   `TaskDisabledException`，就 `recover_to_menu()`：
+
+```text
+最多 N 次：已在主菜单 → 返回 True
+        否则 self.back() + 等待 once_sleep_time
+```
+
+- **只退菜单，不重跑任务**；是否重跑由用户或触发任务决定。
+- 任何异常（`back()` 失败、识图失败）都在内部吞掉 —— 这是失败路径上的兜底，
+  不能让它盖掉原始异常。
+- 主界面判定用 `ui_page_appear(page_main)`，与导航体系同一套判据。
+
+## 4. 失败帧库
+
+`src/core/failure_frame_store.py`，目录 `failure_frames/`（根下，已 gitignore）。
+
+**为什么不复用框架的 `screenshots/`：**
+
+1. 框架落盘前会过 `screenshot_processor`（本项目把左下角 UID 涂黑）和 `blur_area`，
+   落盘图与识别帧**不是同一张图**，拿去复测等于换了输入；
+2. `screenshots/` 有体积/天数清理策略，失败现场会被顺手删掉；
+3. 复测需要稳定索引（时间 / 任务 / 消息）。
+
+存储格式：
+
+```text
+failure_frames/
+├── index.json                       # {"version":1,"frames":[{id,file,created_at,task,message,width,height,channels}]}
+├── 20261124_011530_412_DailyTask.png
+└── ...
+```
+
+- 保留最近 N 帧（`失败帧保留数量`，默认 20），更旧的帧**连同文件一起删**；
+- 索引用 `.tmp` + `os.replace` 原子写；索引损坏或旧格式（裸数组）都能容错读；
+- 同一毫秒内多次失败会追加序号，`id` 与文件名都唯一；
+- `save()` 在失败路径上被调用，**任何异常都不外抛**，只记日志。
+
+写入入口：
+
+- `BaseGameTask.capture_failure_frame(message, task_name=None)` —— 取 `self.frame`（识别原始帧）；
+- `mark_task_failure()` / `handle_task_exception()` 已自动调用。
+
+## 5. 全模板复测
+
+`src/core/template_rescorer.py`：把**同一帧**喂给全部模板（当前 54 个），按得分降序返回。
+
+三个必须遵守的细节（否则分数不可比）：
+
+1. **显式传全屏 box**。`find_one_feature` 不传 box 时只在 coco 标注位置 ±variance（约 2px）
+   的窗口里搜索，分数只反映「那个小窗口里的最佳位置」；
+2. **threshold 压到 -1**。框架里 `threshold == 0` 会被替换成 `default_threshold`（0.8），
+   低于阈值的模板直接不返回 —— 而 `TM_CCOEFF_NORMED` 的范围是 [-1, 1]，-1 才能拿到原始 max 值；
+3. **按当前分辨率解析模板名**（`resolution_resolver(width)`，规则与
+   `RuntimeMixin.get_feature_by_resolution` 一致，`tests/test_template_rescorer.py` 有等价性测试）。
+
+判定分档（离阈值还差 `gap = threshold - score`）：
+
+| gap | 判定 | 含义 |
+|------|------|------|
+| ≤ 0 | 命中 | 模板仍然有效 |
+| 0 ~ 0.08 | 差一点 | 通常是图标微调/抗锯齿/压缩差异，可以放宽阈值或重做模板 |
+| 0.08 ~ 0.25 | 偏弱 | 模板大致对但环境变了（缩放、配色、滤镜） |
+| > 0.25 | 不对 | 模板已经彻底失效（界面改版或换了素材） |
+
+`TemplateRescorer.from_task(task)` 用在任务里（带分辨率映射）；
+`from_feature_set(feature_set, width)` 用在 GUI（没有任务实例）。
+
+## 6. 素材包热更新
+
+`src/core/asset_pack.py`。zip 结构：
+
+```text
+asset_pack.json          # 清单
+assets/images/1.png      # 素材（与仓库内路径一致）
+ok_templates/...
+```
+
+清单：
+
+```json
+{
+  "name": "ok-ap 素材包",
+  "version": "2026.11.24",
+  "created_at": 1764000000.0,
+  "files": {"assets/images/1.png": {"sha256": "…", "size": 12345}}
+}
+```
+
+`files` 也接受 `{"路径": "sha256"}` 简写。
+
+安装流程（`install_pack`）：
+
+```text
+读清单 → 逐文件 SHA-256 校验（含路径合法性/前缀白名单/符号链接检查）
+   ↓ 不通过 → 直接返回失败，磁盘一个字节都没动
+解压到 app 根下的临时目录（同盘，保证后面的 os.replace 是原子的）
+   ↓ 逐文件：旧文件先复制到 backups/asset_pack_<时间戳>/ → os.replace 就位
+   ↓ 中途任何异常 → 按备份回滚 + 删除新增文件
+写 backups/asset_pack_<时间戳>/install.json（清单 + 安装记录）
+回调 on_installed → 刷新 FeatureSet 缓存 / OCR 纠错表
+```
+
+安全边界：
+
+- 只允许写 `assets/` 与 `ok_templates/` 前缀 —— 素材包不该改代码；
+- 拒绝绝对路径、`..`、盘符、zip 内符号链接（zip slip）。
+
+打包侧工具：`build_manifest(root)` / `build_pack(zip, root, …)`（测试也用它造包）。
+
+> ⚠️ **只能替换已有模板名**。`src/data/feature_list.py` 的 `FeatureList` 由
+> `assets/coco_annotations.json` 生成，`get_feature_by_resolution` 会校验名字；
+> 新增模板必须重新标注并重新生成枚举，改图不改名才走热更新这条路径。
+
+## 7. 「工具与诊断」页
+
+`src/gui/diagnostics_tab.py`，注册在 `src/config.py` 的 `custom_tabs`。懒加载
+（首次显示才构建控件），复测在 `QThread` 里跑，不阻塞 UI。
+
+- **失败帧复测**：下拉选帧 → 左侧预览 → 「复测全部模板」→ 右侧表格按得分排序
+  （模板 / 得分 / 阈值 / 判定 / 位置，未命中按差距染成橙/红），底部一句话摘要；
+  另有「刷新 / 打开目录 / 清空」。
+- **素材包安装**：填本地 zip 路径或 http(s) 直链 → 「安装」，结果写回状态行并弹通知；
+  安装成功后自动刷新 FeatureSet 与 OCR 纠错表。
+
+## 8. 测试覆盖
+
+| 测试 | 覆盖 |
+|------|------|
+| `tests/test_runtime_config.py` | 默认值不变、类型兜底、低配缩放、ConfigOption 注册 |
+| `tests/test_stuck_and_recovery.py` | 卡死阈值/去重告警/低配放大、返回次数上限、异常不外抛、失败帧落盘 |
+| `tests/test_failure_frame_store.py` | 落盘/索引/读取/修剪/清空/损坏容错/同名毫秒去重 |
+| `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |
+| `tests/test_asset_pack.py` | 清单读写、篡改检测、zip slip、前缀白名单、备份、dry-run、回滚 |
+| `tests/test_config.py` | 新增 Tab 可导入且已注册 |
+
+全部离线可跑，不需要游戏：
+
+```bash
+uv run python -m unittest discover -s tests
+```

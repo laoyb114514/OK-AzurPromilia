@@ -7,6 +7,7 @@ from ok.gui.widget.CustomTab import CustomTab
 from src.core.global_config_store import get_all_visible_configs
 
 GLOBAL_CONFIG_GROUPS = {
+    "自动化策略": ["Automation Runtime Config"],
     "基础配置": ["Ensure Main Once Action Sleep"],
     "键位配置": ["Game Hotkey Config"],
 }

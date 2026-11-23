@@ -181,3 +181,159 @@ msgstr "委托每日"
 msgid "执行委托每日：消耗体力刷选定的每日委托（需先解锁自动战斗）"
 msgstr "执行委托每日：消耗体力刷选定的每日委托（需先解锁自动战斗）"
 
+
+msgid "工具与诊断"
+msgstr "工具与诊断"
+
+msgid "失败帧复测"
+msgstr "失败帧复测"
+
+msgid "失败帧列表"
+msgstr "失败帧列表"
+
+msgid "刷新"
+msgstr "刷新"
+
+msgid "打开目录"
+msgstr "打开目录"
+
+msgid "清空"
+msgstr "清空"
+
+msgid "复测全部模板"
+msgstr "复测全部模板"
+
+msgid "复测中…正在用这一帧跑全部模板"
+msgstr "复测中…正在用这一帧跑全部模板"
+
+msgid "请选择一个失败帧"
+msgstr "请选择一个失败帧"
+
+msgid "未识别到可用的模板特征集，请先连接游戏"
+msgstr "未识别到可用的模板特征集，请先连接游戏"
+
+msgid "模板"
+msgstr "模板"
+
+msgid "得分"
+msgstr "得分"
+
+msgid "阈值"
+msgstr "阈值"
+
+msgid "判定"
+msgstr "判定"
+
+msgid "位置"
+msgstr "位置"
+
+msgid "素材包安装"
+msgstr "素材包安装"
+
+msgid "素材包路径或 URL"
+msgstr "素材包路径或 URL"
+
+msgid "本地 zip 路径，或 http(s) 直链"
+msgstr "本地 zip 路径，或 http(s) 直链"
+
+msgid "浏览…"
+msgstr "浏览…"
+
+msgid "安装"
+msgstr "安装"
+
+msgid "安装前会逐个校验 SHA-256；校验不通过不会改动任何文件，旧素材会带时间戳备份。"
+msgstr "安装前会逐个校验 SHA-256；校验不通过不会改动任何文件，旧素材会带时间戳备份。"
+
+msgid "失败帧库为空：任务失败时会自动保存识别帧"
+msgstr "失败帧库为空：任务失败时会自动保存识别帧"
+
+msgid "复测完成：{summary}"
+msgstr "复测完成：{summary}"
+
+msgid "复测失败：{error}"
+msgstr "复测失败：{error}"
+
+msgid "已清空 {count} 个失败帧"
+msgstr "已清空 {count} 个失败帧"
+
+msgid "无法打开目录：{error}"
+msgstr "无法打开目录：{error}"
+
+msgid "安装失败：{error}"
+msgstr "安装失败：{error}"
+
+msgid "正在校验素材包…"
+msgstr "正在校验素材包…"
+
+msgid "正在下载素材包…"
+msgstr "正在下载素材包…"
+
+msgid "请填写素材包路径或 URL"
+msgstr "请填写素材包路径或 URL"
+
+msgid "{time}　{task}　{width}×{height}　{message}"
+msgstr "{time}　{task}　{width}×{height}　{message}"
+
+msgid "未知任务"
+msgstr "未知任务"
+
+msgid "选择素材包"
+msgstr "选择素材包"
+
+msgid "素材包文件 (*.zip)"
+msgstr "素材包文件 (*.zip)"
+
+msgid "自动化策略"
+msgstr "自动化策略"
+
+msgid "超时、重试与失败自恢复策略"
+msgstr "超时、重试与失败自恢复策略"
+
+msgid "单步超时(秒)"
+msgstr "单步超时(秒)"
+
+msgid "重试间隔(秒)"
+msgstr "重试间隔(秒)"
+
+msgid "动作后等待(秒)"
+msgstr "动作后等待(秒)"
+
+msgid "卡死检测阈值(秒)"
+msgstr "卡死检测阈值(秒)"
+
+msgid "低配模式"
+msgstr "低配模式"
+
+msgid "失败后自动返回主菜单"
+msgstr "失败后自动返回主菜单"
+
+msgid "最大返回次数"
+msgstr "最大返回次数"
+
+msgid "失败帧保留数量"
+msgstr "失败帧保留数量"
+
+msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
+msgstr "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
+
+msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
+msgstr "动作验证失败后重试之间的间隔，0 表示不额外等待"
+
+msgid "动作成功后追加的稳定等待，0 表示不等待"
+msgstr "动作成功后追加的稳定等待，0 表示不等待"
+
+msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
+msgstr "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
+
+msgid "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽"
+msgstr "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽"
+
+msgid "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务"
+msgstr "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务"
+
+msgid "失败后最多按几次返回键"
+msgstr "失败后最多按几次返回键"
+
+msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
+msgstr "失败帧库最多保留多少帧，超出后丢弃最旧的"

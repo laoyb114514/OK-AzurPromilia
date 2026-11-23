@@ -184,3 +184,159 @@ msgstr ""
 "의뢰 데일리 실행: 체력을 소모하여 선택한 일일 의뢰를 반복 (자동 전투를 먼저 "
 "해제해야 함)"
 
+
+msgid "工具与诊断"
+msgstr "도구 및 진단"
+
+msgid "失败帧复测"
+msgstr "실패 프레임 재검사"
+
+msgid "失败帧列表"
+msgstr "실패 프레임 목록"
+
+msgid "刷新"
+msgstr "새로 고침"
+
+msgid "打开目录"
+msgstr "폴더 열기"
+
+msgid "清空"
+msgstr "비우기"
+
+msgid "复测全部模板"
+msgstr "모든 템플릿 재검사"
+
+msgid "复测中…正在用这一帧跑全部模板"
+msgstr "재검사 중… 이 프레임으로 모든 템플릿을 실행하는 중"
+
+msgid "请选择一个失败帧"
+msgstr "실패 프레임을 선택하세요"
+
+msgid "未识别到可用的模板特征集，请先连接游戏"
+msgstr "사용 가능한 템플릿 세트가 없습니다. 먼저 게임에 연결하세요"
+
+msgid "模板"
+msgstr "템플릿"
+
+msgid "得分"
+msgstr "점수"
+
+msgid "阈值"
+msgstr "임계값"
+
+msgid "判定"
+msgstr "판정"
+
+msgid "位置"
+msgstr "위치"
+
+msgid "素材包安装"
+msgstr "에셋 팩 설치"
+
+msgid "素材包路径或 URL"
+msgstr "팩 경로 또는 URL"
+
+msgid "本地 zip 路径，或 http(s) 直链"
+msgstr "로컬 zip 경로 또는 http(s) 직링크"
+
+msgid "浏览…"
+msgstr "찾아보기…"
+
+msgid "安装"
+msgstr "설치"
+
+msgid "安装前会逐个校验 SHA-256；校验不通过不会改动任何文件，旧素材会带时间戳备份。"
+msgstr "설치 전에 각 파일의 SHA-256을 검증합니다. 검증에 실패하면 아무 파일도 변경되지 않으며, 기존 에셋은 타임스탬프와 함께 백업됩니다."
+
+msgid "失败帧库为空：任务失败时会自动保存识别帧"
+msgstr "저장된 실패 프레임이 없습니다. 작업 실패 시 인식 프레임이 자동으로 저장됩니다"
+
+msgid "复测完成：{summary}"
+msgstr "재검사 완료: {summary}"
+
+msgid "复测失败：{error}"
+msgstr "재검사 실패: {error}"
+
+msgid "已清空 {count} 个失败帧"
+msgstr "실패 프레임 {count}개를 비웠습니다"
+
+msgid "无法打开目录：{error}"
+msgstr "폴더를 열 수 없습니다: {error}"
+
+msgid "安装失败：{error}"
+msgstr "설치 실패: {error}"
+
+msgid "正在校验素材包…"
+msgstr "에셋 팩 검증 중…"
+
+msgid "正在下载素材包…"
+msgstr "에셋 팩 다운로드 중…"
+
+msgid "请填写素材包路径或 URL"
+msgstr "에셋 팩 경로 또는 URL을 입력하세요"
+
+msgid "{time}　{task}　{width}×{height}　{message}"
+msgstr "{time}　{task}　{width}×{height}　{message}"
+
+msgid "未知任务"
+msgstr "알 수 없는 작업"
+
+msgid "选择素材包"
+msgstr "에셋 팩 선택"
+
+msgid "素材包文件 (*.zip)"
+msgstr "에셋 팩 (*.zip)"
+
+msgid "自动化策略"
+msgstr "자동화 정책"
+
+msgid "超时、重试与失败自恢复策略"
+msgstr "타임아웃, 재시도 및 실패 자동 복구"
+
+msgid "单步超时(秒)"
+msgstr "단계 타임아웃(초)"
+
+msgid "重试间隔(秒)"
+msgstr "재시도 간격(초)"
+
+msgid "动作后等待(秒)"
+msgstr "동작 후 대기(초)"
+
+msgid "卡死检测阈值(秒)"
+msgstr "멈춤 감지 임계값(초)"
+
+msgid "低配模式"
+msgstr "저사양 모드"
+
+msgid "失败后自动返回主菜单"
+msgstr "실패 후 자동으로 메인 메뉴로 돌아가기"
+
+msgid "最大返回次数"
+msgstr "최대 돌아가기 횟수"
+
+msgid "失败帧保留数量"
+msgstr "보관할 실패 프레임 수"
+
+msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
+msgstr "단일 대기/폴링 단계의 기본 타임아웃입니다. 명시적으로 지정한 곳에는 영향을 주지 않습니다"
+
+msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
+msgstr "동작 검증 실패 후 재시도 사이의 간격입니다. 0이면 추가 대기가 없습니다"
+
+msgid "动作成功后追加的稳定等待，0 表示不等待"
+msgstr "동작 성공 후 추가 안정 대기입니다. 0이면 대기하지 않습니다"
+
+msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
+msgstr "화면이 오랫동안 그대로일 때(멈춤 의심) 경고를 기록하는 임계값입니다. 경고만 남기고 작업은 중단하지 않습니다"
+
+msgid "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽"
+msgstr "저사양 환경: 모든 타임아웃을 1.5배로 늘리고 멈춤 임계값도 함께 늘립니다"
+
+msgid "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务"
+msgstr "작업 실패 후 뒤로 가기로 메인 메뉴로 돌아갑니다. 작업을 다시 실행하지는 않습니다"
+
+msgid "失败后最多按几次返回键"
+msgstr "실패 후 뒤로 가기를 누르는 최대 횟수"
+
+msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
+msgstr "보관할 실패 프레임의 최대 개수입니다. 초과하면 오래된 것부터 삭제됩니다"

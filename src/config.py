@@ -114,6 +114,7 @@ config = {
     "custom_tabs": [
         ["src.gui.global_config_tab", "GlobalConfigTab"],
         ["src.gui.account_config_tab", "AccountConfigTab"],
+        ["src.gui.diagnostics_tab", "DiagnosticsTab"],
     ],
     "trigger_tasks": [  # 不断执行的触发式任务
         ["src.tasks.trigger.auto_jenga_task", "AutoJengaTask"],

@@ -190,3 +190,159 @@ msgstr ""
 "Run commission daily: spend power to farm the selected daily commission "
 "(auto-combat must be unlocked first)"
 
+
+msgid "工具与诊断"
+msgstr "Tools & Diagnostics"
+
+msgid "失败帧复测"
+msgstr "Failure frame retest"
+
+msgid "失败帧列表"
+msgstr "Failure frames"
+
+msgid "刷新"
+msgstr "Refresh"
+
+msgid "打开目录"
+msgstr "Open folder"
+
+msgid "清空"
+msgstr "Clear"
+
+msgid "复测全部模板"
+msgstr "Retest all templates"
+
+msgid "复测中…正在用这一帧跑全部模板"
+msgstr "Retesting… running every template against this frame"
+
+msgid "请选择一个失败帧"
+msgstr "Select a failure frame"
+
+msgid "未识别到可用的模板特征集，请先连接游戏"
+msgstr "No template feature set available; connect to the game first"
+
+msgid "模板"
+msgstr "Template"
+
+msgid "得分"
+msgstr "Score"
+
+msgid "阈值"
+msgstr "Threshold"
+
+msgid "判定"
+msgstr "Verdict"
+
+msgid "位置"
+msgstr "Position"
+
+msgid "素材包安装"
+msgstr "Asset pack installation"
+
+msgid "素材包路径或 URL"
+msgstr "Pack path or URL"
+
+msgid "本地 zip 路径，或 http(s) 直链"
+msgstr "Local zip path or direct http(s) link"
+
+msgid "浏览…"
+msgstr "Browse…"
+
+msgid "安装"
+msgstr "Install"
+
+msgid "安装前会逐个校验 SHA-256；校验不通过不会改动任何文件，旧素材会带时间戳备份。"
+msgstr "Every file is SHA-256 verified before installing; a bad pack changes nothing and old assets are backed up with a timestamp."
+
+msgid "失败帧库为空：任务失败时会自动保存识别帧"
+msgstr "No failure frames yet: the recognition frame is saved automatically when a task fails"
+
+msgid "复测完成：{summary}"
+msgstr "Retest finished: {summary}"
+
+msgid "复测失败：{error}"
+msgstr "Retest failed: {error}"
+
+msgid "已清空 {count} 个失败帧"
+msgstr "Cleared {count} failure frame(s)"
+
+msgid "无法打开目录：{error}"
+msgstr "Cannot open the folder: {error}"
+
+msgid "安装失败：{error}"
+msgstr "Installation failed: {error}"
+
+msgid "正在校验素材包…"
+msgstr "Verifying the asset pack…"
+
+msgid "正在下载素材包…"
+msgstr "Downloading the asset pack…"
+
+msgid "请填写素材包路径或 URL"
+msgstr "Enter the asset pack path or URL"
+
+msgid "{time}　{task}　{width}×{height}　{message}"
+msgstr "{time}　{task}　{width}×{height}　{message}"
+
+msgid "未知任务"
+msgstr "Unknown task"
+
+msgid "选择素材包"
+msgstr "Select an asset pack"
+
+msgid "素材包文件 (*.zip)"
+msgstr "Asset pack (*.zip)"
+
+msgid "自动化策略"
+msgstr "Automation policy"
+
+msgid "超时、重试与失败自恢复策略"
+msgstr "Timeouts, retries and failure recovery"
+
+msgid "单步超时(秒)"
+msgstr "Step timeout (s)"
+
+msgid "重试间隔(秒)"
+msgstr "Retry interval (s)"
+
+msgid "动作后等待(秒)"
+msgstr "Wait after action (s)"
+
+msgid "卡死检测阈值(秒)"
+msgstr "Stuck detection threshold (s)"
+
+msgid "低配模式"
+msgstr "Low-spec mode"
+
+msgid "失败后自动返回主菜单"
+msgstr "Return to the main menu after a failure"
+
+msgid "最大返回次数"
+msgstr "Maximum back presses"
+
+msgid "失败帧保留数量"
+msgstr "Failure frames to keep"
+
+msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
+msgstr "Default timeout for a single wait/poll step; places that pass an explicit timeout are unaffected"
+
+msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
+msgstr "Delay between retries after a failed verification; 0 means no extra wait"
+
+msgid "动作成功后追加的稳定等待，0 表示不等待"
+msgstr "Extra settle wait after a successful action; 0 means no wait"
+
+msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
+msgstr "Threshold for an unchanged screen (possible freeze); only logs a warning, never aborts the task"
+
+msgid "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽"
+msgstr "Low-spec machines: all timeouts are relaxed by 1.5×, including the stuck threshold"
+
+msgid "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务"
+msgstr "After a failure, press Back to return to the main menu; it never re-runs the task"
+
+msgid "失败后最多按几次返回键"
+msgstr "Maximum number of Back presses after a failure"
+
+msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
+msgstr "How many failure frames to keep; the oldest are dropped"

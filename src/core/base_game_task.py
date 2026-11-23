@@ -1,3 +1,4 @@
+import contextlib
 import time
 from datetime import datetime
 
@@ -12,8 +13,10 @@ from src.core.base_mixin.framework_override_mixin import FrameworkOverrideMixin
 from src.core.base_mixin.runtime_mixin import RuntimeMixin
 from src.core.base_mixin.ui_mixin import UIMixin
 from src.core.config_migration import migrate_config_file_keys, migrate_config_values
+from src.core.failure_frame_store import FailureFrameStore
 from src.core.game_window import find_game_hwnd
-from src.core.global_config_store import get_global_config
+from src.core.global_config_store import get_global_config, get_runtime_settings
+from src.core.runtime_config import STUCK_CHECK_INTERVAL, RuntimeSettings
 from src.data.feature_list import FeatureList
 from src.data.page import PageNotFoundError, page_main
 from src.data.lang import get_lang_accessor
@@ -31,6 +34,23 @@ def _round_ratio(value):
         return round(float(value), 3)
     except Exception:
         return value
+
+
+def _as_delay(value) -> float:
+    """把配置里的延时节流值转成非负秒数，非法值按 0 处理。"""
+    try:
+        delay = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    if delay != delay:  # NaN
+        return 0.0
+    return max(0.0, delay)
+
+
+def _runtime_of(task) -> RuntimeSettings:
+    """取任务的策略快照；不是 BaseGameTask 的对象（测试里的 MockTask）退回默认值。"""
+    settings = getattr(task, "runtime", None)
+    return settings if isinstance(settings, RuntimeSettings) else RuntimeSettings()
 
 
 class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
@@ -62,6 +82,14 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         self._seen_executor_pause_start = getattr(self.executor, "pause_start", None)
         self._logged_in = False
 
+        # 卡死检测：画面指纹长时间不变时只记警告，不中止任务
+        self.sleep_check_interval = STUCK_CHECK_INTERVAL
+        self._stuck_fingerprint = None
+        self._stuck_since = 0.0
+        self._stuck_warned = False
+        self._last_stuck_check = 0.0
+        self._failure_store: FailureFrameStore | None = None
+
     # ── 暂停感知的活动计时 ─────────────────────────────
     def active_time(self) -> float:
         """Return monotonic task time with framework pauses excluded."""
@@ -83,6 +111,19 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             current_task_pause = max(0.0, now - self._task_pause_started_at)
 
         return now - self._active_time_paused_total - current_executor_pause - current_task_pause
+
+    # ── 运行期策略（超时/重试/卡死/自恢复） ─────────────
+    @property
+    def runtime(self) -> RuntimeSettings:
+        """当前全局策略快照。
+
+        每次都重新读 ``Config``（底层是内存里的 dict），所以用户在
+        「全局配置 → 自动化策略」里改完参数，下一个任务就会生效，不需要重启。
+        """
+        try:
+            return get_runtime_settings()
+        except Exception:
+            return RuntimeSettings()
 
     def sleep(self, timeout):
         """Sleep for active task time, keeping the deadline across pauses."""
@@ -109,8 +150,17 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
     def wait_until(self, condition, time_out=0, pre_action=None, post_action=None, settle_time=-1,
                    raise_if_not_found=False):
-        """Framework wait_until variant whose timeout freezes while paused."""
+        """Framework wait_until variant whose timeout freezes while paused.
+
+        另外补齐了 ``config['wait_until_before_delay']`` / ``wait_until_check_delay``：
+        这两个键在 ok-script 2.0.6 里没有任何代码引用（是死键），这里由项目自己实现，
+        默认 0 与旧行为一致。
+        """
         self.executor.reset_scene()
+        before_delay = _as_delay(app_config.get("wait_until_before_delay", 0))
+        check_delay = _as_delay(app_config.get("wait_until_check_delay", 0))
+        if before_delay > 0:
+            self.sleep(before_delay)
         start = self.active_time()
         if time_out == 0:
             time_out = self.executor.wait_scene_timeout
@@ -136,6 +186,8 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             settled = None
             if post_action is not None:
                 post_action()
+            if check_delay > 0:
+                self.sleep(check_delay)
             if self.active_time() - start > time_out:
                 break
 
@@ -238,6 +290,13 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             self.screenshot(prefix)
         except Exception:
             pass
+        self.capture_failure_frame(f"{prefix}: {e}", task_name=prefix)
+        # 失败自恢复：只按返回键退回主菜单，不重跑任务；停用/退出流程不处理
+        try:
+            if not isinstance(e, TaskDisabledException):
+                self.recover_after_failure(str(e))
+        except Exception:
+            pass
 
         if not self.config.get("发生异常时终止游戏", False):
             self.log_info("发生异常，继续游戏", notify=True)
@@ -256,6 +315,7 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             self.screenshot(f"fail_{name}")
         except Exception:
             pass
+        self.capture_failure_frame(str(message), task_name=str(name))
         self.log_info(str(message))
 
     def _ensure_main(self, esc):
@@ -464,7 +524,7 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
     def loop(
         self,
-        time_out: float = 10.0,
+        time_out: float | None = None,
         yield_frame: bool = True,
         raise_if_time_out: bool | Exception | type[Exception] = True,
     ):
@@ -473,7 +533,8 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         基于 self.active_time() 计算活跃时长（自动排除任务暂停时间）。
 
         Args:
-            time_out: 最大循环时间（秒），默认 10 秒。
+            time_out: 最大循环时间（秒）。``None``（默认）取全局策略里的
+                「单步超时」，低配模式下自动放宽 1.5 倍；显式传值不受影响。
             yield_frame: 是否在每次迭代时获取并产出下一帧（self.next_frame()）。
                 为 False 时产出 None。
             raise_if_time_out: 超时未退出时的行为：
@@ -489,6 +550,7 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             TimeoutError: 当 raise_if_time_out 为 True 且循环超时未中断时抛出。
             Exception: 当 raise_if_time_out 传入自定义异常且循环超时未中断时抛出。
         """
+        time_out = _runtime_of(self).resolve_step_timeout(time_out)
         start_time = self.active_time()
         while self.active_time() - start_time < time_out:
             if yield_frame:
@@ -501,3 +563,147 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             if isinstance(raise_if_time_out, type) and issubclass(raise_if_time_out, Exception):
                 raise raise_if_time_out("Loop time out.")
             raise TimeoutError("Loop time out.")
+
+    # ── 卡死检测 ──────────────────────────────────────────
+    def sleep_check(self):
+        """框架在 ``executor.sleep`` 期间周期性调用的钩子（``sleep_check_interval`` ≥ 0 时）。"""
+        with contextlib.suppress(Exception):
+            super().sleep_check()
+        self._check_stuck()
+
+    def _check_stuck(self):
+        """画面指纹长时间不变 → 记一次警告。
+
+        只报警不中止：卡死的原因可能是游戏加载、网络重连或者用户在挂机，
+        真正该中止任务的是任务自己的超时，不是这个探针。
+        """
+        now = self.active_time()
+        if now - self._last_stuck_check < STUCK_CHECK_INTERVAL:
+            return
+        self._last_stuck_check = now
+
+        frame = self.frame
+        if frame is None:
+            return
+        try:
+            fingerprint = perceptual_hash(frame)
+        except Exception:
+            return
+
+        if fingerprint != self._stuck_fingerprint:
+            self._stuck_fingerprint = fingerprint
+            self._stuck_since = now
+            self._stuck_warned = False
+            return
+
+        threshold = self.runtime.resolve_stuck_threshold()
+        if self._stuck_warned or (now - self._stuck_since) < threshold:
+            return
+        self._stuck_warned = True
+        self._log_stuck(now - self._stuck_since, threshold)
+
+    def _log_stuck(self, unchanged_for: float, threshold: float):
+        message = (
+            f"画面已 {unchanged_for:.0f} 秒没有变化（阈值 {threshold:.0f} 秒），"
+            "可能卡在加载/弹窗/断线界面，请检查游戏状态"
+        )
+        try:
+            self.log_warning(message, notify=True)
+        except Exception:
+            with contextlib.suppress(Exception):
+                self.log_info(message)
+
+    def reset_stuck_detection(self):
+        """手动重置卡死基线（例如切换场景后调用，避免误判）。"""
+        self._stuck_fingerprint = None
+        self._stuck_since = 0.0
+        self._stuck_warned = False
+        self._last_stuck_check = 0.0
+
+    # ── 失败后自恢复 ──────────────────────────────────────
+    def is_main_menu(self) -> bool:
+        """当前画面是否为主界面（游戏世界）。"""
+        try:
+            return bool(self.ui_page_appear(page_main))
+        except Exception:
+            return False
+
+    def recover_to_menu(self, attempts: int | None = None, after_sleep: float | None = None) -> bool:
+        """失败后用「按返回键」退回主菜单，最多 ``attempts`` 次。
+
+        只退菜单，**不重跑任务**。返回是否确认回到了主菜单；任何异常都吞掉，
+        因为这是失败路径上的兜底动作，不能让它盖掉原始错误。
+        """
+        settings = self.runtime
+        limit = settings.max_recover_attempts if attempts is None else max(0, int(attempts))
+        if limit <= 0:
+            return self.is_main_menu()
+        wait = settings.after_action_wait if after_sleep is None else max(0.0, float(after_sleep))
+        if wait <= 0:
+            wait = self.once_sleep_time
+
+        for _ in range(limit):
+            if self.is_main_menu():
+                return True
+            try:
+                self.back()
+            except Exception:
+                return self.is_main_menu()
+            if wait > 0:
+                self.sleep(wait)
+        return self.is_main_menu()
+
+    def recover_after_failure(self, reason: str = "") -> bool:
+        """按全局策略决定是否要执行失败自恢复。"""
+        settings = self.runtime
+        if not settings.auto_recover:
+            return False
+        suffix = f"：{reason}" if reason else ""
+        with contextlib.suppress(Exception):
+            self.log_info(f"任务失败，尝试退回主菜单（最多 {settings.max_recover_attempts} 次）{suffix}")
+        recovered = self.recover_to_menu()
+        with contextlib.suppress(Exception):
+            if recovered:
+                self.log_info("已退回主菜单，等待下一次手动/触发执行")
+            else:
+                self.log_warning("未能确认回到主菜单，请手动检查游戏画面")
+        return recovered
+
+    # ── 失败帧 ────────────────────────────────────────────
+    def failure_store(self) -> FailureFrameStore:
+        """失败帧库（按全局配置的保留数量惰性创建）。
+
+        保留数量变化时重建存储，但**沿用原来的目录**：调用方（含测试）可以先把
+        ``_failure_store`` 指到一个自定义目录，后续配置变化不会把帧写到别处。
+        """
+        limit = self.runtime.failure_frame_limit
+        store = self._failure_store
+        if store is None:
+            store = FailureFrameStore(limit=limit, log=self._log_failure_store)
+        elif store.limit != limit:
+            store = FailureFrameStore(root=store.root, limit=limit, log=self._log_failure_store)
+        self._failure_store = store
+        return store
+
+    def _log_failure_store(self, message: str):
+        with contextlib.suppress(Exception):
+            self.log_info(message)
+
+    def capture_failure_frame(self, message: str = "", task_name: str | None = None) -> bool:
+        """把当前识别帧存进失败帧库，供「工具与诊断 → 失败帧复测」使用。
+
+        用的是 ``self.frame``（识别用的原始帧），**不经过** ``screenshot_processor``，
+        所以复测时拿到的画面与实际识别画面完全一致。
+        """
+        try:
+            frame = self.frame
+            if frame is None:
+                return False
+            name = task_name or getattr(self, "current_task", None) or self.__class__.__name__
+            record = self.failure_store().save(frame, task=str(name), message=str(message or ""))
+            if record is not None:
+                self._log_failure_store(f"失败帧已保存: {record.file}")
+                return True
+        except Exception:
+            pass
+        return False

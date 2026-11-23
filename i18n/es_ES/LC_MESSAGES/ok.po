@@ -192,3 +192,159 @@ msgstr ""
 "Ejecutar el encargo diario: gasta vigor para repetir el encargo diario "
 "seleccionado (requiere desbloquear antes el combate automático)"
 
+
+msgid "工具与诊断"
+msgstr "Herramientas y diagnóstico"
+
+msgid "失败帧复测"
+msgstr "Reanálisis de fotograma fallido"
+
+msgid "失败帧列表"
+msgstr "Fotogramas fallidos"
+
+msgid "刷新"
+msgstr "Actualizar"
+
+msgid "打开目录"
+msgstr "Abrir carpeta"
+
+msgid "清空"
+msgstr "Vaciar"
+
+msgid "复测全部模板"
+msgstr "Reanalizar todas las plantillas"
+
+msgid "复测中…正在用这一帧跑全部模板"
+msgstr "Reanalizando… ejecutando todas las plantillas sobre este fotograma"
+
+msgid "请选择一个失败帧"
+msgstr "Selecciona un fotograma fallido"
+
+msgid "未识别到可用的模板特征集，请先连接游戏"
+msgstr "No hay un conjunto de plantillas disponible; conecta primero al juego"
+
+msgid "模板"
+msgstr "Plantilla"
+
+msgid "得分"
+msgstr "Puntuación"
+
+msgid "阈值"
+msgstr "Umbral"
+
+msgid "判定"
+msgstr "Veredicto"
+
+msgid "位置"
+msgstr "Posición"
+
+msgid "素材包安装"
+msgstr "Instalación de paquete de recursos"
+
+msgid "素材包路径或 URL"
+msgstr "Ruta o URL del paquete"
+
+msgid "本地 zip 路径，或 http(s) 直链"
+msgstr "Ruta zip local o enlace directo http(s)"
+
+msgid "浏览…"
+msgstr "Examinar…"
+
+msgid "安装"
+msgstr "Instalar"
+
+msgid "安装前会逐个校验 SHA-256；校验不通过不会改动任何文件，旧素材会带时间戳备份。"
+msgstr "Se verifica el SHA-256 de cada archivo antes de instalar; si el paquete está dañado no se modifica nada y los recursos anteriores se respaldan con marca de tiempo."
+
+msgid "失败帧库为空：任务失败时会自动保存识别帧"
+msgstr "Aún no hay fotogramas fallidos: el fotograma de reconocimiento se guarda al fallar una tarea"
+
+msgid "复测完成：{summary}"
+msgstr "Reanálisis completado: {summary}"
+
+msgid "复测失败：{error}"
+msgstr "Error en el reanálisis: {error}"
+
+msgid "已清空 {count} 个失败帧"
+msgstr "Se vaciaron {count} fotogramas fallidos"
+
+msgid "无法打开目录：{error}"
+msgstr "No se puede abrir la carpeta: {error}"
+
+msgid "安装失败：{error}"
+msgstr "Error de instalación: {error}"
+
+msgid "正在校验素材包…"
+msgstr "Verificando el paquete de recursos…"
+
+msgid "正在下载素材包…"
+msgstr "Descargando el paquete de recursos…"
+
+msgid "请填写素材包路径或 URL"
+msgstr "Introduce la ruta o URL del paquete de recursos"
+
+msgid "{time}　{task}　{width}×{height}　{message}"
+msgstr "{time}　{task}　{width}×{height}　{message}"
+
+msgid "未知任务"
+msgstr "Tarea desconocida"
+
+msgid "选择素材包"
+msgstr "Seleccionar paquete de recursos"
+
+msgid "素材包文件 (*.zip)"
+msgstr "Paquete de recursos (*.zip)"
+
+msgid "自动化策略"
+msgstr "Política de automatización"
+
+msgid "超时、重试与失败自恢复策略"
+msgstr "Tiempos de espera, reintentos y recuperación de fallos"
+
+msgid "单步超时(秒)"
+msgstr "Tiempo de espera por paso (s)"
+
+msgid "重试间隔(秒)"
+msgstr "Intervalo de reintento (s)"
+
+msgid "动作后等待(秒)"
+msgstr "Espera tras la acción (s)"
+
+msgid "卡死检测阈值(秒)"
+msgstr "Umbral de detección de bloqueo (s)"
+
+msgid "低配模式"
+msgstr "Modo para equipos de gama baja"
+
+msgid "失败后自动返回主菜单"
+msgstr "Volver al menú principal tras un fallo"
+
+msgid "最大返回次数"
+msgstr "Número máximo de pulsaciones de volver"
+
+msgid "失败帧保留数量"
+msgstr "Fotogramas fallidos a conservar"
+
+msgid "单个等待/轮询步骤的默认超时；任务里显式传超时的位置不受影响"
+msgstr "Tiempo de espera predeterminado de un paso de espera o sondeo; los puntos que indican uno explícito no se ven afectados"
+
+msgid "动作验证失败后重试之间的间隔，0 表示不额外等待"
+msgstr "Espera entre reintentos tras un fallo de verificación; 0 significa sin espera adicional"
+
+msgid "动作成功后追加的稳定等待，0 表示不等待"
+msgstr "Espera adicional de estabilización tras una acción correcta; 0 significa sin espera"
+
+msgid "画面长时间不变（判定为可能卡死）的阈值，只记录警告不中止任务"
+msgstr "Umbral de pantalla sin cambios (posible bloqueo); solo registra un aviso y nunca aborta la tarea"
+
+msgid "低配机器：所有超时统一放宽 1.5 倍，卡死阈值同步放宽"
+msgstr "Equipos de gama baja: todos los tiempos de espera se amplían 1,5 veces, incluido el umbral de bloqueo"
+
+msgid "任务失败后自动按返回键退回主菜单，只退菜单不重跑任务"
+msgstr "Tras un fallo, pulsa Atrás para volver al menú principal; nunca vuelve a ejecutar la tarea"
+
+msgid "失败后最多按几次返回键"
+msgstr "Número máximo de pulsaciones de Atrás tras un fallo"
+
+msgid "失败帧库最多保留多少帧，超出后丢弃最旧的"
+msgstr "Cuántos fotogramas fallidos se conservan; los más antiguos se descartan"

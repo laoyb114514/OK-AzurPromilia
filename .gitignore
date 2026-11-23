@@ -270,6 +270,10 @@ ok-lang-hints
 /tests/logs
 label_class
 /screenshots/
+# 失败帧库与素材包安装产物（运行时数据）
+/failure_frames/
+/backups/
+/downloads/
 
 
 ############################
