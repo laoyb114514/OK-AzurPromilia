@@ -28,6 +28,10 @@
   - **录制转流程**：把键鼠录制一键转成流程步骤，如实报告跳过的输入。
   - **任务队列**：把流程 / 一次性任务 / 触发任务串成队列，每项可设分钟预算，失败即停或继续。
   - **配置档**：把 `configs/` 打成命名快照，应用前自动备份。
+- **离线工具（纯计算，不碰游戏）**：
+  - **养成计算 (`src/core/growth/`)**：角色/奇波/灵子/装备的材料与体力折算、库存缺口、多目标合并、CSV/PNG 导出。
+  - **抽卡分析 (`src/core/gacha/`)**：保底层 + 伯努利层模型，算期望抽数、预算内完成概率与最坏情况。
+  - **记账与报表 (`src/core/ledger.py`)**：结算文字解析成 `ledger.jsonl`，任务结果写 `runs.jsonl`，都能导出 CSV。
 
 ## 快速导航
 
@@ -35,6 +39,7 @@
 - [开发指南](dev/development.md)
 - [识别诊断与运行策略（失败帧复测 / 素材包 / 卡死自恢复）](dev/diagnostics_and_policy.md)
 - [流程、队列与配置档（JSON 编排 / 断点续跑 / 任务队列）](dev/flows_and_queues.md)
+- [离线工具：养成计算 / 抽卡分析 / 记账报表](dev/offline_tools.md)
 - [Action 生命周期参考](dev/action_lifecycle.md)
 - [祖赞卡之梯算法与判定分析](dev/jenga_judgment.md)
 
@@ -59,6 +64,9 @@
 │   │   ├── asset_pack.py       素材包热更新（SHA-256 + 原子安装 + 回滚）
 │   │   ├── flow/               JSON 流程：模型/校验、执行器、断点、录制转流程
 │   │   ├── queue/              任务队列：模型、执行器
+│   │   ├── growth/             养成计算：数据模型、计算、CSV/PNG 导出
+│   │   ├── gacha/              抽卡概率模型（保底层 + 伯努利层）
+│   │   ├── ledger.py           结算记账（ledger.jsonl）与运行报表（runs.jsonl）
 │   │   ├── profile_store.py    配置档（configs/ 快照，应用前自动备份）
 │   │   └── sequence_parser.py  逗号分隔配置串解析
 │   ├── tasks/
