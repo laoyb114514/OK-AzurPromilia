@@ -1099,3 +1099,21 @@ msgstr "Running"
 
 msgid "已暂停"
 msgstr "Paused"
+
+msgid "模板自检"
+msgstr "Template audit"
+
+msgid "开始自检"
+msgstr "Run audit"
+
+msgid "还没自检；自检只读 assets/coco_annotations.json，不改任何文件"
+msgstr "Not audited yet; the audit only reads assets/coco_annotations.json and changes nothing"
+
+msgid "检查全部模板的纹理与重复（纯色块永远匹配不上）"
+msgstr "Checks every template for texture and duplicates (solid blocks can never match)"
+
+msgid "重复模板："
+msgstr "Duplicate templates:"
+
+msgid "自检完成：{summary}"
+msgstr "Audit finished: {summary}"

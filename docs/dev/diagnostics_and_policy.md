@@ -177,7 +177,28 @@ ok_templates/...
 > `assets/coco_annotations.json` 生成，`get_feature_by_resolution` 会校验名字；
 > 新增模板必须重新标注并重新生成枚举，改图不改名才走热更新这条路径。
 
-## 7. 「工具与诊断」页
+## 7. 模板自检
+
+`src/core/template_audit.py` +「工具与诊断 → 模板自检」。
+
+需求里的原话是「先检查选区有没有纹理（纯色块会被拒绝）」——纯色块永远匹配不上
+（`TM_CCOEFF_NORMED` 对常量图会给出无意义的高分或 NaN），做成模板只会让人误以为识别坏了。
+
+三个便宜但有效的判据（默认值按 1080P 下 20~40px 小图标实测）：
+
+| 指标 | 纯色块表现 | 阈值 |
+|------|-----------|------|
+| `stddev`（灰度标准差） | ≈ 0 | ≥ 6.0 |
+| `unique_colors`（去重颜色数） | 1~2 | ≥ 8 |
+| `edge_density`（Canny 边缘占比） | ≈ 0 | ≥ 0.01 |
+
+- 三项全不达标 → `flat`（拒绝）；只有一项不达标 → `weak`（建议换区域）；全达标 → `ok`；
+- 每个模板算 **SHA-256**，相同哈希归成一组「重复模板」——重复模板会让
+  「全模板复测」的分数再也解释不清；
+- `audit_directory()` 自动找 `coco_annotations.json`，逐条 bbox 从拼图源图裁切后分析；
+- 只读，不改任何文件；当前仓库 54 个模板自检结果：**全部可用、无重复**。
+
+## 8. 「工具与诊断」页
 
 `src/gui/diagnostics_tab.py`，注册在 `src/config.py` 的 `custom_tabs`。懒加载
 （首次显示才构建控件），复测在 `QThread` 里跑，不阻塞 UI。
@@ -185,10 +206,12 @@ ok_templates/...
 - **失败帧复测**：下拉选帧 → 左侧预览 → 「复测全部模板」→ 右侧表格按得分排序
   （模板 / 得分 / 阈值 / 判定 / 位置，未命中按差距染成橙/红），底部一句话摘要；
   另有「刷新 / 打开目录 / 清空」。
+- **模板自检**：「开始自检」→ 列出纹理最弱的 12 个模板与重复分组（见上一节）。
 - **素材包安装**：填本地 zip 路径或 http(s) 直链 → 「安装」，结果写回状态行并弹通知；
   安装成功后自动刷新 FeatureSet 与 OCR 纠错表。
+- **诊断包 / 语言包**：见 [隐私遮挡与支持工具](privacy_and_support.md) 第 4、5 节。
 
-## 8. 测试覆盖
+## 9. 测试覆盖
 
 | 测试 | 覆盖 |
 |------|------|
@@ -196,6 +219,7 @@ ok_templates/...
 | `tests/test_stuck_and_recovery.py` | 卡死阈值/去重告警/低配放大、返回次数上限、异常不外抛、失败帧落盘 |
 | `tests/test_failure_frame_store.py` | 落盘/索引/读取/修剪/清空/损坏容错/同名毫秒去重 |
 | `tests/test_template_rescorer.py` | 排序、判定分档、全屏 box 与 -1 阈值契约、名字去重、缺模板容错、与 RuntimeMixin 等价 |
+| `tests/test_template_audit.py` | 纯色块拒绝、有纹理通过、偏弱/尺寸过小/空区域、灰度图、SHA-256 稳定性与分数排序、COCO 批量自检（重复分组、越界 bbox、缺图报错） |
 | `tests/test_asset_pack.py` | 清单读写、篡改检测、zip slip、前缀白名单、备份、dry-run、回滚 |
 | `tests/test_config.py` | 新增 Tab 可导入且已注册 |
 

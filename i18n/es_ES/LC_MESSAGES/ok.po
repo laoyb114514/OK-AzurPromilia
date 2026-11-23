@@ -1101,3 +1101,21 @@ msgstr "En marcha"
 
 msgid "已暂停"
 msgstr "En pausa"
+
+msgid "模板自检"
+msgstr "Auditoría de plantillas"
+
+msgid "开始自检"
+msgstr "Iniciar auditoría"
+
+msgid "还没自检；自检只读 assets/coco_annotations.json，不改任何文件"
+msgstr "Aún sin auditar; la auditoría solo lee assets/coco_annotations.json y no cambia nada"
+
+msgid "检查全部模板的纹理与重复（纯色块永远匹配不上）"
+msgstr "Revisa la textura y los duplicados de todas las plantillas (un bloque sólido nunca coincide)"
+
+msgid "重复模板："
+msgstr "Plantillas duplicadas:"
+
+msgid "自检完成：{summary}"
+msgstr "Auditoría completada: {summary}"

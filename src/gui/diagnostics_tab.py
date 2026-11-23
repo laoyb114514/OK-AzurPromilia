@@ -14,7 +14,15 @@ from pathlib import Path
 from ok.gui.widget.CustomTab import CustomTab
 from PySide6.QtCore import Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QColor, QImage, QPixmap
-from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QPlainTextEdit,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 from qfluentwidgets import (
     BodyLabel,
     CheckBox,
@@ -33,6 +41,7 @@ from src.core.asset_pack import install_pack
 from src.core.diagnostics_bundle import build_bundle
 from src.core.failure_frame_store import FailureFrameStore
 from src.core.lang_pack import apply_pack, list_backups, restore_backup, scan_packs
+from src.core.template_audit import TemplateAuditError, audit_directory
 from src.core.template_rescorer import TemplateRescorer
 
 PREBUILD_DELAY_MS = 3000
@@ -117,6 +126,8 @@ class DiagnosticsTab(CustomTab):
         self.bundle_status: BodyLabel | None = None
         self.lang_pack_combo: ComboBox | None = None
         self.lang_pack_status: BodyLabel | None = None
+        self.audit_detail: QPlainTextEdit | None = None
+        self.audit_status: BodyLabel | None = None
         self._packs: list = []
 
         QTimer.singleShot(PREBUILD_DELAY_MS, self, self._schedule_build)
@@ -157,11 +168,70 @@ class DiagnosticsTab(CustomTab):
             return
         self._built = True
         self.add_card(self.tr("失败帧复测"), self._build_failure_frame_card())
+        self.add_card(self.tr("模板自检"), self._build_template_audit_card())
         self.add_card(self.tr("素材包安装"), self._build_asset_pack_card())
         self.add_card(self.tr("诊断包"), self._build_bundle_card())
         self.add_card(self.tr("语言包"), self._build_lang_pack_card())
         QTimer.singleShot(0, self._refresh_frames)
         QTimer.singleShot(0, self.refresh_lang_packs)
+
+    def _build_template_audit_card(self) -> QWidget:
+        card = QWidget()
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        row = QHBoxLayout()
+        row.setSpacing(6)
+        row.addWidget(BodyLabel(self.tr("检查全部模板的纹理与重复（纯色块永远匹配不上）")))
+        audit = PrimaryPushButton(FluentIcon.CHECKBOX, self.tr("开始自检"))
+        audit.clicked.connect(self._run_template_audit)
+        row.addWidget(audit)
+        row.addStretch(1)
+        layout.addLayout(row)
+
+        self.audit_detail = QPlainTextEdit()
+        self.audit_detail.setReadOnly(True)
+        self.audit_detail.setFixedHeight(120)
+        layout.addWidget(self.audit_detail)
+
+        self.audit_status = BodyLabel(self.tr("还没自检；自检只读 assets/coco_annotations.json，不改任何文件"))
+        self.audit_status.setWordWrap(True)
+        layout.addWidget(self.audit_status)
+        return card
+
+    def _run_template_audit(self):
+        try:
+            report = audit_directory(os.getcwd())
+        except TemplateAuditError as exc:
+            self._set_audit_status(str(exc))
+            self._notify(str(exc), error=True)
+            return
+        lines = [report.summary(), ""]
+        for item in report.worst(12):
+            reasons = f"（{'；'.join(item.reasons)}）" if item.reasons else ""
+            lines.append(f"{item.label()}  分数 {item.score()}{reasons}")
+        if report.duplicates:
+            lines.append("")
+            lines.append(self.tr("重复模板："))
+            for digest, names in report.duplicates.items():
+                lines.append(f"  {digest[:8]}…  {'、'.join(names)}")
+        self._set_audit_detail("\n".join(lines))
+        self._set_audit_status(
+            self.tr("自检完成：{summary}").format(summary=report.summary())
+        )
+        self._notify(
+            self.tr("自检完成：{summary}").format(summary=report.summary()),
+            error=bool(report.flat or report.duplicates),
+        )
+
+    def _set_audit_detail(self, text: str):
+        if self.audit_detail is not None:
+            self.audit_detail.setPlainText(text)
+
+    def _set_audit_status(self, text: str):
+        if self.audit_status is not None:
+            self.audit_status.setText(text)
 
     def _build_bundle_card(self) -> QWidget:
         card = QWidget()

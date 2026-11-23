@@ -1095,3 +1095,21 @@ msgstr "実行中"
 
 msgid "已暂停"
 msgstr "一時停止中"
+
+msgid "模板自检"
+msgstr "テンプレート点検"
+
+msgid "开始自检"
+msgstr "点検を開始"
+
+msgid "还没自检；自检只读 assets/coco_annotations.json，不改任何文件"
+msgstr "まだ点検していません。点検は assets/coco_annotations.json を読むだけで、何も変更しません"
+
+msgid "检查全部模板的纹理与重复（纯色块永远匹配不上）"
+msgstr "全テンプレートのテクスチャと重複を点検します（単色ブロックは絶対に一致しません）"
+
+msgid "重复模板："
+msgstr "重複テンプレート："
+
+msgid "自检完成：{summary}"
+msgstr "点検完了：{summary}"
