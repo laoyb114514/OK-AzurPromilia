@@ -68,9 +68,16 @@ Full traceability (requirement → code / tests / docs) lives in the
 
 **Privacy & support**
 
-- **UID masking**: up to 8 blocks, solid or mosaic, in 1920×1080 reference coordinates, applied to every saved screenshot.
-- **Diagnostic bundle / crash diagnostics / language packs / online repo / install health check**.
+- **UID masking**: up to 8 blocks, solid or mosaic, in 1920×1080 reference coordinates, applied to every saved screenshot (failure frames included).
+- **Diagnostic bundle / crash diagnostics / language packs / online repo / install health check**; bundles are redacted (bot tokens, webhooks, account names) before packaging.
 - **UI behaviour**: always-on-top HUD bar, three-way close prompt, taskbar progress, four rebindable global hotkeys, daily-reset and stamina reminders.
+
+**Not done yet (needs in-game input — see the [feature map](docs/dev/feature_map.md))**
+
+- Crisis Hunt / Story Commission: skeleton flows are ready, but 3 in-game button templates still need to be marked (or send screenshots).
+- Growth data: the bundled numbers are examples; import a promilia.wiki export for real material tables.
+- Window transparency / background image: ok-script 2.0.6 exposes no transparency API.
+- Full-screen crosshair picker: currently a 1-second delayed pick; a real overlay needs on-device validation (multi-monitor, DPI).
 
 ## 📥 Download & Install
 

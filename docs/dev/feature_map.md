@@ -17,7 +17,7 @@
 | 需求 | 状态 | 代码 | 测试 | 文档 |
 |------|------|------|------|------|
 | 识别失败自动存帧（最近 N 张） | ✅ | `src/core/failure_frame_store.py` | `test_failure_frame_store.py` | [诊断](diagnostics_and_policy.md) §4 |
-| 失败帧复测：整帧扫全部模板并报每个匹配分数 | ✅ | `src/core/template_rescorer.py` + 「工具与诊断」页 | `test_template_rescorer.py` | 同上 §5 |
+| 失败帧复测：整帧扫全部模板并报每个匹配分数（落盘前已过 UID 遮挡） | ✅ | `src/core/template_rescorer.py` + 「工具与诊断」页 | `test_template_rescorer.py` | 同上 §5 |
 | 模板标注工具（框选/命名/增删/存标注） | 🔧 | 框架 `ui/qt/markup` | — | 同上 §5 |
 | 标注区域纹理检查（纯色块拒绝） | ✅ | `src/core/template_audit.py` | `test_template_audit.py` | 同上 §7 |
 | 模板 SHA-256（重复检测） | ✅ | 同上 | 同上 | 同上 §7 |
@@ -37,7 +37,7 @@
 | 危机讨伐 / 剧情委托 | 🚧 | `assets/flow_templates/`（骨架流程，各差 3 个模板；模板名已写死，标好照抄即可） | 同上 | 同上 §7 |
 | 实时辅助（按设置持续操作） | ✅ | `src/tasks/trigger/auto_combat_assist_task.py` | `test_auto_combat_assist_task.py` | 同上 §4 |
 | 导航测试 / 路线管理（航点串、断点续跑） | ✅ | `src/core/route.py` + 「导航路线」任务 | `test_route.py` | 同上 §2 |
-| 动作录制 → 流程（框架录制器 + 转换） | ✅ | `src/core/flow/recording.py` | `test_flow_recording.py` | [流程](flows_and_queues.md) §2 |
+| 动作录制 → 流程（框架录制器 + 转换；长按转 hold、异常坐标跳过） | ✅ | `src/core/flow/recording.py` | `test_flow_recording.py` | [流程](flows_and_queues.md) §2 |
 | 轮椅方案（多段录制拼成固定流程） | ✅ | `src/core/replay.py`（可循环、可导出成流程、可进队列） | `test_replay.py` | [路线](routes_and_replay.md) §3 |
 
 ## 三、流程编排
@@ -46,11 +46,11 @@
 |------|------|------|------|------|
 | JSON 流程（500 步 / 1000 次 / 4 层嵌套） | ✅ | `src/core/flow/model.py`、`executor.py` | `test_flow.py`、`test_flow.py` | [流程](flows_and_queues.md) §1 |
 | 录制一键转流程（最多 400 步） | ✅ | `src/core/flow/recording.py` | `test_flow_recording.py` | 同上 §3 |
-| 断点续跑（跳过已完成顶层步骤） | ✅ | `executor.CheckpointStore` | 同上 | 同上 §2 |
+| 断点续跑（跳过已完成顶层步骤；结构变了则忽略旧断点） | ✅ | `executor.CheckpointStore` | 同上 | 同上 §2 |
 | 任务队列（含分钟预算、失败即停） | ✅ | `src/core/queue/` | `test_queue*.py` | 同上 §4 |
 | 队列项支持流程 / 队列 / 任务 / 轮椅方案 | ✅ | `flow_task._queue_resolver` | `test_replay.py` | 同上 §4 |
 | 定时触发（框架的计划任务） | 🔧 | `support_schedule_task = True` | — | 同上 §5 |
-| 配置档（快照 / 应用前备份 / 增删） | ✅ | `src/core/profile_store.py` | `test_profile_store.py` | 同上 §6 |
+| 配置档（快照 / 应用前备份 / 增删；失败回滚） | ✅ | `src/core/profile_store.py` | `test_profile_store.py` | 同上 §6 |
 
 ## 四、养成计算
 
@@ -104,8 +104,8 @@
 
 | 需求 | 状态 | 代码 | 测试 | 文档 |
 |------|------|------|------|------|
-| 语言包（应用/还原，带备份，路径白名单） | ✅ | `src/core/lang_pack.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
-| 诊断包（配置/日志/模板/失败帧/系统信息） | ✅ | `src/core/diagnostics_bundle.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
+| 语言包（应用/还原，带备份，路径白名单 + 拒绝链接/超限/非法类型） | ✅ | `src/core/lang_pack.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
+| 诊断包（配置/日志/模板/失败帧/系统信息，**打包前脱敏 token/webhook/账号**） | ✅ | `src/core/diagnostics_bundle.py` | `test_privacy_and_diagnostics.py` | 同上 §4 |
 | 崩溃诊断（钩子 + 自动附诊断包，启动时安装） | ✅ | `src/core/crash_guard.py` + `src/patches/crash_guard_patch.py` | `test_privacy_and_diagnostics.py` | 同上 §5 |
 | 在线仓库（索引 + 一键安装，同名不覆盖） | ✅ | `src/core/repo_index.py` + 「分享仓库」页 | `test_repo_index.py` | 同上 §6 |
 | 单实例（防多开） | 🔧 | 框架 `ok.util.process.check_mutex`（cwd 命名互斥量，等待 5 秒后按记录的 PID 收尾，失败则拒绝启动） | — | 同上 §8 |
@@ -117,10 +117,40 @@
 | 安装自检（流程/队列/方案/路线/配置/i18n） | ✅ | `src/core/health_check.py` + `tools/health_check.py` | `test_health_check.py` | [诊断](diagnostics_and_policy.md) §9 |
 | GUI 页离屏构建冒烟（9 个自定义页全部 build） | ✅ | `tests/test_gui_tabs.py` | 自身 | [开发指南](development.md) |
 | 静态引用体检（动作白名单 / FeatureList / 配置项重名 / 图标 / i18n / 任务名） | ✅ | `tests/test_imports.py` | 自身 | [开发指南](development.md) |
-| 离线回归 | ✅ | `tests/`（**1133 项**，不需要游戏） | 自身 | [开发指南](development.md) |
+| 离线回归 | ✅ | `tests/`（**1200+ 项**，不需要游戏） | 自身 | [开发指南](development.md) |
 | CI 测试门禁 | ✅ | `.github/workflows/pr-test.yml` | — | [界面行为](ui_behavior.md) §6 |
 | CI 只对改动文件跑 ruff | ✅ | 同上 | — | 同上 §6 |
 | i18n 校验（6 语种、无空 msgstr） | ✅ | `scripts/validate_all.py` + `tools/task_i18n_helper.py` | — | 同上 §6 |
+
+---
+
+## 十一、复查记录（验收后逐批回查，第 12–27 轮）
+
+功能清单完成之后，按 A→E 逐批回查「**文档说做了、代码是否真的做了**」。
+下表每一条都是**实际发现**，不是走过场；最后一列是验证它的测试。
+
+| # | 发现 | 影响 | 修复 |
+|---|------|------|------|
+| 1 | `重试间隔(秒)` 没有任何消费点 | 改了不起作用 | `7f287d2` + `d74e12c`（`wait_until` 真的等待） |
+| 2 | `wait_until` 绕开全局「单步超时」 | 超时策略管不到它 | `fab1866` |
+| 3 | 队列 `total_budget_minutes` 从来不被读取 | 总预算形同虚设 | `13127d8` |
+| 4 | 素材热更新后刷新模板缓存没加锁 | 任务运行中会漏检 | `20b95b8`（`feature_set.lock` + 运行中告警） |
+| 5 | **失败帧存的是未遮挡原图** | UID 长期落盘、还会进诊断包 | `f1f7da0`（记录带 `masked` 标记） |
+| 6 | **诊断包明文带 bot token / webhook** | 发群即泄漏发送权限 | `0756b5a`（`src/core/redaction.py` + manifest 记录脱敏统计） |
+| 7 | 语言包可借符号链接读任意文件、无体积上限、任意类型 | 隐私泄漏 / 磁盘被塞满 | `9e5f665` |
+| 8 | 流程预算只在步骤之间检查、超预算被当成步骤失败 | 长等待能撑爆预算；`continue_on_error` 下刷屏 | `8a4d6d4`（`FlowBudgetExceeded`） |
+| 9 | **长按（蓄力）被转成「点击 + 等待」** | 录制回放语义完全不对 | `1ef0f2b`（新增 `click.hold`，走 `mouse_down/up`） |
+| 10 | 录制器拿不到窗口尺寸时给原始像素坐标 | 流程校验报「比例越界」，用户看不懂 | `1ef0f2b`（跳过并计数 `bad_coordinates`） |
+| 11 | 配置档保存先删旧快照、应用失败无回滚、档内可写 `../..` | 丢配置 / 写出 `configs/` 外 | `40a166d`（暂存目录 + 回滚 + 路径校验） |
+| 12 | 概率表 `150%`、非单调、缺硬保底都照收 | 算出一堆「看起来很正常」的错结论 | `8ce2dc6` |
+| 13 | 养成份数 0 静默当 1；负时长污染平均用时 | 结果不可信，且影响任务栏/HUD 预计 | `8ce2dc6` |
+| 14 | **断点只记序号，不看内容** | 改流程/路线后续跑会跳过错误的步骤 | `ce667a4`（结构摘要 fingerprint，兼容旧断点） |
+| 15 | 提醒/任务栏线程出错静默死掉 | 「提醒没反应」无法排查 | `f44354c`（单轮函数 + 限流日志） |
+| 16 | 全模板复测的参数是否正确 | ——（**验证结论：正确**，贴入模板得 +1.000 排第一） | `e3807da`（真素材端到端测试） |
+
+**还验证过、确认无误的部分**（没有改动，只补了护栏）：路线校验（空航点/越界/未知界面/超时为 0）、
+仓库条目名不能跳出目录、损坏 JSON 的配置一律回退默认值、`notification.emit` 的参数与框架一致、
+热键/HUD/任务栏/提醒都有真实调用点。
 
 ---
 
