@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest import mock
 
 from src.core.flow import templates, validate_flow
+from src.core.flow.model import load_flow_by_name
 from src.core.flow.templates import (
     FlowTemplateError,
     example_target,
@@ -113,6 +114,39 @@ class TestRequiredTemplates(unittest.TestCase):
 
 
 class TestInstallTemplates(unittest.TestCase):
+    def test_install_sanitizes_name_with_full_width_parens(self):
+        """示例名带全角括号时，落盘名要被清洗，且装完能用名字读回来。
+
+        真实 bug：直接拼 `target/剧情委托（骨架）.json` 会写出带全角括号的文件，
+        而 `load_flow_by_name` 用 `flow_path` 再清洗成 `剧情委托_骨架.json` → 读不到。
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "templates"
+            target = root / "flows"
+            name = "剧情委托（骨架）"
+            write_template(source, name, {"name": name, "steps": [{"type": "wait", "seconds": 1}]})
+
+            report = install_templates(target_folder=target, folder=source)
+            self.assertEqual(len(report.installed), 1, report.describe())
+            installed = {path.name for path in target.glob("*.json")}
+            self.assertEqual(installed, {"剧情委托_骨架.json"})
+
+            flow = load_flow_by_name(name, target)
+            self.assertEqual(flow.name, name)
+
+    def test_load_legacy_file_with_raw_name(self):
+        """已经有带全角括号的旧文件时也要能读（不要求用户重装）。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            name = "危机讨伐（骨架）"
+            (root / f"{name}.json").write_text(
+                json.dumps({"name": name, "steps": [{"type": "wait", "seconds": 1}]}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            flow = load_flow_by_name(name, root)
+            self.assertEqual(flow.name, name)
+
     def test_install_copies_and_skips_existing(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

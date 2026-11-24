@@ -26,8 +26,8 @@
 | 模板/素材热更新（逐文件校验 + 备份 + 回滚） | ✅ | `src/core/asset_pack.py` | `test_asset_pack.py` | 同上 §6 |
 | 超时/重试/动作后等待/失败帧数量可调 | ✅ | `src/core/runtime_config.py` + 全局配置「自动化策略」 | `test_runtime_config.py` | 同上 §1 |
 | 低配模式（超时 ×1.5，阈值不动） | ✅ | 同上 | 同上 | 同上 §1 |
-| 卡死检测（画面长时间不变告警） | ✅ | `src/core/base_game_task.py` `_check_stuck` | `test_stuck_and_recovery.py` | 同上 §2 |
-| 失败自恢复（回主菜单，带次数上限） | ✅ | 同上 `recover_after_failure` | 同上 | 同上 §3 |
+| 卡死检测（画面长时间不变告警） | ✅ | `src/core/base_mixin/agent_mixin.py` `agent_check_stuck` | `test_stuck_and_recovery.py` | 同上 §2 |
+| 失败自恢复（回主菜单，带次数上限） | ✅ | 同上 `AgentMixin.recover_after_failure` | 同上 | 同上 §3 |
 
 ## 二、日常自动化
 

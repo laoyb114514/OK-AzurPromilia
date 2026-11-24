@@ -1,4 +1,3 @@
-import contextlib
 import time
 from datetime import datetime
 
@@ -7,14 +6,20 @@ import ok.gui.debug.Screenshot as _ok_screenshot
 from ok import BaseTask, CannotFindException, TaskDisabledException, TriggerTask, WaitFailedException
 
 from src.config import config as app_config
+from src.core.base_mixin.agent_mixin import (
+    AgentMixin,
+    agent_after_failure,
+    agent_retry_gap,
+    agent_scale_timeout,
+    agent_tick,
+    agent_wait_timeout,
+)
 from src.core.base_mixin.framework_override_mixin import FrameworkOverrideMixin
 from src.core.base_mixin.runtime_mixin import RuntimeMixin
 from src.core.base_mixin.ui_mixin import UIMixin
 from src.core.config_migration import migrate_config_file_keys, migrate_config_values
-from src.core.failure_frame_store import FailureFrameStore
 from src.core.game_window import find_game_hwnd
-from src.core.global_config_store import get_global_config, get_runtime_settings
-from src.core.runtime_config import DEFAULT_STEP_TIMEOUT, STUCK_CHECK_INTERVAL, RuntimeSettings
+from src.core.global_config_store import get_global_config
 from src.data.feature_list import FeatureList
 from src.data.lang import get_lang_accessor
 from src.data.page import PageNotFoundError, page_main
@@ -34,24 +39,7 @@ def _round_ratio(value):
         return value
 
 
-def _as_delay(value) -> float:
-    """把配置里的延时节流值转成非负秒数，非法值按 0 处理。"""
-    try:
-        delay = float(value)
-    except (TypeError, ValueError):
-        return 0.0
-    if delay != delay:  # NaN
-        return 0.0
-    return max(0.0, delay)
-
-
-def _runtime_of(task) -> RuntimeSettings:
-    """取任务的策略快照；不是 BaseGameTask 的对象（测试里的 MockTask）退回默认值。"""
-    settings = getattr(task, "runtime", None)
-    return settings if isinstance(settings, RuntimeSettings) else RuntimeSettings()
-
-
-class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
+class BaseGameTask(AgentMixin, RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
     """游戏自动化任务基类，提供通用的交互和识别功能。
 
     新项目从本类派生一次性任务；触发式任务继承
@@ -80,14 +68,6 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         self._seen_executor_pause_start = getattr(self.executor, "pause_start", None)
         self._logged_in = False
 
-        # 卡死检测：画面指纹长时间不变时只记警告，不中止任务
-        self.sleep_check_interval = STUCK_CHECK_INTERVAL
-        self._stuck_fingerprint = None
-        self._stuck_since = 0.0
-        self._stuck_warned = False
-        self._last_stuck_check = 0.0
-        self._failure_store: FailureFrameStore | None = None
-
     # ── 暂停感知的活动计时 ─────────────────────────────
     def active_time(self) -> float:
         """Return monotonic task time with framework pauses excluded."""
@@ -109,19 +89,6 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             current_task_pause = max(0.0, now - self._task_pause_started_at)
 
         return now - self._active_time_paused_total - current_executor_pause - current_task_pause
-
-    # ── 运行期策略（超时/重试/卡死/自恢复） ─────────────
-    @property
-    def runtime(self) -> RuntimeSettings:
-        """当前全局策略快照。
-
-        每次都重新读 ``Config``（底层是内存里的 dict），所以用户在
-        「全局配置 → 自动化策略」里改完参数，下一个任务就会生效，不需要重启。
-        """
-        try:
-            return get_runtime_settings()
-        except Exception:
-            return RuntimeSettings()
 
     def sleep(self, timeout):
         """Sleep for active task time, keeping the deadline across pauses."""
@@ -148,33 +115,12 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
     def wait_until(self, condition, time_out=0, pre_action=None, post_action=None, settle_time=-1,
                    raise_if_not_found=False):
-        """Framework wait_until variant whose timeout freezes while paused.
-
-        另外补齐了 ``config['wait_until_before_delay']`` / ``wait_until_check_delay``：
-        这两个键在 ok-script 2.0.6 里没有任何代码引用（是死键），这里由项目自己实现，
-        默认 0 与旧行为一致。条件没满足时的重试间隔还会叠加全局配置的
-        ``重试间隔(秒)``（取两者较大值），这样那个配置项才真的有用。
-
-        超时也接上了全局策略（之前这里只认框架写死的 ``wait_scene_timeout``）：
-        ``time_out=0`` 时用「单步超时」，用户没改过就用框架值，两种都按低配模式缩放；
-        显式传值的同样按低配模式缩放，与 ``loop()`` 保持一致。
-        """
+        """Framework wait_until variant whose timeout freezes while paused."""
         self.executor.reset_scene()
-        settings = _runtime_of(self)
-        before_delay = _as_delay(app_config.get("wait_until_before_delay", 0))
-        check_delay = _as_delay(app_config.get("wait_until_check_delay", 0))
-        retry_gap = settings.resolve_retry_gap(check_delay)
-        if before_delay > 0:
-            self.sleep(before_delay)
         start = self.active_time()
-        if time_out == 0:
-            default_timeout = self.executor.wait_scene_timeout
-            # 用户改过「单步超时」才覆盖框架默认值，否则保持框架行为不变
-            if abs(settings.step_timeout - DEFAULT_STEP_TIMEOUT) > 1e-9:
-                default_timeout = settings.step_timeout
-            time_out = settings.scaled_timeout(default_timeout)
-        else:
-            time_out = settings.scaled_timeout(time_out)
+        # agent: 超时按全局策略缩放（None/0 取单步超时），重试间隔取配置与全局的较大值
+        time_out = agent_wait_timeout(self, time_out, self.executor.wait_scene_timeout)
+        retry_gap = agent_retry_gap(self, app_config.get("wait_until_check_delay", 0) or 0.0)
         settled = None
 
         while not self.executor.exit_event.is_set():
@@ -297,15 +243,11 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         - 根据配置 `发生异常时终止游戏` 决定是继续（记录日志）还是终止（记录并不抛出）
         - 对于 `TaskDisabledException` 总是重新抛出以便上层处理
         """
-        with contextlib.suppress(Exception):
+        try:  # noqa: SIM105 - 上游原有写法，保持原样
             self.screenshot(prefix)
-        self.capture_failure_frame(f"{prefix}: {e}", task_name=prefix)
-        # 失败自恢复：只按返回键退回主菜单，不重跑任务；停用/退出流程不处理
-        try:
-            if not isinstance(e, TaskDisabledException):
-                self.recover_after_failure(str(e))
         except Exception:
             pass
+        agent_after_failure(self, str(e), prefix)
 
         if not self.config.get("发生异常时终止游戏", False):
             self.log_info("发生异常，继续游戏", notify=True)
@@ -320,9 +262,11 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
     def mark_task_failure(self, message: str, task_name: str | None = None):
         """统一标记任务失败消息，并截图（包含时间和任务名称）。"""
         name = task_name or getattr(self, "current_task", None) or "UnknownTask"
-        with contextlib.suppress(Exception):
+        try:  # noqa: SIM105 - 上游原有写法，保持原样
             self.screenshot(f"fail_{name}")
-        self.capture_failure_frame(str(message), task_name=str(name))
+        except Exception:
+            pass
+        agent_after_failure(self, str(message), name)
         self.log_info(str(message))
 
     def _ensure_main(self, esc):
@@ -444,7 +388,10 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         # 3. 为所有配置项补充默认值（安全处理）
         for group_items in groups.values():
             for item in group_items:
-                key = item if isinstance(item, str) else str(item)
+                if isinstance(item, str):  # noqa: SIM108 - 上游原有写法，保持原样
+                    key = item
+                else:
+                    key = str(item)
 
                 if key not in self.default_config:
                     if hasattr(self, "config") and self.config is not None and key in self.config:
@@ -528,7 +475,7 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
 
     def loop(
         self,
-        time_out: float | None = None,
+        time_out: float = 10.0,
         yield_frame: bool = True,
         raise_if_time_out: bool | Exception | type[Exception] = True,
     ):
@@ -537,8 +484,7 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
         基于 self.active_time() 计算活跃时长（自动排除任务暂停时间）。
 
         Args:
-            time_out: 最大循环时间（秒）。``None``（默认）取全局策略里的
-                「单步超时」，低配模式下自动放宽 1.5 倍；显式传值不受影响。
+            time_out: 最大循环时间（秒），默认 10 秒。
             yield_frame: 是否在每次迭代时获取并产出下一帧（self.next_frame()）。
                 为 False 时产出 None。
             raise_if_time_out: 超时未退出时的行为：
@@ -554,9 +500,13 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             TimeoutError: 当 raise_if_time_out 为 True 且循环超时未中断时抛出。
             Exception: 当 raise_if_time_out 传入自定义异常且循环超时未中断时抛出。
         """
-        time_out = _runtime_of(self).resolve_step_timeout(time_out)
         start_time = self.active_time()
-        while self.active_time() - start_time < time_out:
+        limit = agent_scale_timeout(self, time_out)
+        while True:
+            now = self.active_time()
+            if now - start_time >= limit:
+                break
+            agent_tick(self, now)
             if yield_frame:
                 yield self.next_frame()
             else:
@@ -567,217 +517,3 @@ class BaseGameTask(RuntimeMixin, UIMixin, FrameworkOverrideMixin, BaseTask):
             if isinstance(raise_if_time_out, type) and issubclass(raise_if_time_out, Exception):
                 raise raise_if_time_out("Loop time out.")
             raise TimeoutError("Loop time out.")
-
-    # ── 卡死检测 ──────────────────────────────────────────
-    def sleep_check(self):
-        """框架在 ``executor.sleep`` 期间周期性调用的钩子（``sleep_check_interval`` ≥ 0 时）。"""
-        with contextlib.suppress(Exception):
-            super().sleep_check()
-        self._check_stuck()
-
-    def _check_stuck(self):
-        """画面指纹长时间不变 → 记一次警告。
-
-        只报警不中止：卡死的原因可能是游戏加载、网络重连或者用户在挂机，
-        真正该中止任务的是任务自己的超时，不是这个探针。
-        """
-        now = self.active_time()
-        if now - self._last_stuck_check < STUCK_CHECK_INTERVAL:
-            return
-        self._last_stuck_check = now
-
-        frame = self.frame
-        if frame is None:
-            return
-        try:
-            fingerprint = perceptual_hash(frame)
-        except Exception:
-            return
-
-        if fingerprint != self._stuck_fingerprint:
-            self._stuck_fingerprint = fingerprint
-            self._stuck_since = now
-            self._stuck_warned = False
-            return
-
-        threshold = self.runtime.resolve_stuck_threshold()
-        if self._stuck_warned or (now - self._stuck_since) < threshold:
-            return
-        self._stuck_warned = True
-        self._log_stuck(now - self._stuck_since, threshold)
-
-    def _log_stuck(self, unchanged_for: float, threshold: float):
-        message = (
-            f"画面已 {unchanged_for:.0f} 秒没有变化（阈值 {threshold:.0f} 秒），"
-            "可能卡在加载/弹窗/断线界面，请检查游戏状态"
-        )
-        try:
-            self.log_warning(message, notify=True)
-        except Exception:
-            with contextlib.suppress(Exception):
-                self.log_info(message)
-
-    def reset_stuck_detection(self):
-        """手动重置卡死基线（例如切换场景后调用，避免误判）。"""
-        self._stuck_fingerprint = None
-        self._stuck_since = 0.0
-        self._stuck_warned = False
-        self._last_stuck_check = 0.0
-
-    # ── 失败后自恢复 ──────────────────────────────────────
-    def is_main_menu(self) -> bool:
-        """当前画面是否为主界面（游戏世界）。"""
-        try:
-            return bool(self.ui_page_appear(page_main))
-        except Exception:
-            return False
-
-    def recover_to_menu(self, attempts: int | None = None, after_sleep: float | None = None) -> bool:
-        """失败后用「按返回键」退回主菜单，最多 ``attempts`` 次。
-
-        只退菜单，**不重跑任务**。返回是否确认回到了主菜单；任何异常都吞掉，
-        因为这是失败路径上的兜底动作，不能让它盖掉原始错误。
-        """
-        settings = self.runtime
-        limit = settings.max_recover_attempts if attempts is None else max(0, int(attempts))
-        if limit <= 0:
-            return self.is_main_menu()
-        wait = settings.after_action_wait if after_sleep is None else max(0.0, float(after_sleep))
-        if wait <= 0:
-            wait = self.once_sleep_time
-
-        for _ in range(limit):
-            if self.is_main_menu():
-                return True
-            try:
-                self.back()
-            except Exception:
-                return self.is_main_menu()
-            if wait > 0:
-                self.sleep(wait)
-        return self.is_main_menu()
-
-    def recover_after_failure(self, reason: str = "") -> bool:
-        """按全局策略决定是否要执行失败自恢复。"""
-        settings = self.runtime
-        if not settings.auto_recover:
-            return False
-        suffix = f"：{reason}" if reason else ""
-        with contextlib.suppress(Exception):
-            self.log_info(f"任务失败，尝试退回主菜单（最多 {settings.max_recover_attempts} 次）{suffix}")
-        recovered = self.recover_to_menu()
-        with contextlib.suppress(Exception):
-            if recovered:
-                self.log_info("已退回主菜单，等待下一次手动/触发执行")
-            else:
-                self.log_warning("未能确认回到主菜单，请手动检查游戏画面")
-        return recovered
-
-    # ── 失败帧 ────────────────────────────────────────────
-    def failure_store(self) -> FailureFrameStore:
-        """失败帧库（按全局配置的保留数量惰性创建）。
-
-        保留数量变化时重建存储，但**沿用原来的目录**：调用方（含测试）可以先把
-        ``_failure_store`` 指到一个自定义目录，后续配置变化不会把帧写到别处。
-        落盘前会过 ``screenshot_processor``（UID 遮挡），与框架落盘截图同一套。
-        """
-        limit = self.runtime.failure_frame_limit
-        store = self._failure_store
-        if store is None:
-            store = FailureFrameStore(
-                limit=limit,
-                log=self._log_failure_store,
-                processor=self._privacy_processor_for_frames,
-            )
-        elif store.limit != limit:
-            store = FailureFrameStore(
-                root=store.root,
-                limit=limit,
-                log=self._log_failure_store,
-                processor=self._privacy_processor_for_frames,
-            )
-        self._failure_store = store
-        return store
-
-    def _privacy_processor_for_frames(self, frame):
-        """失败帧的遮挡处理器：每次从当前配置取，改了遮挡设置立即生效。"""
-        processor = app_config.get("screenshot_processor")
-        if not callable(processor):
-            return None
-        return processor(frame)
-
-    def _log_failure_store(self, message: str):
-        with contextlib.suppress(Exception):
-            self.log_info(message)
-
-    def capture_failure_frame(self, message: str = "", task_name: str | None = None) -> bool:
-        """把当前识别帧存进失败帧库，供「工具与诊断 → 失败帧复测」使用。
-
-        用的是 ``self.frame``（识别用的原始帧），入库存盘前过一遍 ``screenshot_processor``：
-        失败帧会长期留在磁盘上，隐私遮挡必须和框架截图一致。
-        """
-        try:
-            frame = self.frame
-            if frame is None:
-                return False
-            name = task_name or getattr(self, "current_task", None) or self.__class__.__name__
-            record = self.failure_store().save(frame, task=str(name), message=str(message or ""))
-            if record is not None:
-                self._log_failure_store(f"失败帧已保存: {record.file}")
-                return True
-        except Exception:
-            pass
-        return False
-
-    # ── OCR 文本行 ────────────────────────────────────────
-    def ocr_lines(self, box=None, min_confidence: float = 0.0, line_tolerance: float = 0.6) -> list[str]:
-        """把当前画面的 OCR 结果**按视觉行**输出。
-
-        框架的 ``ocr()`` 不传 match 时返回全部文本框（``.name`` 是文本），
-        但它们是散装的：同一行的「尤尼」和「×1,500」是两个框，直接拼会拆行。
-        这里按 y 中心聚类成行、行内按 x 排序，结算记账就靠这个把
-        「物品 ×数量」拼回同一行。
-        """
-        try:
-            boxes = self.ocr(box=box) if box is not None else self.ocr()
-        except Exception as exc:
-            self._log_failure_store(f"OCR 失败: {exc}")
-            return []
-
-        items = []
-        for item in boxes or []:
-            text = str(getattr(item, "name", "") or "").strip()
-            if not text:
-                continue
-            try:
-                confidence = float(getattr(item, "confidence", 1.0) or 0.0)
-            except (TypeError, ValueError):
-                confidence = 1.0
-            if confidence < min_confidence:
-                continue
-            height = float(getattr(item, "height", 0) or 0)
-            items.append((float(getattr(item, "y", 0) or 0), float(getattr(item, "x", 0) or 0), height, text))
-
-        if not items:
-            return []
-        items.sort()
-
-        heights = [height for _, _, height, _ in items if height > 0]
-        typical = sorted(heights)[len(heights) // 2] if heights else 16.0
-        tolerance = max(4.0, typical * max(0.1, float(line_tolerance)))
-
-        lines: list[list[tuple[float, str]]] = []
-        current_y = None
-        current: list[tuple[float, str]] = []
-        for y, x, _height, text in items:
-            if current_y is None or abs(y - current_y) <= tolerance:
-                current.append((x, text))
-                current_y = y if current_y is None else (current_y + y) / 2.0
-            else:
-                lines.append(current)
-                current = [(x, text)]
-                current_y = y
-        if current:
-            lines.append(current)
-
-        return ["  ".join(text for _x, text in sorted(line)) for line in lines]

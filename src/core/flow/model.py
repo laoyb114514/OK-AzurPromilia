@@ -98,9 +98,14 @@ def list_flows(folder: str | Path | None = None) -> list[str]:
 
 
 def load_flow_by_name(name: str, folder: str | Path | None = None) -> Flow:
+    """按名字读流程：先试清洗后的文件名，再试原名（兼容历史安装的旧文件）。"""
     path = flow_path(name, folder)
     if not path.is_file():
-        raise FlowFormatError(f"流程不存在: {name}")
+        legacy = (Path(folder) if folder is not None else FLOW_FOLDER) / f"{name}.json"
+        if legacy.is_file():
+            path = legacy
+        else:
+            raise FlowFormatError(f"流程不存在: {name}")
     return Flow.from_file(path)
 
 

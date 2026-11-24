@@ -14,7 +14,7 @@ Python 模块文件统一用 `snake_case.py`，`tests/` 中的测试文件用 `t
 |------|------|
 | `main.py` / `main_debug.py` | 入口（Release / Debug）。启动前先装 `src/patches/` |
 | `src/config.py` | ok-script 应用配置：窗口、OCR、模板匹配、任务与 Tab 注册 |
-| `src/core/base_game_task.py` | **任务基类**：暂停感知计时、配置迁移、异常处理、配置分组 |
+| `src/core/base_game_task.py` | **任务基类**：暂停感知计时、配置迁移、异常处理、配置分组（运行期策略/卡死/失败帧/自恢复都在 `src/core/base_mixin/agent_mixin.py`，基类只调 4 处一行钩子） |
 | `src/core/base_mixin/runtime_mixin.py` | 通用能力库：分辨率映射、点击验证、YOLO 检测、画面稳定判定、键鼠 |
 | `src/core/base_mixin/framework_override_mixin.py` | 用"同名覆写 + `super()`"扩展框架方法（不复制框架代码） |
 | `src/core/detector/` | **识别层**：把四类识别源（模板 / YOLO / OCR / 按钮）归一成统一判据 `Hit` / `Detector`，供 Action 生命周期编排使用 |

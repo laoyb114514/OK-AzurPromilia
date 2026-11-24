@@ -158,6 +158,31 @@ def example_target(kind: str, folder: str | Path | None = None) -> Path:
     raise FlowTemplateError(f"不认识的示例类型 {kind!r}")
 
 
+def destination_path(kind: str, name: str, target: Path) -> Path:
+    """示例落盘时的文件名：走各类型自己的 ``*_path``（会清洗非法字符）。
+
+    真实 bug：示例名叫「剧情委托（骨架）」，直接拼 ``target/名字.json`` 会写出带
+    全角括号的文件；而 ``load_flow_by_name`` 用 ``flow_path`` 再清洗一遍得到
+    「剧情委托_骨架.json」，于是「能列出来、点开却说不存在」。
+    """
+    try:
+        if kind == KIND_FLOW:
+            from src.core.flow.model import flow_path
+
+            return flow_path(name, target)
+        if kind == KIND_QUEUE:
+            from src.core.queue.model import queue_path
+
+            return queue_path(name, target)
+        if kind == KIND_ROUTE:
+            from src.core.route import route_path
+
+            return route_path(name, target)
+    except Exception:
+        pass
+    return target / f"{name}.json"
+
+
 def list_examples(kind: str, folder: str | Path | None = None) -> list[str]:
     base = Path(folder) if folder is not None else EXAMPLE_SOURCES[kind]
     if not base.is_dir():
@@ -220,7 +245,7 @@ def install_examples(
             report.results.append(TemplateInstall(name=name, message=str(exc)))
             continue
         try:
-            path = target / f"{name}.json"
+            path = destination_path(kind, name, target)
             if path.exists() and not overwrite:
                 report.results.append(TemplateInstall(name=name, message="同名文件已存在，不覆盖"))
                 continue

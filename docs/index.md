@@ -81,7 +81,8 @@
 │   ├── globals.py              全局单例
 │   ├── icons.py                图标（复用 FluentIcon）
 │   ├── core/
-│   │   ├── base_game_task.py   任务通用基类（self.loop、暂停感知、配置迁移、卡死检测、失败自恢复）
+│   │   ├── base_game_task.py   任务通用基类（self.loop、暂停感知、配置迁移、配置分组）
+│   │   │   └── base_mixin/agent_mixin.py  运行期策略、卡死探针、失败帧、失败自恢复、OCR 分行
 │   │   ├── base_mixin/         通用能力 mixin（RuntimeMixin、FrameworkOverrideMixin）
 │   │   ├── detector/           Action 生命周期识别层（Hit / Detector 统一判据）
 │   │   ├── config_migration.py 配置键迁移工具

@@ -12,6 +12,7 @@ import numpy as np
 
 from src.core.base_game_task import BaseGameTask
 from src.core.failure_frame_store import FailureFrameStore
+from src.core.base_mixin.agent_mixin import AgentMixin
 from src.core.runtime_config import STUCK_CHECK_INTERVAL, RuntimeSettings
 
 
