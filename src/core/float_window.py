@@ -40,6 +40,11 @@ DEFAULT_MAX_TASKS = 8
 MAX_TASKS_LIMIT = 20
 DEFAULT_POLL_MS = 500
 
+#: 默认离屏幕边缘的距离
+DEFAULT_MARGIN = 16
+#: 默认位置离屏幕底边再多留这么多：避开 Windows 通知弹窗（从任务栏上方升起）
+NOTIFICATION_CLEARANCE = 72
+
 UNKNOWN_ETA = "未知"
 
 
@@ -175,17 +180,46 @@ def save_settings(settings: FloatSettings, path: str | Path | None = None) -> Pa
 def clamp_position(
     x: int | None, y: int | None, width: int, height: int,
     screen_width: int, screen_height: int, margin: int = 0,
+    offset_x: int = 0, offset_y: int = 0,
 ) -> tuple[int, int]:
-    """把窗口位置夹到屏幕内（允许贴边，不允许多数面积跑到屏幕外）。"""
+    """把窗口位置夹到屏幕内（允许贴边，不允许多数面积跑到屏幕外）。
+
+    ``offset_x/offset_y`` 是屏幕可用区域的左上角：任务栏在左边或上边时
+    ``availableGeometry()`` 不是从 (0,0) 开始，夹取必须按那个原点算。
+    """
     screen_width = max(1, int(screen_width))
     screen_height = max(1, int(screen_height))
     width = min(max(1, int(width)), screen_width)
     height = min(max(1, int(height)), screen_height)
-    max_x = max(margin, screen_width - width - margin)
-    max_y = max(margin, screen_height - height - margin)
-    safe_x = margin if x is None else int(x)
-    safe_y = margin if y is None else int(y)
-    return max(margin, min(safe_x, max_x)), max(margin, min(safe_y, max_y))
+    left = int(offset_x) + margin
+    top = int(offset_y) + margin
+    max_x = max(left, int(offset_x) + screen_width - width - margin)
+    max_y = max(top, int(offset_y) + screen_height - height - margin)
+    safe_x = left if x is None else int(x)
+    safe_y = top if y is None else int(y)
+    return max(left, min(safe_x, max_x)), max(top, min(safe_y, max_y))
+
+
+def default_position(
+    width: int, height: int, screen_width: int, screen_height: int,
+    margin: int = DEFAULT_MARGIN, clearance: int = NOTIFICATION_CLEARANCE,
+    offset_x: int = 0, offset_y: int = 0,
+) -> tuple[int, int]:
+    """默认放在**屏幕右下角**，离底边再留出通知区的高度。
+
+    为什么不是贴到底：Windows 的通知弹窗从任务栏上方升起，正好盖住右下角那块；
+    留 ``clearance``（默认 72px）能避开它，视觉上仍然在右下角。
+    """
+    screen_width = max(1, int(screen_width))
+    screen_height = max(1, int(screen_height))
+    width = min(max(1, int(width)), screen_width)
+    height = min(max(1, int(height)), screen_height)
+    x = int(offset_x) + screen_width - width - margin
+    y = int(offset_y) + screen_height - height - margin - max(0, int(clearance))
+    return clamp_position(
+        x, y, width, height, screen_width, screen_height,
+        margin=margin, offset_x=offset_x, offset_y=offset_y,
+    )
 
 
 def format_eta(seconds: float | None) -> str:

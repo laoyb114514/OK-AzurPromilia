@@ -86,6 +86,28 @@ class TestPosition(unittest.TestCase):
         self.assertGreaterEqual(x, 0)
         self.assertGreaterEqual(y, 0)
 
+    def test_default_position_is_bottom_right(self):
+        x, y = fw.default_position(64, 64, 1920, 1040)
+        self.assertEqual(x, 1920 - 64 - fw.DEFAULT_MARGIN)
+        self.assertEqual(y, 1040 - 64 - fw.DEFAULT_MARGIN - fw.NOTIFICATION_CLEARANCE)
+
+    def test_default_position_leaves_room_for_notifications(self):
+        """离底边要留出通知区高度，否则 Windows 通知弹窗会盖住悬浮图标。"""
+        _x, y = fw.default_position(64, 64, 1920, 1040)
+        self.assertLessEqual(y + 64, 1040 - fw.NOTIFICATION_CLEARANCE)
+
+    def test_default_position_respects_taskbar_offset(self):
+        """任务栏在左边时可用区域原点不是 (0,0)，右下角要跟着平移。"""
+        x, y = fw.default_position(64, 64, 1840, 1040, offset_x=80)
+        self.assertEqual(x, 80 + 1840 - 64 - fw.DEFAULT_MARGIN)
+        self.assertGreaterEqual(y, 0)
+
+    def test_default_position_on_tiny_screen(self):
+        x, y = fw.default_position(340, 320, 400, 300)
+        self.assertGreaterEqual(x, 0)
+        self.assertGreaterEqual(y, 0)
+        self.assertLessEqual(x + 340, 400 + 1)
+
 
 class TestTexts(unittest.TestCase):
     def test_eta_format(self):

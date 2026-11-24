@@ -135,16 +135,27 @@ class FloatWindow(QWidget):
             self.setFixedSize(width, height)
             self._move_to(self._settings.panel_x, self._settings.panel_y, width, height)
 
-    def _screen_size(self) -> tuple[int, int]:
+    def _available_rect(self):
+        """屏幕**可用区域**（已排除任务栏）；任务栏在左/上时原点不是 (0,0)。"""
         screen = self.screen() or QApplication.primaryScreen()
         if screen is None:
-            return 1920, 1080
+            return 0, 0, 1920, 1080
         geometry = screen.availableGeometry()
-        return geometry.width(), geometry.height()
+        return geometry.x(), geometry.y(), geometry.width(), geometry.height()
 
     def _move_to(self, x: int | None, y: int | None, width: int, height: int) -> None:
-        screen_width, screen_height = self._screen_size()
-        safe_x, safe_y = fw.clamp_position(x, y, width, height, screen_width, screen_height, margin=8)
+        offset_x, offset_y, screen_width, screen_height = self._available_rect()
+        if x is None and y is None:
+            # 首次显示：右下角，并让开通栏通知区（见 fw.default_position 的说明）
+            safe_x, safe_y = fw.default_position(
+                width, height, screen_width, screen_height,
+                offset_x=offset_x, offset_y=offset_y,
+            )
+        else:
+            safe_x, safe_y = fw.clamp_position(
+                x, y, width, height, screen_width, screen_height,
+                margin=fw.DEFAULT_MARGIN, offset_x=offset_x, offset_y=offset_y,
+            )
         self.move(safe_x, safe_y)
 
     def remember_geometry(self) -> None:
