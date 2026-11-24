@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from ok.gui.widget.CustomTab import CustomTab
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QColorDialog, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import (
     BodyLabel,
     CheckBox,
-    ColorDialog,
     FluentIcon,
     NavigationItemPosition,
     PushButton,
@@ -228,7 +228,11 @@ class FloatWindowTab(CustomTab):
             self.opacity_label.setText(f"{max(int(fw.MIN_OPACITY * 100), int(value))}%")
 
     def _pick_color(self):
-        color = ColorDialog.getColor(Qt.white, self, self.tr("选择悬浮窗背景颜色"))
+        """用 Qt 自带的取色对话框（qfluentwidgets 的 ColorDialog 没有静态 getColor）。"""
+        current = QColor(self._settings.bg_color)
+        if not current.isValid():
+            current = QColor(fw.DEFAULT_BG_COLOR)
+        color = QColorDialog.getColor(current, self, self.tr("选择悬浮窗背景颜色"))
         if color.isValid() and self.color_label is not None:
             self.color_label.setText(f"#{color.red():02x}{color.green():02x}{color.blue():02x}")
 
